@@ -86,7 +86,7 @@ function showMedia(items, type, append = false) {
     const card = document.createElement('div');
     card.classList.add('card');
     card.innerHTML = `
-      <img src="${IMG_PATH + poster_path}" alt="${title}">
+      <img src="${IMG_PATH + poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
       <div class="card-info">
         <h3>${title}</h3>
         <span>★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
@@ -118,7 +118,7 @@ async function loadHeroAndTop10() {
         if(!item.poster_path) return;
         const card = document.createElement('div');
         card.classList.add('carousel-card');
-        card.innerHTML = `<span>#${index + 1}</span><img src="${IMG_PATH + item.poster_path}" alt="${title}">`;
+        card.innerHTML = `<span>#${index + 1}</span><img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">`;
         card.addEventListener('click', () => openModal(item, item.media_type === 'tv' ? 'tv' : 'movie'));
         top10Carousel.appendChild(card);
       });
@@ -138,34 +138,27 @@ function loadContinueWatching() {
       if(!item.poster_path) return;
       const card = document.createElement('div');
       card.classList.add('carousel-card');
+      card.style.position = 'relative'; // Para sa positioning ng delete button
+      
       card.innerHTML = `
-        <img src="${IMG_PATH + item.poster_path}" alt="${title}">
+        <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
+        <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
         <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
       `;
       
-      // Normal click para buksan ang pelikula
-      card.addEventListener('click', () => openModal(item, item.media_type || 'movie'));
+      // Click event para buksan ang pelikula
+      card.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('delete-history-btn')) {
+          openModal(item, item.media_type || 'movie');
+        }
+      });
 
-      // Long press handler para burahin sa history
-      let pressTimer;
-      const startLongPress = (e) => {
-        pressTimer = setTimeout(() => {
-          if (confirm(`Remove "${title}" from Continue Watching?`)) {
-            removeFromContinueWatching(item.id);
-          }
-        }, 600); // 600 milliseconds para sa long press
-      };
-
-      const cancelLongPress = () => {
-        clearTimeout(pressTimer);
-      };
-
-      card.addEventListener('touchstart', startLongPress);
-      card.addEventListener('touchend', cancelLongPress);
-      card.addEventListener('touchmove', cancelLongPress);
-      card.addEventListener('mousedown', startLongPress);
-      card.addEventListener('mouseup', cancelLongPress);
-      card.addEventListener('mouseleave', cancelLongPress);
+      // Delete button event handler
+      const deleteBtn = card.querySelector('.delete-history-btn');
+      deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Iwas trigger sa modal open
+        removeFromContinueWatching(item.id);
+      });
       
       continueCarousel.appendChild(card);
     });
@@ -342,7 +335,7 @@ async function openModal(item, type) {
         const actorDiv = document.createElement('div');
         actorDiv.classList.add('cast-item');
         actorDiv.innerHTML = `
-          <img src="${profileImg}" alt="${actor.name}">
+          <img src="${profileImg}" alt="${actor.name}" style="-webkit-touch-callout: none; user-select: none;">
           <span>${actor.name}</span>
         `;
         castScrollContainer.appendChild(actorDiv);
