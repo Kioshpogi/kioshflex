@@ -1,21 +1,21 @@
 {
   "name": "KIOSHFLEX",
-  "short_name": "KioshFlex",
-  "start_url": "./index.html",
+  "short_name": "KIOSHFLEX",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#e50914",
-  "description": "Ultimate Streaming Experience",
   "icons": [
     {
-      "src": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=192&h=192&fit=crop",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=512&h=512&fit=crop",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ]
 }
+

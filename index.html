@@ -3,166 +3,443 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KIOSHFLEX - Ultimate Streaming Experience</title>
-  <link rel="manifest" href="manifest.json">
+  <title>KIOSHFLEX</title>
+  
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#e50914">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <style>
     :root {
-      --bg-color: #000000;
-      --card-bg: #141414;
+      --bg-color: #141414;
       --text-color: #ffffff;
-      --text-muted: #b3b3b3;
+      --card-bg: #1f1f1f;
       --accent-color: #e50914;
-      --border-color: #222222;
+      --nav-bg: rgba(20, 20, 20, 0.95);
     }
 
     body.light-mode {
       --bg-color: #f4f4f4;
-      --card-bg: #ffffff;
-      --text-color: #121212;
-      --text-muted: #666666;
-      --border-color: #dddddd;
+      --text-color: #111111;
+      --card-bg: #e2e2e2;
+      --nav-bg: rgba(244, 244, 244, 0.95);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; transition: background 0.3s, color 0.3s; }
-
-    header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
-    .header-left { display: flex; align-items: center; gap: 12px; }
-    .hamburger-btn { background: none; border: none; color: var(--text-color); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-    .logo { color: var(--accent-color); font-size: 20px; font-weight: 900; letter-spacing: 1.5px; }
-    .header-actions { display: flex; gap: 8px; }
-    .header-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
-    .header-btn:hover { border-color: var(--accent-color); }
-
-    /* Sidebar Menu Drawer */
-    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 200; }
-    .sidebar { 
-      position: fixed; 
-      top: 0; 
-      left: -280px; 
-      width: 280px; 
-      height: 100vh; 
-      background: var(--card-bg); 
-      border-right: 1px solid var(--border-color); 
-      z-index: 201; 
-      transition: left 0.3s ease; 
-      padding: 20px 20px 60px 20px; 
-      display: flex; 
-      flex-direction: column; 
-      gap: 16px; 
-      overflow-y: auto; 
-      -webkit-overflow-scrolling: touch; 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-    .sidebar.open { left: 0; }
-    .sidebar-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; flex-shrink: 0; }
-    .sidebar-title { font-size: 16px; font-weight: 800; color: var(--accent-color); }
-    .close-sidebar { background: none; border: none; color: var(--text-color); font-size: 22px; cursor: pointer; }
 
-    .sidebar-group { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-    .sidebar-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    .sidebar select { 
-      width: 100%; 
-      background: var(--bg-color); 
-      color: var(--text-color); 
-      border: 1px solid var(--border-color); 
-      padding: 10px; 
-      border-radius: 8px; 
-      font-size: 12px; 
-      outline: none; 
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding-bottom: 50px;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    /* Navbar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--nav-bg);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    #hamburgerBtn {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 20px;
       cursor: pointer;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      background-image: url("data:image/svg+xml;utf8,<svg fill='%23aaaaaa' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      background-size: 16px;
-      padding-right: 30px;
     }
-    
-    .sidebar select option { background: var(--card-bg); color: var(--text-color); }
-    .type-switcher { display: flex; gap: 8px; }
-    .type-btn { flex: 1; text-align: center; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-muted); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 11px; }
-    .type-btn.active { background: var(--accent-color); border-color: var(--accent-color); color: #fff; font-weight: 700; }
+
+    .logo {
+      color: var(--accent-color);
+      font-weight: 900;
+      font-size: 20px;
+      letter-spacing: 1px;
+    }
+
+    .nav-right {
+      display: flex;
+      gap: 8px;
+    }
+
+    .nav-btn {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+    }
 
     /* Search Bar */
-    .search-container { display: flex; padding: 12px 20px; gap: 8px; background: var(--bg-color); border-bottom: 1px solid var(--border-color); }
-    .search-container input { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); padding: 9px 12px; border-radius: 8px; color: var(--text-color); font-size: 12px; outline: none; }
-    .search-container button { background: var(--accent-color); color: #fff; border: none; padding: 0 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
+    .search-container {
+      padding: 12px 16px;
+      display: flex;
+      gap: 8px;
+    }
+
+    #searchInput {
+      flex: 1;
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    #searchBtn {
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Sidebar / Drawer */
+    #sidebarOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+    }
+
+    #sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background: var(--bg-color);
+      border-right: 1px solid rgba(255,255,255,0.1);
+      z-index: 201;
+      transition: left 0.3s ease;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    #closeSidebar {
+      background: none;
+      border: none;
+      color: var(--text-color);
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-group label {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .filter-group select {
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .type-switch {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .type-btn {
+      flex: 1;
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .type-btn.active {
+      background: var(--accent-color);
+      color: #fff;
+    }
 
     /* Hero Banner */
-    .hero-banner { position: relative; width: 100%; height: 300px; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 20px; margin-bottom: 16px; }
-    .hero-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-color) 10%, rgba(0,0,0,0.2) 80%); }
-    .hero-content { position: relative; z-index: 2; max-width: 100%; }
-    .hero-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-    .hero-btn { background: var(--accent-color); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 11px; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
+    #heroBanner {
+      width: 100%;
+      height: 220px;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: flex-end;
+      padding: 16px;
+      position: relative;
+    }
 
-    .section-title { font-size: 15px; font-weight: 700; padding: 14px 20px 10px 20px; color: var(--text-color); }
-    .carousel-section { padding: 0 20px 16px 20px; }
-    .carousel { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
-    .carousel::-webkit-scrollbar { display: none; }
-    .carousel-card { min-width: 110px; max-width: 110px; position: relative; cursor: pointer; transition: transform 0.2s; }
-    .carousel-card:hover { transform: scale(1.05); }
-    .carousel-card span { position: absolute; bottom: -8px; left: -6px; background: var(--accent-color); color: #fff; font-size: 16px; font-weight: 900; padding: 2px 7px; border-radius: 6px; z-index: 2; }
-    .carousel-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; }
+    #heroBanner::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, var(--bg-color), transparent);
+    }
 
-    .movie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 20px 30px 20px; }
-    @media (min-width: 600px) { .movie-grid { grid-template-columns: repeat(5, 1fr); } }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
 
-    .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid var(--border-color); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
-    .card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.6); border-color: #444; }
-    .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-    .card-info { padding: 8px; }
-    .card-info h3 { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; color: var(--text-color); }
-    .card-info span { font-size: 10px; color: var(--text-muted); }
-    
-    .progress-bar { width: 100%; height: 4px; background: #333; position: absolute; bottom: 0; left: 0; }
-    .progress-fill { height: 100%; background: var(--accent-color); width: 60%; }
+    #heroTitle {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
 
-    .cast-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; margin-top: 6px; }
+    #heroPlayBtn {
+      background: var(--accent-color);
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* Carousels */
+    .section-container {
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .carousel {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .carousel-card {
+      min-width: 110px;
+      width: 110px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .carousel-card img {
+      width: 100%;
+      height: 165px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: var(--card-bg);
+    }
+
+    .carousel-card span {
+      position: absolute;
+      bottom: 5px;
+      left: 5px;
+      background: rgba(0,0,0,0.8);
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    /* Movie Grid */
+    .grid-container {
+      padding: 0 16px;
+    }
+
+    #movieGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card img {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+    }
+
+    .card-info {
+      padding: 6px;
+    }
+
+    .card-info h3 {
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+
+    .card-info span {
+      font-size: 10px;
+      color: #aaa;
+    }
+
+    /* Modal */
+    #movieModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 300;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: var(--bg-color);
+      width: 100%;
+      max-width: 500px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.1);
+      padding: 16px;
+      position: relative;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    #closeModal {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: var(--card-bg);
+      color: var(--text-color);
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      font-size: 14px;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    /* Cast & Actor Scroll */
+    .cast-scroll {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 5px;
+      scrollbar-width: none;
+    }
     .cast-scroll::-webkit-scrollbar { display: none; }
-    .cast-item { min-width: 50px; max-width: 50px; text-align: center; }
-    .cast-item img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); margin-bottom: 3px; }
-    .cast-item span { font-size: 8px; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-content { background: var(--card-bg); width: 100%; max-width: 500px; max-height: 92vh; border-radius: 14px; padding: 18px; overflow-y: auto; position: relative; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-    .close-modal { position: absolute; top: 14px; right: 14px; background: var(--border-color); color: var(--text-color); border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-    .close-modal:hover { background: var(--accent-color); }
+    .cast-item {
+      min-width: 60px;
+      width: 60px;
+      text-align: center;
+    }
+
+    .cast-item img {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--card-bg);
+    }
+
+    .cast-item span {
+      font-size: 9px;
+      display: block;
+      margin-top: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
   </style>
 </head>
 <body>
 
   <header>
-    <div class="header-left">
-      <button class="hamburger-btn" id="hamburgerBtn">&#9776;</button>
+    <div class="nav-left">
+      <button id="hamburgerBtn">&#9776;</button>
       <div class="logo">KIOSHFLEX</div>
     </div>
-    <div class="header-actions">
-      <button class="header-btn" id="watchlistNavBtn">Watchlist</button>
-      <button class="header-btn" id="themeToggleBtn">Theme</button>
+    <div class="nav-right">
+      <button id="watchlistNavBtn" class="nav-btn">Watchlist</button>
+      <button id="themeToggleBtn" class="nav-btn">Theme</button>
     </div>
   </header>
 
-  <!-- Sidebar Drawer Menu -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
-  <div class="sidebar" id="sidebar">
+  <div id="sidebarOverlay"></div>
+  <div id="sidebar">
     <div class="sidebar-header">
-      <div class="sidebar-title">Menu & Filters</div>
-      <button class="close-sidebar" id="closeSidebar">&times;</button>
+      <h3 style="font-size: 16px;">Menu & Filters</h3>
+      <button id="closeSidebar">&times;</button>
     </div>
 
-    <div class="sidebar-group">
-      <span class="sidebar-label">Category</span>
-      <div class="type-switcher">
-        <button class="type-btn active" id="btnMovies" data-type="movie">Movies</button>
-        <button class="type-btn" id="btnTV" data-type="tv">TV Series</button>
-      </div>
+    <div class="type-switch">
+      <button id="btnMovies" class="type-btn active" data-type="movie">Movies</button>
+      <button id="btnTV" class="type-btn" data-type="tv">TV Series</button>
     </div>
 
-    <div class="sidebar-group">
-      <span class="sidebar-label">Genre</span>
+    <div class="filter-group">
+      <label>Genre</label>
       <select id="genreSelect">
         <option value="">All Genres</option>
         <option value="28">Action</option>
@@ -171,25 +448,29 @@
         <option value="35">Comedy</option>
         <option value="80">Crime</option>
         <option value="18">Drama</option>
+        <option value="14">Fantasy</option>
         <option value="27">Horror</option>
+        <option value="9648">Mystery</option>
         <option value="10749">Romance</option>
         <option value="878">Sci-Fi</option>
+        <option value="53">Thriller</option>
       </select>
     </div>
 
-    <div class="sidebar-group">
-      <span class="sidebar-label">Language</span>
+    <div class="filter-group">
+      <label>Language</label>
       <select id="languageSelect">
         <option value="">All Languages</option>
         <option value="en">English</option>
         <option value="ko">Korean</option>
         <option value="ja">Japanese</option>
-        <option value="tl">Tagalog</option>
+        <option value="es">Spanish</option>
+        <option value="zh">Chinese</option>
       </select>
     </div>
 
-    <div class="sidebar-group">
-      <span class="sidebar-label">Sort By</span>
+    <div class="filter-group">
+      <label>Sort By</label>
       <select id="sortSelect">
         <option value="popularity.desc">Most Popular</option>
         <option value="vote_average.desc">Highest Rated</option>
@@ -197,8 +478,8 @@
       </select>
     </div>
 
-    <div class="sidebar-group">
-      <span class="sidebar-label">Release Year</span>
+    <div class="filter-group">
+      <label>Year</label>
       <select id="yearSelect">
         <option value="">All Years</option>
         <option value="2026">2026</option>
@@ -206,18 +487,7 @@
         <option value="2024">2024</option>
         <option value="2023">2023</option>
         <option value="2022">2022</option>
-        <option value="2021">2021</option>
         <option value="2020">2020</option>
-        <option value="2019">2019</option>
-        <option value="2018">2018</option>
-        <option value="2017">2017</option>
-        <option value="2016">2016</option>
-        <option value="2015">2015</option>
-        <option value="2014">2014</option>
-        <option value="2013">2013</option>
-        <option value="2012">2012</option>
-        <option value="2011">2011</option>
-        <option value="2010">2010</option>
       </select>
     </div>
   </div>
@@ -227,29 +497,31 @@
     <button id="searchBtn">Search</button>
   </div>
 
-  <div id="heroBanner" class="hero-banner" style="display:none;">
+  <div id="heroBanner">
     <div class="hero-content">
-      <div id="heroTitle" class="hero-title">Featured Title</div>
-      <button id="heroPlayBtn" class="hero-btn">▶ Watch Now</button>
+      <h2 id="heroTitle">Loading Featured...</h2>
+      <button id="heroPlayBtn">▶ Play</button>
     </div>
   </div>
 
-  <div id="continueSection" class="carousel-section" style="display:none; margin-top: 14px;">
-    <div class="section-title">Continue Watching</div>
-    <div class="carousel" id="continueCarousel"></div>
+  <div id="continueSection" class="section-container" style="display: none;">
+    <h3 class="section-title">Continue Watching</h3>
+    <div id="continueCarousel" class="carousel"></div>
   </div>
 
-  <div id="carouselSection" class="carousel-section" style="margin-top: 14px;">
-    <div class="section-title">Trending Top 10</div>
-    <div class="carousel" id="top10Carousel"></div>
+  <div id="carouselSection" class="section-container">
+    <h3 class="section-title">Trending Top 10</h3>
+    <div id="top10Carousel" class="carousel"></div>
   </div>
 
-  <div class="section-title" id="sectionTitle">Trending Movies</div>
-  <div class="movie-grid" id="movieGrid"></div>
+  <div class="section-container">
+    <h3 id="sectionTitle" class="section-title">Explore Movies</h3>
+    <div id="movieGrid" class="grid-container"></div>
+  </div>
 
-  <div class="modal" id="movieModal">
+  <div id="movieModal">
     <div class="modal-content">
-      <button class="close-modal" id="closeModal">&times;</button>
+      <button id="closeModal">&times;</button>
       <div id="modalBody"></div>
     </div>
   </div>
