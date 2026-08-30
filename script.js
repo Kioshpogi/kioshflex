@@ -331,10 +331,13 @@ async function openModal(item, type) {
         const profileImg = actor.profile_path ? `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 'https://via.placeholder.com/50x50?text=No+Img';
         const actorDiv = document.createElement('div');
         actorDiv.classList.add('cast-item');
+        actorDiv.style.cursor = 'pointer';
         actorDiv.innerHTML = `
           <img src="${profileImg}" alt="${actor.name}" style="-webkit-touch-callout: none; user-select: none;">
           <span>${actor.name}</span>
         `;
+        
+        actorDiv.addEventListener('click', () => openActorModal(actor.id));
         castScrollContainer.appendChild(actorDiv);
       });
     } else {
@@ -377,6 +380,60 @@ async function openModal(item, type) {
       let cur = parseInt(eSelect.value);
       if(cur < 25) { eSelect.value = cur + 1; updateSrc(); }
     });
+  }
+}
+
+async function openActorModal(personId) {
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/person/${personId}?api_key=${API_KEY}`);
+    const person = await res.json();
+
+    const creditsRes = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${API_KEY}`);
+    const creditsData = await creditsRes.json();
+    
+    const profileImg = person.profile_path ? `https://image.tmdb.org/t/p/w300${person.profile_path}` : 'https://via.placeholder.com/150?text=No+Img';
+    
+    modalBody.innerHTML = `
+      <button id="backToMediaBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">← Close</button>
+      <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:15px; flex-wrap:wrap;">
+        <img src="${profileImg}" alt="${person.name}" style="width:100px; height:150px; object-fit:cover; border-radius:8px;">
+        <div style="flex:1;">
+          <h3 style="color:#fff; font-size:18px; margin-bottom:5px;">${person.name}</h3>
+          <p style="color:#aaa; font-size:12px; margin-bottom:8px;"><strong>Born:</strong> ${person.birthday || 'N/A'}</p>
+          <p style="color:#bbb; font-size:11px; max-height:80px; overflow-y:auto; line-height:1.4;">${person.biography || 'No biography available.'}</p>
+        </div>
+      </div>
+      <h4 style="color:#fff; font-size:14px; margin-bottom:8px;">Filmography:</h4>
+      <div id="actorMoviesGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:8px; max-height:200px; overflow-y:auto;">
+        ${creditsData.cast && creditsData.cast.length > 0 ? creditsData.cast.map(media => {
+          if(!media.poster_path) return '';
+          return `
+            <div class="actor-media-card" data-id="${media.id}" data-type="${media.media_type || 'movie'}" style="cursor:pointer;">
+              <img src="https://image.tmdb.org/t/p/w185${media.poster_path}" style="width:100%; border-radius:6px;" alt="${media.title || media.name}">
+              <span style="font-size:10px; color:#aaa; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${media.title || media.name}</span>
+            </div>
+          `;
+        }).join('') : '<p style="color:#aaa; font-size:11px;">No filmography found.</p>'}
+      </div>
+    `;
+
+    document.getElementById('backToMediaBtn').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    document.querySelectorAll('.actor-media-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const mediaId = card.getAttribute('data-id');
+        const mediaType = card.getAttribute('data-type');
+        fetch(`https://api.themoviedb.org/3/${mediaType}/${mediaId}?api_key=${API_KEY}`)
+          .then(res => res.json())
+          .then(item => openModal(item, mediaType));
+      });
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert('Failed to load actor profile.');
   }
 }
 
