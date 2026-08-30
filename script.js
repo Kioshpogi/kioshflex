@@ -140,13 +140,14 @@ function loadContinueWatching() {
       const card = document.createElement('div');
       card.classList.add('continue-card');
       
-      // Dynamic random progress para magkakaiba ang haba ng progress bar
       const progressValue = item.progress || (Math.floor(Math.random() * 70) + 15);
       
       card.innerHTML = `
-        <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
-        <button class="delete-history-btn" title="Remove">&times;</button>
-        <div class="progress-bar"><div class="progress-fill" style="width: ${progressValue}%;"></div></div>
+        <div class="poster-wrapper">
+          <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
+          <button class="delete-history-btn" title="Remove">&times;</button>
+          <div class="progress-bar"><div class="progress-fill" style="width: ${progressValue}%;"></div></div>
+        </div>
       `;
       
       card.addEventListener('click', (e) => {
