@@ -295,9 +295,10 @@ async function openModal(item, type) {
       ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
     ${type === 'tv' ? `
-      <div style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px;">
+      <div style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; align-items:center;">
         <select id="seasonSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 10}, (_, i) => `<option value="${i+1}">Season ${i+1}</option>`).join('')}</select>
         <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}">Episode ${i+1}</option>`).join('')}</select>
+        <button id="autoNextToggle" style="background:#222; color:#aaa; border:none; padding:6px 10px; font-size:11px; border-radius:6px; cursor:pointer;" title="Toggle Auto-Next Countdown">Auto-Next: OFF</button>
       </div>
     ` : ''}
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
@@ -307,8 +308,12 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
       <button onclick="changeServer('${links.s5}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 5</button>
     </div>
-    <div style="border-radius:10px; overflow:hidden; margin-bottom:12px;">
+    <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
+      <div id="autoNextOverlay" style="display:none; position:absolute; bottom:15px; right:15px; background:rgba(0,0,0,0.85); border:1px solid #e50914; padding:10px 14px; border-radius:8px; color:#fff; font-size:12px; z-index:5; align-items:center; gap:10px;">
+        <span id="countdownText">Next ep in 5s...</span>
+        <button id="cancelAutoNext" style="background:#222; color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:10px; cursor:pointer;">Cancel</button>
+      </div>
     </div>
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
     
@@ -347,12 +352,16 @@ async function openModal(item, type) {
     document.getElementById('castSection').style.display = 'none';
   }
 
+  // IN-APP TRAILER MODAL LOGIC
   document.getElementById('trailerBtn').addEventListener('click', async () => {
     const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
     const vidData = await vidRes.json();
     const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-    if (trailer) document.getElementById('playerIframe').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
-    else alert('Trailer not available.');
+    if (trailer) {
+      document.getElementById('playerIframe').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+    } else {
+      alert('Trailer not available.');
+    }
   });
 
   document.getElementById('shareBtn').addEventListener('click', () => {
@@ -369,12 +378,66 @@ async function openModal(item, type) {
   if (type === 'tv') {
     const sSelect = document.getElementById('seasonSelect');
     const eSelect = document.getElementById('episodeSelect');
+    let autoNextActive = false;
+    let countdownInterval = null;
+
     const updateSrc = () => {
       let nl = getLinks(sSelect.value, eSelect.value);
       document.getElementById('playerIframe').src = nl.s1;
+      resetCountdown();
     };
+
     sSelect.addEventListener('change', updateSrc);
     eSelect.addEventListener('change', updateSrc);
+
+    const triggerNextEpisode = () => {
+      let curEp = parseInt(eSelect.value);
+      if (curEp < 25) {
+        eSelect.value = curEp + 1;
+        updateSrc();
+      }
+    };
+
+    const resetCountdown = () => {
+      clearInterval(countdownInterval);
+      document.getElementById('autoNextOverlay').style.display = 'none';
+      if (autoNextActive) startCountdown();
+    };
+
+    const startCountdown = () => {
+      let timeLeft = 10; // 10 seconds simulation countdown
+      const overlay = document.getElementById('autoNextOverlay');
+      const text = document.getElementById('countdownText');
+      overlay.style.display = 'flex';
+      text.textContent = `Next ep in ${timeLeft}s...`;
+
+      countdownInterval = setInterval(() => {
+        timeLeft--;
+        text.textContent = `Next ep in ${timeLeft}s...`;
+        if (timeLeft <= 0) {
+          clearInterval(countdownInterval);
+          overlay.style.display = 'none';
+          triggerNextEpisode();
+        }
+      }, 1000);
+    };
+
+    const autoToggleBtn = document.getElementById('autoNextToggle');
+    autoToggleBtn.addEventListener('click', () => {
+      autoNextActive = !autoNextActive;
+      autoToggleBtn.style.background = autoNextActive ? '#e50914' : '#222';
+      autoToggleBtn.style.color = autoNextActive ? '#fff' : '#aaa';
+      autoToggleBtn.textContent = `Auto-Next: ${autoNextActive ? 'ON' : 'OFF'}`;
+      if (autoNextActive) {
+        startCountdown();
+      } else {
+        resetCountdown();
+      }
+    });
+
+    document.getElementById('cancelAutoNext').addEventListener('click', () => {
+      resetCountdown();
+    });
 
     document.getElementById('nextEpBtn').addEventListener('click', () => {
       let cur = parseInt(eSelect.value);
