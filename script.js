@@ -81,7 +81,7 @@ function showMedia(items, type, append = false) {
   });
 }
 
-// Load Top 10 Carousel & Continue Watching Section
+// Load Top 10 Carousel
 async function loadTop10() {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`);
@@ -224,7 +224,7 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// Enhanced Modal with Trailer, Cast, Share, and Download Option
+// Redesigned Modern Modal UI
 async function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
@@ -258,55 +258,59 @@ async function openModal(item, type) {
   const isInWatchlist = watchlist.some(i => i.id === id);
 
   modalBody.innerHTML = `
-    <h3 style="margin-bottom:4px; font-size:16px; color:var(--text-color);">${title}</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+      <h3 style="margin:0; font-size:18px; font-weight:700; color:var(--text-color);">${title}</h3>
+    </div>
     
-    <div class="modal-actions" style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
-      <button id="modalWatchlistBtn" class="watchlist-btn ${isInWatchlist ? 'in-watchlist' : ''}" style="padding:6px 10px; font-size:11px;">
-        ${isInWatchlist ? 'Remove Watchlist' : '+ Watchlist'}
+    <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
+      <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#262626'}; color:#fff; transition:0.2s;">
+        ${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}
       </button>
-      <button id="trailerBtn" style="padding:6px 10px; font-size:11px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">▶ Trailer</button>
-      <button id="shareBtn" style="padding:6px 10px; font-size:11px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">🔗 Share</button>
-      <button id="downloadBtn" style="padding:6px 10px; font-size:11px; background:#1b5e20; color:#fff; border:none; border-radius:4px; cursor:pointer;">⬇ Download Link</button>
+      <button id="trailerBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; background:#262626; color:#fff;">▶ Trailer</button>
+      <button id="shareBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; background:#262626; color:#fff;">🔗 Share</button>
     </div>
 
     ${type === 'tv' ? `
-      <div class="episode-selector">
-        <div class="select-group">
-          <label style="font-size:11px; color:#aaa;">Season:</label>
-          <select id="seasonSelect">
+      <div class="episode-selector" style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:8px; border-radius:8px;">
+        <div class="select-group" style="flex:1;">
+          <label style="font-size:11px; color:#888; display:block; margin-bottom:2px;">Season</label>
+          <select id="seasonSelect" style="width:100%; background:#1a1a1a; color:#fff; border:1px solid #333; padding:6px; border-radius:4px;">
             ${Array.from({length: 15}, (_, i) => `<option value="${i+1}" ${i+1 === season ? 'selected' : ''}>Season ${i+1}</option>`).join('')}
           </select>
         </div>
-        <div class="select-group">
-          <label style="font-size:11px; color:#aaa;">Episode:</label>
-          <select id="episodeSelect">
+        <div class="select-group" style="flex:1;">
+          <label style="font-size:11px; color:#888; display:block; margin-bottom:2px;">Episode</label>
+          <select id="episodeSelect" style="width:100%; background:#1a1a1a; color:#fff; border:1px solid #333; padding:6px; border-radius:4px;">
             ${Array.from({length: 35}, (_, i) => `<option value="${i+1}" ${i+1 === episode ? 'selected' : ''}>Episode ${i+1}</option>`).join('')}
           </select>
         </div>
       </div>
     ` : ''}
 
-    <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;" id="serverButtons">
-      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:#e50914; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 1</button>
-      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:var(--btn-bg); color:var(--text-color); border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 2</button>
-      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:var(--btn-bg); color:var(--text-color); border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 3</button>
-      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:var(--btn-bg); color:var(--text-color); border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 4</button>
+    <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
+      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#e50914; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 1</button>
+      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 2</button>
+      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 3</button>
+      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 4</button>
     </div>
 
-    <iframe id="playerIframe" src="${links.s1}" width="100%" height="250" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="border-radius:6px; background:#000;"></iframe>
-    <p style="margin-top:8px; color:#ccc; font-size:12px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
-
-    <div id="castSection" style="margin-top:8px; font-size:12px; color:#aaa;">
-      <strong>Cast:</strong> <span id="castList">Loading cast...</span>
+    <div style="border-radius:8px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); margin-bottom:12px;">
+      <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="display:block; background:#000;"></iframe>
     </div>
 
-    <div class="review-section" style="margin-top:10px;">
-      <h4 style="font-size:13px;">User Reviews & Ratings</h4>
-      <div class="review-input-group">
-        <input type="text" id="reviewInput" placeholder="Leave a comment...">
-        <button id="submitReviewBtn">Post</button>
+    <p style="margin-top:0; margin-bottom:10px; color:#bbb; font-size:12px; line-height:1.4; max-height:60px; overflow-y:auto;">${overview || 'No overview available.'}</p>
+
+    <div id="castSection" style="margin-bottom:12px; font-size:12px; color:#888; background:rgba(255,255,255,0.02); padding:8px; border-radius:6px;">
+      <strong style="color:#fff;">Cast:</strong> <span id="castList">Loading...</span>
+    </div>
+
+    <div class="review-section" style="border-top:1px solid rgba(255,255,255,0.08); padding-top:10px;">
+      <h4 style="font-size:13px; margin-bottom:6px; color:#fff;">User Reviews & Ratings</h4>
+      <div class="review-input-group" style="display:flex; gap:6px; margin-bottom:8px;">
+        <input type="text" id="reviewInput" placeholder="Write a review..." style="flex:1; background:#1a1a1a; border:1px solid #333; padding:6px 10px; border-radius:4px; color:#fff; font-size:12px;">
+        <button id="submitReviewBtn" style="background:#e50914; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer; font-size:12px;">Post</button>
       </div>
-      <div id="reviewsList" class="reviews-list"></div>
+      <div id="reviewsList" class="reviews-list" style="max-height:80px; overflow-y:auto;"></div>
     </div>
   `;
 
@@ -324,7 +328,7 @@ async function openModal(item, type) {
     document.getElementById('castList').textContent = 'Unavailable';
   }
 
-  // Trailer Button functionality
+  // Trailer functionality
   document.getElementById('trailerBtn').addEventListener('click', async () => {
     try {
       const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
@@ -340,26 +344,19 @@ async function openModal(item, type) {
     }
   });
 
-  // Share Button functionality
+  // Share functionality
   document.getElementById('shareBtn').addEventListener('click', () => {
-    const shareUrl = window.location.href;
-    navigator.clipboard.writeText(shareUrl).then(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
       alert('Link copied to clipboard!');
     });
-  });
-
-  // Download Option Helper
-  document.getElementById('downloadBtn').addEventListener('click', () => {
-    alert('Redirecting or generating direct source stream link for download utility...');
-    window.open(links.s1, '_blank');
   });
 
   document.getElementById('modalWatchlistBtn').addEventListener('click', (e) => {
     toggleWatchlist(item);
     const updatedList = getWatchlist();
     const isNowIn = updatedList.some(i => i.id === id);
-    e.target.textContent = isNowIn ? 'Remove Watchlist' : '+ Watchlist';
-    e.target.classList.toggle('in-watchlist', isNowIn);
+    e.target.textContent = isNowIn ? '✓ In Watchlist' : '+ Watchlist';
+    e.target.style.background = isNowIn ? '#e50914' : '#262626';
   });
 
   const reviewsKey = `kiosh_reviews_${id}`;
@@ -367,9 +364,9 @@ async function openModal(item, type) {
     const reviews = JSON.parse(localStorage.getItem(reviewsKey)) || [];
     const listEl = document.getElementById('reviewsList');
     if(reviews.length === 0) {
-      listEl.innerHTML = '<span style="color:#777; font-size:11px;">No reviews yet.</span>';
+      listEl.innerHTML = '<span style="color:#666; font-size:11px;">No reviews yet.</span>';
     } else {
-      listEl.innerHTML = reviews.map(r => `<div style="font-size:11px;">• ${r}</div>`).join('');
+      listEl.innerHTML = reviews.map(r => `<div style="font-size:11px; color:#ccc; margin-bottom:4px;">• ${r}</div>`).join('');
     }
   };
   loadReviews();
@@ -407,8 +404,8 @@ async function openModal(item, type) {
           b.style.background = '#e50914';
           b.style.color = '#fff';
         } else {
-          b.style.background = 'var(--btn-bg)';
-          b.style.color = 'var(--text-color)';
+          b.style.background = '#222';
+          b.style.color = '#ccc';
         }
       });
     };
@@ -422,8 +419,8 @@ window.changeServer = function(url, btn) {
   document.getElementById('playerIframe').src = url;
   const buttons = document.querySelectorAll('#serverButtons button');
   buttons.forEach(b => {
-    b.style.background = 'var(--btn-bg)';
-    b.style.color = 'var(--text-color)';
+    b.style.background = '#222';
+    b.style.color = '#ccc';
   });
   btn.style.background = '#e50914';
   btn.style.color = '#fff';
@@ -445,3 +442,4 @@ window.addEventListener('click', (e) => {
 
 loadTop10();
 loadContent(true);
+
