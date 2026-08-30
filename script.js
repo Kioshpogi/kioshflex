@@ -252,14 +252,14 @@ async function openModal(item, type) {
     s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
     s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
-    s4: `https://embed.su/embed/tv/${id}/${s}/${e}`,
-    s5: `https://vidsrc.icu/embed/tv/${id}/${s}/${e}`
+    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
+    s5: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`
   } : {
     s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
     s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
     s3: `https://vidlink.pro/movie/${id}`,
-    s4: `https://embed.su/embed/movie/${id}`,
-    s5: `https://vidsrc.icu/embed/movie/${id}`
+    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`,
+    s5: `https://vidsrc.xyz/embed/movie?tmdb=${id}`
   };
 
   let links = getLinks(season, episode);
@@ -270,7 +270,7 @@ async function openModal(item, type) {
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
       <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
-      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
+      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">🔗 Share</button>
       ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
     ${type === 'tv' ? `
