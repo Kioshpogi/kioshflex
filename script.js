@@ -32,7 +32,6 @@ let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
 
-// Theme Persistence
 if (localStorage.getItem('kiosh_theme') === 'light') {
   document.body.classList.add('light-mode');
 }
@@ -80,13 +79,11 @@ function showMedia(items, type, append = false) {
   });
 }
 
-// Load Hero Banner (True Random) & Top 10
 async function loadHeroAndTop10() {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`);
     const data = await res.json();
     if(data.results && data.results.length > 0) {
-      // True random selection from trending results
       const validItems = data.results.filter(item => item.backdrop_path);
       if (validItems.length > 0) {
         const randomIndex = Math.floor(Math.random() * validItems.length);
@@ -94,7 +91,6 @@ async function loadHeroAndTop10() {
         heroTitle.textContent = featuredItem.title || featuredItem.name;
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
         heroBanner.style.display = 'flex';
-        
         heroPlayBtn.onclick = () => openModal(featuredItem, featuredItem.media_type === 'tv' ? 'tv' : 'movie');
       }
 
@@ -114,7 +110,6 @@ async function loadHeroAndTop10() {
   }
 }
 
-// Load Continue Watching Row
 function loadContinueWatching() {
   const history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
   if (history.length > 0) {
@@ -246,7 +241,7 @@ async function openModal(item, type) {
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
       <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
-      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
+      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">🔗 Share</button>
       ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
     ${type === 'tv' ? `
@@ -263,10 +258,39 @@ async function openModal(item, type) {
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px;">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
     </div>
-    <p style="color:#bbb; font-size:12px; line-height:1.4; max-height:60px; overflow-y:auto;">${overview || 'No overview available.'}</p>
+    <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
+    
+    <div id="castSection" style="margin-top: 10px;">
+      <strong style="font-size:12px; color:#fff;">Top Cast:</strong>
+      <div id="castScrollContainer" class="cast-scroll"><span style="font-size:11px; color:#777;">Loading cast...</span></div>
+    </div>
   `;
 
   modal.style.display = 'flex';
+
+  try {
+    const castRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`);
+    const castData = await castRes.json();
+    const castScrollContainer = document.getElementById('castScrollContainer');
+    
+    if (castData.cast && castData.cast.length > 0) {
+      castScrollContainer.innerHTML = '';
+      castData.cast.slice(0, 10).forEach(actor => {
+        const profileImg = actor.profile_path ? `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 'https://via.placeholder.com/50x50?text=No+Img';
+        const actorDiv = document.createElement('div');
+        actorDiv.classList.add('cast-item');
+        actorDiv.innerHTML = `
+          <img src="${profileImg}" alt="${actor.name}">
+          <span>${actor.name}</span>
+        `;
+        castScrollContainer.appendChild(actorDiv);
+      });
+    } else {
+      document.getElementById('castSection').style.display = 'none';
+    }
+  } catch (err) {
+    document.getElementById('castSection').style.display = 'none';
+  }
 
   document.getElementById('trailerBtn').addEventListener('click', async () => {
     const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
