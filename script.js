@@ -30,6 +30,14 @@ const languageSelect = document.getElementById('languageSelect');
 const sortSelect = document.getElementById('sortSelect');
 const yearSelect = document.getElementById('yearSelect');
 
+// Awtomatikong maglagay ng years mula 2026 pababa sa 2000
+for (let y = 2026; y >= 2000; y--) {
+  const option = document.createElement('option');
+  option.value = y;
+  option.textContent = y;
+  yearSelect.appendChild(option);
+}
+
 let currentType = 'movie';
 let currentPage = 1;
 let currentFetchUrl = '';
@@ -377,7 +385,6 @@ async function openModal(item, type) {
       let nl = getLinks(sSelect.value, eSelect.value);
       document.getElementById('playerIframe').src = nl.s1;
       
-      // I-update din ang active state ng server buttons pabalik sa Server 1 kapag lumipat ng episode
       document.querySelectorAll('#serverButtons button').forEach((b, idx) => {
         if(idx === 0) {
           b.style.background = '#e50914';
