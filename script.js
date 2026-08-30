@@ -31,10 +31,10 @@ async function getMedia(url, type) {
     if(data.results && data.results.length > 0) {
       showMedia(data.results, type);
     } else {
-      movieGrid.innerHTML = '<p style="color:#aaa;">Walang nahanap.</p>';
+      movieGrid.innerHTML = '<p style="color:#aaa;">No results found.</p>';
     }
   } catch (error) {
-    movieGrid.innerHTML = '<p style="color:#e50914;">May problema sa pag-load ng data.</p>';
+    movieGrid.innerHTML = '<p style="color:#e50914;">Error loading data.</p>';
   }
 }
 
@@ -122,12 +122,12 @@ function toggleWatchlist(item) {
 
 watchlistNavBtn.addEventListener('click', () => {
   carouselSection.style.display = 'none';
-  sectionTitle.textContent = 'My Watchlist ⭐';
+  sectionTitle.textContent = 'My Watchlist';
   const watchlist = getWatchlist();
   if(watchlist.length > 0) {
     showMedia(watchlist, currentType);
   } else {
-    movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Wala pang laman ang iyong Watchlist.</p>';
+    movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
   }
 });
 
@@ -206,7 +206,7 @@ function openModal(item, type) {
     
     <div class="modal-actions">
       <button id="modalWatchlistBtn" class="watchlist-btn ${isInWatchlist ? 'in-watchlist' : ''}">
-        ${isInWatchlist ? '⭐ Remove from Watchlist' : '⭐ Add to Watchlist'}
+        ${isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
       </button>
     </div>
 
@@ -240,8 +240,8 @@ function openModal(item, type) {
     <div class="review-section">
       <h4>User Reviews & Ratings</h4>
       <div class="review-input-group">
-        <input type="text" id="reviewInput" placeholder="Mag-iwan ng komento o rating (e.g. 5/5 ⭐)...">
-        <button id="submitReviewBtn">I-post</button>
+        <input type="text" id="reviewInput" placeholder="Leave a comment or rating...">
+        <button id="submitReviewBtn">Post</button>
       </div>
       <div id="reviewsList" class="reviews-list"></div>
     </div>
@@ -249,22 +249,20 @@ function openModal(item, type) {
 
   modal.style.display = 'flex';
 
-  // Watchlist Button Event inside Modal
   document.getElementById('modalWatchlistBtn').addEventListener('click', (e) => {
     toggleWatchlist(item);
     const updatedList = getWatchlist();
     const isNowIn = updatedList.some(i => i.id === id);
-    e.target.textContent = isNowIn ? '⭐ Remove from Watchlist' : '⭐ Add to Watchlist';
+    e.target.textContent = isNowIn ? 'Remove from Watchlist' : 'Add to Watchlist';
     e.target.classList.toggle('in-watchlist', isNowIn);
   });
 
-  // Load and Save Reviews via localStorage
   const reviewsKey = `kiosh_reviews_${id}`;
   const loadReviews = () => {
     const reviews = JSON.parse(localStorage.getItem(reviewsKey)) || [];
     const listEl = document.getElementById('reviewsList');
     if(reviews.length === 0) {
-      listEl.innerHTML = '<span style="color:#777;">Wala pang reviews. Mag-iwan ng sarili mo!</span>';
+      listEl.innerHTML = '<span style="color:#777;">No reviews yet. Be the first to leave one!</span>';
     } else {
       listEl.innerHTML = reviews.map(r => `<div>• ${r}</div>`).join('');
     }
@@ -296,8 +294,8 @@ function openModal(item, type) {
       const buttons = document.querySelectorAll('#serverButtons button');
       buttons[0].setAttribute('onclick', `changeServer('${newLinks.s1}', this)`);
       buttons[1].setAttribute('onclick', `changeServer('${newLinks.s2}', this)`);
-      buttons[2].setAttribute('onclick', `changeServer('${newLinks.s3}', this)`);
-      buttons[3].setAttribute('onclick', `changeServer('${newLinks.s4}', this)`);
+      buttons[2].setAttribute('onclick', `changeServer('${newLinks.s3}', this)`,
+      buttons[3].setAttribute('onclick', `changeServer('${newLinks.s4}', this)`));
 
       buttons.forEach((b, idx) => {
         if(idx === 0) {
@@ -340,6 +338,5 @@ window.addEventListener('click', (e) => {
   }
 });
 
-// Initial Load
 loadTop10();
 loadContent();
