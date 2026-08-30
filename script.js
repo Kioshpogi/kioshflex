@@ -253,14 +253,15 @@ async function openModal(item, type) {
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
     s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
-    s5: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`
+    s5: `https://autoembed.cc/embed/tv/${id}/${s}/${e}`
   } : {
     s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
     s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
     s3: `https://vidlink.pro/movie/${id}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-    s5: `https://vidsrc.xyz/embed/movie?tmdb=${id}`
+    s5: `https://autoembed.cc/embed/movie/${id}`
   };
+
 
   let links = getLinks(season, episode);
   const isInWatchlist = getWatchlist().some(i => i.id === id);
