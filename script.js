@@ -17,6 +17,11 @@ const themeToggleBtn = document.getElementById('themeToggleBtn');
 const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
 let currentType = 'movie';
+let currentPage = 1;
+let currentFetchUrl = '';
+let isLoadingMore = false;
+let isSearchMode = false;
+let currentQuery = '';
 
 // Dark / Light Mode Toggle
 themeToggleBtn.addEventListener('click', () => {
@@ -24,25 +29,34 @@ themeToggleBtn.addEventListener('click', () => {
 });
 
 // Fetch Media for Grid
-async function getMedia(url, type) {
+async function getMedia(url, type, append = false) {
   try {
+    isLoadingMore = true;
     const res = await fetch(url);
     const data = await res.json();
+    
     if(data.results && data.results.length > 0) {
-      showMedia(data.results, type);
-    } else {
+      showMedia(data.results, type, append);
+    } else if (!append) {
       movieGrid.innerHTML = '<p style="color:#aaa;">No results found.</p>';
     }
   } catch (error) {
-    movieGrid.innerHTML = '<p style="color:#e50914;">Error loading data.</p>';
+    if (!append) {
+      movieGrid.innerHTML = '<p style="color:#e50914;">Error loading data.</p>';
+    }
+  } finally {
+    isLoadingMore = false;
   }
 }
 
-function showMedia(items, type) {
-  movieGrid.innerHTML = '';
+function showMedia(items, type, append = false) {
+  if (!append) {
+    movieGrid.innerHTML = '';
+  }
+  
   items.forEach(item => {
     const title = item.title || item.name;
-    const { poster_path, vote_average, overview, id } = item;
+    const { poster_path, vote_average, id } = item;
     if(!poster_path) return;
 
     const card = document.createElement('div');
@@ -69,7 +83,7 @@ async function loadTop10() {
       top10Carousel.innerHTML = '';
       data.results.slice(0, 10).forEach((item, index) => {
         const title = item.title || item.name;
-        const { poster_path, media_type, id } = item;
+        const { poster_path, media_type } = item;
         if(!poster_path) return;
 
         const card = document.createElement('div');
@@ -87,21 +101,25 @@ async function loadTop10() {
   }
 }
 
-function loadContent() {
+function loadContent(resetPage = true) {
+  isSearchMode = false;
   carouselSection.style.display = 'block';
   const genreId = genreSelect ? genreSelect.value : '';
-  let url = '';
+  
+  if (resetPage) {
+    currentPage = 1;
+  }
 
   if (genreId) {
     const selectedText = genreSelect.options[genreSelect.selectedIndex].text;
     sectionTitle.textContent = `${selectedText} (${currentType === 'movie' ? 'Movies' : 'TV Shows'})`;
-    url = `https://api.themoviedb.org/3/discover/${currentType}?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc`;
+    currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc&page=`;
   } else {
     sectionTitle.textContent = `Trending ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
-    url = `https://api.themoviedb.org/3/trending/${currentType}/week?api_key=${API_KEY}`;
+    currentFetchUrl = `https://api.themoviedb.org/3/trending/${currentType}/week?api_key=${API_KEY}&page=`;
   }
 
-  getMedia(url, currentType);
+  getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
 // Watchlist System using localStorage
@@ -121,11 +139,12 @@ function toggleWatchlist(item) {
 }
 
 watchlistNavBtn.addEventListener('click', () => {
+  isSearchMode = true; // disable infinite scroll for watchlist
   carouselSection.style.display = 'none';
   sectionTitle.textContent = 'My Watchlist';
   const watchlist = getWatchlist();
   if(watchlist.length > 0) {
-    showMedia(watchlist, currentType);
+    showMedia(watchlist, currentType, false);
   } else {
     movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
   }
@@ -137,19 +156,19 @@ if (btnMovies && btnTV) {
     currentType = 'movie';
     btnMovies.classList.add('active');
     btnTV.classList.remove('active');
-    loadContent();
+    loadContent(true);
   });
 
   btnTV.addEventListener('click', () => {
     currentType = 'tv';
     btnTV.classList.add('active');
     btnMovies.classList.remove('active');
-    loadContent();
+    loadContent(true);
   });
 }
 
 if (genreSelect) {
-  genreSelect.addEventListener('change', loadContent);
+  genreSelect.addEventListener('change', () => loadContent(true));
 }
 
 // Search Feature
@@ -157,9 +176,13 @@ if (searchBtn && searchInput) {
   searchBtn.addEventListener('click', () => {
     const query = searchInput.value.trim();
     if(query) {
+      isSearchMode = true;
       carouselSection.style.display = 'none';
       sectionTitle.textContent = `Search Results: ${query}`;
-      getMedia(`https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${query}`, currentType);
+      currentQuery = query;
+      currentPage = 1;
+      currentFetchUrl = `https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${query}&page=`;
+      getMedia(currentFetchUrl + currentPage, currentType, false);
     }
   });
 
@@ -170,7 +193,20 @@ if (searchBtn && searchInput) {
   });
 }
 
-// Modal Player with Seasons, Watchlist & Reviews
+// Infinite Scroll Listener
+window.addEventListener('scroll', () => {
+  if (isSearchMode && watchlistNavBtn === document.activeElement) return; // skip if custom views
+  
+  const { scrollTop, scrollHeight,clientHeight } = document.documentElement;
+  if (scrollTop + clientHeight >= scrollHeight - 300 && !isLoadingMore) {
+    currentPage++;
+    if (currentFetchUrl) {
+      getMedia(currentFetchUrl + currentPage, currentType, true);
+    }
+  }
+});
+
+// Modal Player with Alternative Servers & Fallbacks
 function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
@@ -182,17 +218,17 @@ function openModal(item, type) {
   function getLinks(s, e) {
     if (type === 'tv') {
       return {
-        s1: `https://vidlink.pro/tv/${id}/${s}/${e}`,
-        s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-        s3: `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`,
-        s4: `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`
+        s1: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+        s2: `https://vidlink.pro/tv/${id}/${s}/${e}`,
+        s3: `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`,
+        s4: `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
       };
     } else {
       return {
-        s1: `https://vidlink.pro/movie/${id}`,
-        s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
-        s3: `https://www.2embed.cc/embed/${id}`,
-        s4: `https://vidsrc.pro/embed/movie/${id}`
+        s1: `https://vidsrc.cc/v2/embed/movie/${id}`,
+        s2: `https://vidlink.pro/movie/${id}`,
+        s3: `https://vidsrc.pro/embed/movie/${id}`,
+        s4: `https://www.2embed.cc/embed/${id}`
       };
     }
   }
@@ -215,13 +251,13 @@ function openModal(item, type) {
         <div class="select-group">
           <label style="font-size:11px; color:#aaa;">Season:</label>
           <select id="seasonSelect">
-            ${Array.from({length: 10}, (_, i) => `<option value="${i+1}" ${i+1 === season ? 'selected' : ''}>Season ${i+1}</option>`).join('')}
+            ${Array.from({length: 15}, (_, i) => `<option value="${i+1}" ${i+1 === season ? 'selected' : ''}>Season ${i+1}</option>`).join('')}
           </select>
         </div>
         <div class="select-group">
           <label style="font-size:11px; color:#aaa;">Episode:</label>
           <select id="episodeSelect">
-            ${Array.from({length: 30}, (_, i) => `<option value="${i+1}" ${i+1 === episode ? 'selected' : ''}>Episode ${i+1}</option>`).join('')}
+            ${Array.from({length: 35}, (_, i) => `<option value="${i+1}" ${i+1 === episode ? 'selected' : ''}>Episode ${i+1}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -235,7 +271,7 @@ function openModal(item, type) {
     </div>
 
     <iframe id="playerIframe" src="${links.s1}" width="100%" height="250" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="border-radius:6px; background:#000;"></iframe>
-    <p style="margin-top:8px; color:#ccc; font-size:12px; max-height:60px; overflow-y:auto;">${overview}</p>
+    <p style="margin-top:8px; color:#ccc; font-size:12px; max-height:60px; overflow-y:auto;">${overview || 'No overview available.'}</p>
 
     <div class="review-section">
       <h4>User Reviews & Ratings</h4>
@@ -294,8 +330,8 @@ function openModal(item, type) {
       const buttons = document.querySelectorAll('#serverButtons button');
       buttons[0].setAttribute('onclick', `changeServer('${newLinks.s1}', this)`);
       buttons[1].setAttribute('onclick', `changeServer('${newLinks.s2}', this)`);
-      buttons[2].setAttribute('onclick', `changeServer('${newLinks.s3}', this)`,
-      buttons[3].setAttribute('onclick', `changeServer('${newLinks.s4}', this)`));
+      buttons[2].setAttribute('onclick', `changeServer('${newLinks.s3}', this)`);
+      buttons[3].setAttribute('onclick', `changeServer('${newLinks.s4}', this)`);
 
       buttons.forEach((b, idx) => {
         if(idx === 0) {
@@ -339,4 +375,4 @@ window.addEventListener('click', (e) => {
 });
 
 loadTop10();
-loadContent();
+loadContent(true);
