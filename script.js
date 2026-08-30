@@ -298,7 +298,6 @@ async function openModal(item, type) {
       <div style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; align-items:center;">
         <select id="seasonSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 10}, (_, i) => `<option value="${i+1}">Season ${i+1}</option>`).join('')}</select>
         <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}">Episode ${i+1}</option>`).join('')}</select>
-        <button id="autoNextToggle" style="background:#e50914; color:#fff; border:none; padding:6px 10px; font-size:11px; border-radius:6px; cursor:pointer;" title="Toggle Auto-Next">Auto-Next: ON</button>
       </div>
     ` : ''}
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
@@ -373,56 +372,33 @@ async function openModal(item, type) {
   if (type === 'tv') {
     const sSelect = document.getElementById('seasonSelect');
     const eSelect = document.getElementById('episodeSelect');
-    let autoNextTimeout = null;
-    let isAutoNextActive = true;
 
     const updateSrc = () => {
       let nl = getLinks(sSelect.value, eSelect.value);
       document.getElementById('playerIframe').src = nl.s1;
-      resetAutoNextTimer();
+      
+      // I-update din ang active state ng server buttons pabalik sa Server 1 kapag lumipat ng episode
+      document.querySelectorAll('#serverButtons button').forEach((b, idx) => {
+        if(idx === 0) {
+          b.style.background = '#e50914';
+          b.style.color = '#fff';
+        } else {
+          b.style.background = '#222';
+          b.style.color = '#ccc';
+        }
+      });
     };
 
     sSelect.addEventListener('change', updateSrc);
     eSelect.addEventListener('change', updateSrc);
 
-    const triggerNextEpisode = () => {
-      let curEp = parseInt(eSelect.value);
-      if (curEp < 25) {
-        eSelect.value = curEp + 1;
-        updateSrc();
-      }
-    };
-
-    const resetAutoNextTimer = () => {
-      clearTimeout(autoNextTimeout);
-      if (isAutoNextActive) startAutoNextTimer();
-    };
-
-    const startAutoNextTimer = () => {
-      autoNextTimeout = setTimeout(() => {
-        triggerNextEpisode();
-      }, 20 * 60 * 1000); // 20 minutes estimate per episode
-    };
-
-    const autoToggleBtn = document.getElementById('autoNextToggle');
-    autoToggleBtn.addEventListener('click', () => {
-      isAutoNextActive = !isAutoNextActive;
-      autoToggleBtn.style.background = isAutoNextActive ? '#e50914' : '#222';
-      autoToggleBtn.style.color = isAutoNextActive ? '#fff' : '#aaa';
-      autoToggleBtn.textContent = `Auto-Next: ${isAutoNextActive ? 'ON' : 'OFF'}`;
-      if (isAutoNextActive) {
-        startAutoNextTimer();
-      } else {
-        clearTimeout(autoNextTimeout);
-      }
-    });
-
     document.getElementById('nextEpBtn').addEventListener('click', () => {
       let cur = parseInt(eSelect.value);
-      if(cur < 25) { eSelect.value = cur + 1; updateSrc(); }
+      if(cur < 25) { 
+        eSelect.value = cur + 1; 
+        updateSrc(); 
+      }
     });
-
-    startAutoNextTimer();
   }
 }
 
