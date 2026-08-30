@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KioshFlex - Stream Movies & TV Shows</title>
+  <link rel="stylesheet" href="style.css">
+  <!-- PWA Manifest at Icon Links -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#e50914">
+  <link rel="apple-touch-icon" href="icon.png">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header>
+    <div class="logo">KIOSHFLEX</div>
+    <div class="search-bar">
+      <input type="text" id="searchInput" placeholder="Search movies, TV shows...">
+      <button id="searchBtn">Search</button>
+    </div>
+  </header>
+
+  <!-- Category & Genre Nav -->
+  <nav class="category-nav">
+    <div class="type-btns">
+      <button id="btnMovies" class="nav-btn active">Movies</button>
+      <button id="btnTV" class="nav-btn">TV Series</button>
+    </div>
+    
+    <!-- Dropdown Filter -->
+    <div class="genre-filter">
+      <select id="genreSelect">
+        <option value="">All Genres</option>
+        <option value="28">Action</option>
+        <option value="35">Comedy</option>
+        <option value="27">Horror</option>
+        <option value="16">Anime / Animation</option>
+      </select>
+    </div>
+  </nav>
+
+  <!-- Content Container -->
+  <main class="container">
+    <h2 id="sectionTitle">Trending Movies</h2>
+    <div id="movieGrid" class="movie-grid"></div>
+  </main>
+
+  <!-- Player Modal -->
+  <div id="movieModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
