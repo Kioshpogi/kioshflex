@@ -26,63 +26,63 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     body { background-color: var(--bg-color); color: var(--text-color); min-height: 100vh; transition: background 0.3s, color 0.3s; }
 
-    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
-    .logo { color: var(--accent-color); font-size: 22px; font-weight: 900; letter-spacing: 1.5px; }
-    .header-actions { display: flex; gap: 10px; }
-    .header-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+    .logo { color: var(--accent-color); font-size: 20px; font-weight: 900; letter-spacing: 1.5px; }
+    .header-actions { display: flex; gap: 8px; }
+    .header-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
     .header-btn:hover { border-color: var(--accent-color); }
 
+    /* Search Bar at the Top */
+    .search-container { display: flex; padding: 12px 20px; gap: 8px; background: var(--bg-color); border-bottom: 1px solid var(--border-color); }
+    .search-container input { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); padding: 9px 12px; border-radius: 8px; color: var(--text-color); font-size: 12px; outline: none; }
+    .search-container button { background: var(--accent-color); color: #fff; border: none; padding: 0 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
+
     /* Hero Banner */
-    .hero-banner { position: relative; width: 100%; height: 320px; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 20px; margin-bottom: 16px; }
+    .hero-banner { position: relative; width: 100%; height: 300px; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 20px; margin-bottom: 16px; }
     .hero-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-color) 10%, rgba(0,0,0,0.2) 80%); }
     .hero-content { position: relative; z-index: 2; max-width: 100%; }
-    .hero-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-    .hero-btn { background: var(--accent-color); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
-
-    .search-container { display: flex; padding: 0 20px 16px 20px; gap: 10px; background: var(--bg-color); }
-    .search-container input { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 8px; color: var(--text-color); font-size: 13px; outline: none; }
-    .search-container button { background: var(--accent-color); color: #fff; border: none; padding: 0 18px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
+    .hero-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+    .hero-btn { background: var(--accent-color); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 11px; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
 
     .type-switcher { display: flex; padding: 0 20px 14px 20px; gap: 10px; }
-    .type-btn { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 10px; border-radius: 8px; font-weight: 600; cursor: pointer; text-align: center; font-size: 13px; transition: 0.2s; }
+    .type-btn { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-muted); padding: 9px; border-radius: 8px; font-weight: 600; cursor: pointer; text-align: center; font-size: 12px; transition: 0.2s; }
     .type-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
 
-    .filters-container { display: flex; gap: 10px; padding: 0 20px 16px 20px; overflow-x: auto; scrollbar-width: none; }
+    .filters-container { display: flex; gap: 8px; padding: 0 20px 16px 20px; overflow-x: auto; scrollbar-width: none; }
     .filters-container::-webkit-scrollbar { display: none; }
-    .filter-select { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 8px; font-size: 12px; outline: none; cursor: pointer; }
+    .filter-select { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 7px 10px; border-radius: 8px; font-size: 11px; outline: none; cursor: pointer; }
 
-    .section-title { font-size: 16px; font-weight: 700; padding: 16px 20px 10px 20px; color: var(--text-color); }
+    .section-title { font-size: 15px; font-weight: 700; padding: 14px 20px 10px 20px; color: var(--text-color); }
     .carousel-section { padding: 0 20px 16px 20px; }
-    .carousel { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+    .carousel { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
     .carousel::-webkit-scrollbar { display: none; }
-    .carousel-card { min-width: 120px; max-width: 120px; position: relative; cursor: pointer; transition: transform 0.2s; }
+    .carousel-card { min-width: 110px; max-width: 110px; position: relative; cursor: pointer; transition: transform 0.2s; }
     .carousel-card:hover { transform: scale(1.05); }
-    .carousel-card span { position: absolute; bottom: -8px; left: -6px; background: var(--accent-color); color: #fff; font-size: 18px; font-weight: 900; padding: 2px 8px; border-radius: 6px; z-index: 2; }
-    .carousel-card img { width: 100%; height: 175px; object-fit: cover; border-radius: 12px; }
+    .carousel-card span { position: absolute; bottom: -8px; left: -6px; background: var(--accent-color); color: #fff; font-size: 16px; font-weight: 900; padding: 2px 7px; border-radius: 6px; z-index: 2; }
+    .carousel-card img { width: 100%; height: 160px; object-fit: cover; border-radius: 10px; }
 
-    .movie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 0 20px 30px 20px; }
+    .movie-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 20px 30px 20px; }
     @media (min-width: 600px) { .movie-grid { grid-template-columns: repeat(5, 1fr); } }
 
-    .card { background: var(--card-bg); border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid var(--border-color); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+    .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid var(--border-color); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
     .card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.6); border-color: #444; }
     .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-    .card-info { padding: 10px; }
-    .card-info h3 { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; color: var(--text-color); }
-    .card-info span { font-size: 11px; color: var(--text-muted); }
+    .card-info { padding: 8px; }
+    .card-info h3 { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; color: var(--text-color); }
+    .card-info span { font-size: 10px; color: var(--text-muted); }
     
     .progress-bar { width: 100%; height: 4px; background: #333; position: absolute; bottom: 0; left: 0; }
     .progress-fill { height: 100%; background: var(--accent-color); width: 60%; }
 
-    /* Cast Pictures Scroll */
-    .cast-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; margin-top: 6px; }
+    .cast-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; margin-top: 6px; }
     .cast-scroll::-webkit-scrollbar { display: none; }
-    .cast-item { min-width: 55px; max-width: 55px; text-align: center; }
-    .cast-item img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); margin-bottom: 3px; }
-    .cast-item span { font-size: 9px; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cast-item { min-width: 50px; max-width: 50px; text-align: center; }
+    .cast-item img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border-color); margin-bottom: 3px; }
+    .cast-item span { font-size: 8px; color: var(--text-muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-content { background: var(--card-bg); width: 100%; max-width: 520px; max-height: 92vh; border-radius: 16px; padding: 20px; overflow-y: auto; position: relative; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
-    .close-modal { position: absolute; top: 16px; right: 16px; background: var(--border-color); color: var(--text-color); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .modal-content { background: var(--card-bg); width: 100%; max-width: 500px; max-height: 92vh; border-radius: 14px; padding: 18px; overflow-y: auto; position: relative; border: 1px solid var(--border-color); box-shadow: 0 20px 40px rgba(0,0,0,0.8); }
+    .close-modal { position: absolute; top: 14px; right: 14px; background: var(--border-color); color: var(--text-color); border: none; width: 30px; height: 30px; border-radius: 50%; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
     .close-modal:hover { background: var(--accent-color); }
   </style>
 </head>
@@ -96,6 +96,12 @@
     </div>
   </header>
 
+  <!-- Search Bar Inilagay sa Taas -->
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search movies, TV shows...">
+    <button id="searchBtn">Search</button>
+  </div>
+
   <div id="heroBanner" class="hero-banner" style="display:none;">
     <div class="hero-content">
       <div id="heroTitle" class="hero-title">Featured Title</div>
@@ -103,12 +109,7 @@
     </div>
   </div>
 
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Search movies, TV shows...">
-    <button id="searchBtn">Search</button>
-  </div>
-
-  <div class="type-switcher">
+  <div class="type-switcher" style="margin-top: 14px;">
     <button class="type-btn active" id="btnMovies">Movies</button>
     <button class="type-btn" id="btnTV">TV Series</button>
   </div>
