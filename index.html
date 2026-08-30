@@ -3,131 +3,209 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KIOSHFLEX</title>
-  
-  <!-- PWA Manifest & Theme Color for Installation -->
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#e50914">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Kioshflex Search UI</title>
+  <style>
+    /* General Styles */
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
 
-  <link rel="stylesheet" href="style.css">
+    /* Search Container Wrapper */
+    .search-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 550px;
+      margin: 0 20px;
+    }
+
+    /* Search Bar Box */
+    .search-bar-container {
+      display: flex;
+      align-items: center;
+      background-color: #121212;
+      border: 1px solid #27272a;
+      border-radius: 9999px;
+      padding: 10px 16px;
+      transition: border-color 0.2s ease;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+    }
+
+    .search-bar-container:focus-within {
+      border-color: #dc2626;
+    }
+
+    /* Search Icon */
+    .search-icon {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #a1a1aa;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    /* Input Field */
+    .search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      width: 100%;
+      font-size: 14px;
+    }
+
+    .search-input::placeholder {
+      color: #71717a;
+    }
+
+    /* Search Button */
+    .search-btn {
+      background-color: #dc2626;
+      color: #ffffff;
+      border: none;
+      border-radius: 9999px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-left: 8px;
+      flex-shrink: 0;
+    }
+
+    .search-btn:hover {
+      background-color: #b91c1c;
+    }
+
+    /* Search History Dropdown */
+    .search-history {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      margin-top: 8px;
+      background-color: #121212;
+      border: 1px solid #27272a;
+      border-radius: 16px;
+      padding: 12px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+      z-index: 50;
+      display: none; /* Naka-hide by default */
+    }
+
+    .search-history.active {
+      display: block; /* Lilitaw kapag na-click ang search bar */
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px 8px 4px;
+    }
+
+    .history-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #a1a1aa;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin: 0;
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 11px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .clear-btn:hover {
+      color: #f87171;
+    }
+
+    /* History Tags List */
+    .history-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .history-tag {
+      background-color: rgba(39, 39, 42, 0.8);
+      border: 1px solid rgba(63, 63, 70, 0.5);
+      color: #d4d4d8;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      text-decoration: none;
+      transition: background-color 0.2s ease;
+    }
+
+    .history-tag:hover {
+      background-color: #27272a;
+    }
+  </style>
 </head>
 <body>
 
-  <header>
-    <div class="nav-left">
-      <button id="hamburgerBtn" class="hamburger-btn">&#9776;</button>
-      <div class="logo">KIOSHFLEX</div>
-    </div>
-    <div class="header-actions">
-      <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
-      <button id="themeToggleBtn" class="header-btn">Theme</button>
-    </div>
-  </header>
-
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
-  <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">Menu & Filters</div>
-      <button id="closeSidebar" class="close-sidebar">&times;</button>
+  <div class="search-wrapper">
+    <div class="search-bar-container" id="searchContainer">
+      <svg class="search-icon" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-input" 
+        placeholder="Search movies, TV shows..." 
+        autocomplete="off"
+      />
+      <button class="search-btn">Search</button>
     </div>
 
-    <div class="sidebar-group">
-      <div class="sidebar-label">Content Type</div>
-      <div class="type-switcher">
-        <button id="btnMovies" class="type-btn active" data-type="movie">Movies</button>
-        <button id="btnTV" class="type-btn" data-type="tv">TV Series</button>
+    <div class="search-history" id="searchHistory">
+      <div class="history-header">
+        <p class="history-title">Recent Searches</p>
+        <button class="clear-btn">Clear</button>
+      </div>
+      <div class="history-tags">
+        <a href="#" class="history-tag">jhjj</a>
+        <a href="#" class="history-tag">The Odyssey</a>
       </div>
     </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Genre</div>
-      <select id="genreSelect">
-        <option value="">All Genres</option>
-        <option value="28">Action</option>
-        <option value="12">Adventure</option>
-        <option value="16">Animation</option>
-        <option value="35">Comedy</option>
-        <option value="80">Crime</option>
-        <option value="18">Drama</option>
-        <option value="14">Fantasy</option>
-        <option value="27">Horror</option>
-        <option value="9648">Mystery</option>
-        <option value="10749">Romance</option>
-        <option value="878">Sci-Fi</option>
-        <option value="53">Thriller</option>
-      </select>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Language</div>
-      <select id="languageSelect">
-        <option value="">All Languages</option>
-        <option value="en">English</option>
-        <option value="ko">Korean</option>
-        <option value="ja">Japanese</option>
-        <option value="es">Spanish</option>
-        <option value="zh">Chinese</option>
-      </select>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Sort By</div>
-      <select id="sortSelect">
-        <option value="popularity.desc">Most Popular</option>
-        <option value="vote_average.desc">Highest Rated</option>
-        <option value="primary_release_date.desc">Latest Release</option>
-      </select>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Year</div>
-      <select id="yearSelect">
-        <option value="">All Years</option>
-      </select>
-    </div>
   </div>
 
-  <div class="search-container">
-    <div class="search-wrapper" style="position: relative; flex: 1;">
-      <input type="text" id="searchInput" placeholder="Search movies, TV shows..." autocomplete="off">
-      <div id="suggestionsBox" class="suggestions-dropdown"></div>
-    </div>
-    <button id="searchBtn">Search</button>
-  </div>
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const searchHistory = document.getElementById('searchHistory');
 
-  <div id="searchHistoryContainer" class="history-container" style="padding: 0 20px 10px 20px; display: flex; gap: 8px; flex-wrap: wrap;"></div>
+    // Ipakita ang history kapag kinlik o na-focus ang search input
+    searchInput.addEventListener('focus', () => {
+      searchHistory.classList.add('active');
+    });
 
-  <div id="heroBanner" class="hero-banner" style="display: none;">
-    <div class="hero-content">
-      <h2 id="heroTitle" class="hero-title">Loading Featured...</h2>
-      <button id="heroPlayBtn" class="hero-btn">▶ Play</button>
-    </div>
-  </div>
+    // Itago ang history kapag nag-click sa labas nito
+    document.addEventListener('click', (event) => {
+      const isClickInside = searchInput.contains(event.target) || searchHistory.contains(event.target);
+      if (!isClickInside) {
+        searchHistory.classList.remove('active');
+      }
+    });
+  </script>
 
-  <div id="continueSection" class="carousel-section" style="display: none;">
-    <div class="section-title">Continue Watching</div>
-    <div id="continueCarousel" class="carousel"></div>
-  </div>
-
-  <div id="carouselSection" class="carousel-section">
-    <div class="section-title">Trending Top 10</div>
-    <div id="top10Carousel" class="carousel"></div>
-  </div>
-
-  <div>
-    <div id="sectionTitle" class="section-title">Explore Movies</div>
-    <div id="movieGrid" class="movie-grid"></div>
-  </div>
-
-  <div id="movieModal" class="modal">
-    <div class="modal-content">
-      <button id="closeModal" class="close-modal">&times;</button>
-      <div id="modalBody"></div>
-    </div>
-  </div>
-
-  <script src="script.js"></script>
 </body>
 </html>
