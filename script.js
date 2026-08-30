@@ -110,7 +110,7 @@ async function loadTop10() {
   }
 }
 
-// Advanced Content Loader (Genres, Sorting, Years)
+// Advanced Content Loader
 function loadContent(resetPage = true) {
   isSearchMode = false;
   carouselSection.style.display = 'block';
@@ -135,7 +135,7 @@ function loadContent(resetPage = true) {
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
-// Watchlist & Continue Watching System
+// Watchlist & History System
 function getWatchlist() {
   return JSON.parse(localStorage.getItem('kiosh_watchlist')) || [];
 }
@@ -191,7 +191,7 @@ if (btnMovies && btnTV) {
   });
 }
 
-// Advanced Filters Event Listeners
+// Filters Listeners
 if (genreSelect) genreSelect.addEventListener('change', () => loadContent(true));
 if (sortBySelect) sortBySelect.addEventListener('change', () => loadContent(true));
 if (yearSelect) yearSelect.addEventListener('change', () => loadContent(true));
@@ -218,7 +218,7 @@ if (searchBtn && searchInput) {
   });
 }
 
-// Infinite Scroll Listener
+// Infinite Scroll
 window.addEventListener('scroll', () => {
   if (isSearchMode && watchlistNavBtn === document.activeElement) return;
   
@@ -231,7 +231,7 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// Redesigned Modern Modal UI
+// Modal UI with Auto-Play Next Episode
 async function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
@@ -270,24 +270,25 @@ async function openModal(item, type) {
     </div>
     
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
-      <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#262626'}; color:#fff; transition:0.2s;">
+      <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff; transition:0.2s;">
         ${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}
       </button>
-      <button id="trailerBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; background:#262626; color:#fff;">▶ Trailer</button>
-      <button id="shareBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:6px; border:none; cursor:pointer; background:#262626; color:#fff;">🔗 Share</button>
+      <button id="trailerBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
+      <button id="shareBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">🔗 Share</button>
+      ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; font-weight:600; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff; box-shadow: 0 4px 12px rgba(229,9,20,0.4);">⏭ Next Ep</button>` : ''}
     </div>
 
     ${type === 'tv' ? `
-      <div class="episode-selector" style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:8px; border-radius:8px;">
+      <div class="episode-selector" style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; border:1px solid var(--border-color);">
         <div class="select-group" style="flex:1;">
           <label style="font-size:11px; color:#888; display:block; margin-bottom:2px;">Season</label>
-          <select id="seasonSelect" style="width:100%; background:#1a1a1a; color:#fff; border:1px solid #333; padding:6px; border-radius:4px;">
+          <select id="seasonSelect" style="width:100%; background:#1a1a1a; color:#fff; border:1px solid #333; padding:6px; border-radius:6px;">
             ${Array.from({length: 15}, (_, i) => `<option value="${i+1}" ${i+1 === season ? 'selected' : ''}>Season ${i+1}</option>`).join('')}
           </select>
         </div>
         <div class="select-group" style="flex:1;">
           <label style="font-size:11px; color:#888; display:block; margin-bottom:2px;">Episode</label>
-          <select id="episodeSelect" style="width:100%; background:#1a1a1a; color:#fff; border:1px solid #333; padding:6px; border-radius:4px;">
+          <select id="episodeSelect" style="width:100%; background:#1a1a1a; color:#fff; border:1px solid #333; padding:6px; border-radius:6px;">
             ${Array.from({length: 35}, (_, i) => `<option value="${i+1}" ${i+1 === episode ? 'selected' : ''}>Episode ${i+1}</option>`).join('')}
           </select>
         </div>
@@ -295,27 +296,27 @@ async function openModal(item, type) {
     ` : ''}
 
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
-      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#e50914; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 1</button>
-      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 2</button>
-      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 3</button>
-      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:6px; cursor:pointer; font-weight:600;">Server 4</button>
+      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Server 1</button>
+      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Server 2</button>
+      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Server 3</button>
+      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer; font-weight:600;">Server 4</button>
     </div>
 
-    <div style="border-radius:8px; overflow:hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.5); margin-bottom:12px;">
+    <div style="border-radius:10px; overflow:hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.6); margin-bottom:12px;">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="display:block; background:#000;"></iframe>
     </div>
 
     <p style="margin-top:0; margin-bottom:10px; color:#bbb; font-size:12px; line-height:1.4; max-height:60px; overflow-y:auto;">${overview || 'No overview available.'}</p>
 
-    <div id="castSection" style="margin-bottom:12px; font-size:12px; color:#888; background:rgba(255,255,255,0.02); padding:8px; border-radius:6px;">
+    <div id="castSection" style="margin-bottom:12px; font-size:12px; color:#888; background:rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid var(--border-color);">
       <strong style="color:#fff;">Cast:</strong> <span id="castList">Loading...</span>
     </div>
 
-    <div class="review-section" style="border-top:1px solid rgba(255,255,255,0.08); padding-top:10px;">
+    <div class="review-section" style="border-top:1px solid var(--border-color); padding-top:10px;">
       <h4 style="font-size:13px; margin-bottom:6px; color:#fff;">User Reviews & Ratings</h4>
       <div class="review-input-group" style="display:flex; gap:6px; margin-bottom:8px;">
-        <input type="text" id="reviewInput" placeholder="Write a review..." style="flex:1; background:#1a1a1a; border:1px solid #333; padding:6px 10px; border-radius:4px; color:#fff; font-size:12px;">
-        <button id="submitReviewBtn" style="background:#e50914; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:600; cursor:pointer; font-size:12px;">Post</button>
+        <input type="text" id="reviewInput" placeholder="Write a review..." style="flex:1; background:#1a1a1a; border:1px solid #333; padding:7px 10px; border-radius:6px; color:#fff; font-size:12px;">
+        <button id="submitReviewBtn" style="background:#e50914; color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:600; cursor:pointer; font-size:12px;">Post</button>
       </div>
       <div id="reviewsList" class="reviews-list" style="max-height:80px; overflow-y:auto;"></div>
     </div>
@@ -323,7 +324,7 @@ async function openModal(item, type) {
 
   modal.style.display = 'flex';
 
-  // Fetch Cast & Crew
+  // Fetch Cast
   try {
     const castRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`);
     const castData = await castRes.json();
@@ -363,7 +364,7 @@ async function openModal(item, type) {
     const updatedList = getWatchlist();
     const isNowIn = updatedList.some(i => i.id === id);
     e.target.textContent = isNowIn ? '✓ In Watchlist' : '+ Watchlist';
-    e.target.style.background = isNowIn ? '#e50914' : '#262626';
+    e.target.style.background = isNowIn ? '#e50914' : '#222';
   });
 
   const reviewsKey = `kiosh_reviews_${id}`;
@@ -392,6 +393,7 @@ async function openModal(item, type) {
   if (type === 'tv') {
     const seasonSelect = document.getElementById('seasonSelect');
     const episodeSelect = document.getElementById('episodeSelect');
+    const nextEpBtn = document.getElementById('nextEpBtn');
 
     const updatePlayerSource = () => {
       season = seasonSelect.value;
@@ -419,6 +421,19 @@ async function openModal(item, type) {
 
     seasonSelect.addEventListener('change', updatePlayerSource);
     episodeSelect.addEventListener('change', updatePlayerSource);
+
+    // Auto-Play Next Episode Listener
+    if (nextEpBtn) {
+      nextEpBtn.addEventListener('click', () => {
+        let currentEp = parseInt(episodeSelect.value);
+        if (currentEp < 35) {
+          episodeSelect.value = currentEp + 1;
+          updatePlayerSource();
+        } else {
+          alert('This is the last available episode in the list.');
+        }
+      });
+    }
   }
 }
 
