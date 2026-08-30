@@ -25,6 +25,12 @@ const yearSelect = document.getElementById('yearSelect');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
+// Hamburger Elements
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const closeSidebar = document.getElementById('closeSidebar');
+
 let currentType = 'movie';
 let currentPage = 1;
 let currentFetchUrl = '';
@@ -40,6 +46,20 @@ themeToggleBtn.addEventListener('click', () => {
   document.body.classList.toggle('light-mode');
   localStorage.setItem('kiosh_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
 });
+
+// Sidebar Toggle Logic
+hamburgerBtn.addEventListener('click', () => {
+  sidebar.classList.add('open');
+  sidebarOverlay.style.display = 'block';
+});
+
+const closeSidebarMenu = () => {
+  sidebar.classList.remove('open');
+  sidebarOverlay.style.display = 'none';
+};
+
+closeSidebar.addEventListener('click', closeSidebarMenu);
+sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
 async function getMedia(url, type, append = false) {
   try {
@@ -184,13 +204,26 @@ watchlistNavBtn.addEventListener('click', () => {
   else movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
 });
 
-btnMovies.addEventListener('click', () => { currentType = 'movie'; btnMovies.classList.add('active'); btnTV.classList.remove('active'); loadContent(true); });
-btnTV.addEventListener('click', () => { currentType = 'tv'; btnTV.classList.add('active'); btnMovies.classList.remove('active'); loadContent(true); });
+btnMovies.addEventListener('click', () => { 
+  currentType = 'movie'; 
+  btnMovies.classList.add('active'); 
+  btnTV.classList.remove('active'); 
+  loadContent(true); 
+  closeSidebarMenu();
+});
 
-if (genreSelect) genreSelect.addEventListener('change', () => loadContent(true));
-if (languageSelect) languageSelect.addEventListener('change', () => loadContent(true));
-if (sortBySelect) sortBySelect.addEventListener('change', () => loadContent(true));
-if (yearSelect) yearSelect.addEventListener('change', () => loadContent(true));
+btnTV.addEventListener('click', () => { 
+  currentType = 'tv'; 
+  btnTV.classList.add('active'); 
+  btnMovies.classList.remove('active'); 
+  loadContent(true); 
+  closeSidebarMenu();
+});
+
+if (genreSelect) genreSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
+if (languageSelect) languageSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
+if (sortBySelect) sortBySelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
+if (yearSelect) yearSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
 
 searchBtn.addEventListener('click', () => {
   const query = searchInput.value.trim();
