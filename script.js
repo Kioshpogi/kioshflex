@@ -13,6 +13,8 @@ const closeModal = document.getElementById('closeModal');
 const btnMovies = document.getElementById('btnMovies');
 const btnTV = document.getElementById('btnTV');
 const genreSelect = document.getElementById('genreSelect');
+const sortBySelect = document.getElementById('sortBySelect');
+const yearSelect = document.getElementById('yearSelect');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
@@ -45,11 +47,11 @@ async function getMedia(url, type, append = false) {
     if(data.results && data.results.length > 0) {
       showMedia(data.results, type, append);
     } else if (!append) {
-      movieGrid.innerHTML = '<p style="color:#aaa;">No results found.</p>';
+      movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">No results found.</p>';
     }
   } catch (error) {
     if (!append) {
-      movieGrid.innerHTML = '<p style="color:#e50914;">Error loading data.</p>';
+      movieGrid.innerHTML = '<p style="color:#e50914; padding:20px;">Error loading data.</p>';
     }
   } finally {
     isLoadingMore = false;
@@ -108,24 +110,28 @@ async function loadTop10() {
   }
 }
 
+// Advanced Content Loader (Genres, Sorting, Years)
 function loadContent(resetPage = true) {
   isSearchMode = false;
   carouselSection.style.display = 'block';
+  
   const genreId = genreSelect ? genreSelect.value : '';
+  const sortBy = sortBySelect ? sortBySelect.value : 'popularity.desc';
+  const year = yearSelect ? yearSelect.value : '';
   
   if (resetPage) {
     currentPage = 1;
   }
 
-  if (genreId) {
-    const selectedText = genreSelect.options[genreSelect.selectedIndex].text;
-    sectionTitle.textContent = `${selectedText} (${currentType === 'movie' ? 'Movies' : 'TV Shows'})`;
-    currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?api_key=${API_KEY}&with_genres=${genreId}&sort_by=popularity.desc&page=`;
-  } else {
-    sectionTitle.textContent = `Trending ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
-    currentFetchUrl = `https://api.themoviedb.org/3/trending/${currentType}/week?api_key=${API_KEY}&page=`;
+  sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
+  
+  let queryParams = `api_key=${API_KEY}&sort_by=${sortBy}&page=`;
+  if (genreId) queryParams += `&with_genres=${genreId}`;
+  if (year) {
+    queryParams += currentType === 'movie' ? `&primary_release_year=${year}` : `&first_air_date_year=${year}`;
   }
 
+  currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?${queryParams}`;
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
@@ -164,7 +170,7 @@ watchlistNavBtn.addEventListener('click', () => {
   if(combined.length > 0) {
     showMedia(combined, currentType, false);
   } else {
-    movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
+    movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist & History is empty.</p>';
   }
 });
 
@@ -185,9 +191,10 @@ if (btnMovies && btnTV) {
   });
 }
 
-if (genreSelect) {
-  genreSelect.addEventListener('change', () => loadContent(true));
-}
+// Advanced Filters Event Listeners
+if (genreSelect) genreSelect.addEventListener('change', () => loadContent(true));
+if (sortBySelect) sortBySelect.addEventListener('change', () => loadContent(true));
+if (yearSelect) yearSelect.addEventListener('change', () => loadContent(true));
 
 // Search Feature
 if (searchBtn && searchInput) {
@@ -442,4 +449,3 @@ window.addEventListener('click', (e) => {
 
 loadTop10();
 loadContent(true);
-
