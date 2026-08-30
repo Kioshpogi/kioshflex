@@ -140,12 +140,9 @@ function loadContinueWatching() {
       card.classList.add('carousel-card');
       card.style.position = 'relative';
       
-      const progressValue = item.progress || 50;
-      
       card.innerHTML = `
         <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
         <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
-        <div class="progress-bar"><div class="progress-fill" style="width: ${progressValue}%;"></div></div>
       `;
       
       card.addEventListener('click', (e) => {
@@ -169,14 +166,8 @@ function loadContinueWatching() {
 
 function saveContinueWatching(item, type) {
   let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
-  const existingIndex = history.findIndex(i => i.id === item.id);
-  
-  let progress = existingIndex > -1 && history[existingIndex].progress 
-    ? history[existingIndex].progress 
-    : (Math.floor(Math.random() * 70) + 15);
-  
   history = history.filter(i => i.id !== item.id);
-  history.unshift({ ...item, media_type: type, progress: progress });
+  history.unshift({ ...item, media_type: type });
   if (history.length > 10) history.pop();
   localStorage.setItem('kiosh_continue', JSON.stringify(history));
   loadContinueWatching();
