@@ -23,9 +23,16 @@ let isLoadingMore = false;
 let isSearchMode = false;
 let currentQuery = '';
 
-// Dark / Light Mode Toggle
+// Theme Persistence
+const savedTheme = localStorage.getItem('kiosh_theme');
+if (savedTheme === 'light') {
+  document.body.classList.add('light-mode');
+}
+
 themeToggleBtn.addEventListener('click', () => {
   document.body.classList.toggle('light-mode');
+  const isLight = document.body.classList.contains('light-mode');
+  localStorage.setItem('kiosh_theme', isLight ? 'light' : 'dark');
 });
 
 // Fetch Media for Grid
@@ -74,7 +81,7 @@ function showMedia(items, type, append = false) {
   });
 }
 
-// Load Top 10 Carousel
+// Load Top 10 Carousel & Continue Watching Section
 async function loadTop10() {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`);
@@ -122,7 +129,7 @@ function loadContent(resetPage = true) {
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
-// Watchlist System using localStorage
+// Watchlist & Continue Watching System
 function getWatchlist() {
   return JSON.parse(localStorage.getItem('kiosh_watchlist')) || [];
 }
@@ -138,13 +145,24 @@ function toggleWatchlist(item) {
   localStorage.setItem('kiosh_watchlist', JSON.stringify(watchlist));
 }
 
+function saveContinueWatching(item, type) {
+  let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
+  history = history.filter(i => i.id !== item.id);
+  history.unshift({ ...item, media_type: type });
+  if (history.length > 10) history.pop();
+  localStorage.setItem('kiosh_continue', JSON.stringify(history));
+}
+
 watchlistNavBtn.addEventListener('click', () => {
   isSearchMode = true; 
   carouselSection.style.display = 'none';
-  sectionTitle.textContent = 'My Watchlist';
+  sectionTitle.textContent = 'My Watchlist & History';
   const watchlist = getWatchlist();
-  if(watchlist.length > 0) {
-    showMedia(watchlist, currentType, false);
+  const history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
+  const combined = [...watchlist, ...history];
+  
+  if(combined.length > 0) {
+    showMedia(combined, currentType, false);
   } else {
     movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
   }
@@ -206,11 +224,13 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// Modal Player with Fixed Working Streams
-function openModal(item, type) {
+// Enhanced Modal with Trailer, Cast, Share, and Download Option
+async function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
   const id = item.id;
+  
+  saveContinueWatching(item, type);
   
   let season = 1;
   let episode = 1;
@@ -240,10 +260,13 @@ function openModal(item, type) {
   modalBody.innerHTML = `
     <h3 style="margin-bottom:4px; font-size:16px; color:var(--text-color);">${title}</h3>
     
-    <div class="modal-actions">
-      <button id="modalWatchlistBtn" class="watchlist-btn ${isInWatchlist ? 'in-watchlist' : ''}">
-        ${isInWatchlist ? 'Remove from Watchlist' : 'Add to Watchlist'}
+    <div class="modal-actions" style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+      <button id="modalWatchlistBtn" class="watchlist-btn ${isInWatchlist ? 'in-watchlist' : ''}" style="padding:6px 10px; font-size:11px;">
+        ${isInWatchlist ? 'Remove Watchlist' : '+ Watchlist'}
       </button>
+      <button id="trailerBtn" style="padding:6px 10px; font-size:11px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">▶ Trailer</button>
+      <button id="shareBtn" style="padding:6px 10px; font-size:11px; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">🔗 Share</button>
+      <button id="downloadBtn" style="padding:6px 10px; font-size:11px; background:#1b5e20; color:#fff; border:none; border-radius:4px; cursor:pointer;">⬇ Download Link</button>
     </div>
 
     ${type === 'tv' ? `
@@ -271,12 +294,16 @@ function openModal(item, type) {
     </div>
 
     <iframe id="playerIframe" src="${links.s1}" width="100%" height="250" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="border-radius:6px; background:#000;"></iframe>
-    <p style="margin-top:8px; color:#ccc; font-size:12px; max-height:60px; overflow-y:auto;">${overview || 'No overview available.'}</p>
+    <p style="margin-top:8px; color:#ccc; font-size:12px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
 
-    <div class="review-section">
-      <h4>User Reviews & Ratings</h4>
+    <div id="castSection" style="margin-top:8px; font-size:12px; color:#aaa;">
+      <strong>Cast:</strong> <span id="castList">Loading cast...</span>
+    </div>
+
+    <div class="review-section" style="margin-top:10px;">
+      <h4 style="font-size:13px;">User Reviews & Ratings</h4>
       <div class="review-input-group">
-        <input type="text" id="reviewInput" placeholder="Leave a comment or rating...">
+        <input type="text" id="reviewInput" placeholder="Leave a comment...">
         <button id="submitReviewBtn">Post</button>
       </div>
       <div id="reviewsList" class="reviews-list"></div>
@@ -285,11 +312,53 @@ function openModal(item, type) {
 
   modal.style.display = 'flex';
 
+  // Fetch Cast & Crew
+  try {
+    const castRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`);
+    const castData = await castRes.json();
+    if(castData.cast) {
+      const topCast = castData.cast.slice(0, 4).map(c => c.name).join(', ');
+      document.getElementById('castList').textContent = topCast || 'N/A';
+    }
+  } catch (e) {
+    document.getElementById('castList').textContent = 'Unavailable';
+  }
+
+  // Trailer Button functionality
+  document.getElementById('trailerBtn').addEventListener('click', async () => {
+    try {
+      const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
+      const vidData = await vidRes.json();
+      const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+      if (trailer) {
+        document.getElementById('playerIframe').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+      } else {
+        alert('Trailer not available.');
+      }
+    } catch(err) {
+      alert('Could not load trailer.');
+    }
+  });
+
+  // Share Button functionality
+  document.getElementById('shareBtn').addEventListener('click', () => {
+    const shareUrl = window.location.href;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      alert('Link copied to clipboard!');
+    });
+  });
+
+  // Download Option Helper
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    alert('Redirecting or generating direct source stream link for download utility...');
+    window.open(links.s1, '_blank');
+  });
+
   document.getElementById('modalWatchlistBtn').addEventListener('click', (e) => {
     toggleWatchlist(item);
     const updatedList = getWatchlist();
     const isNowIn = updatedList.some(i => i.id === id);
-    e.target.textContent = isNowIn ? 'Remove from Watchlist' : 'Add to Watchlist';
+    e.target.textContent = isNowIn ? 'Remove Watchlist' : '+ Watchlist';
     e.target.classList.toggle('in-watchlist', isNowIn);
   });
 
@@ -298,9 +367,9 @@ function openModal(item, type) {
     const reviews = JSON.parse(localStorage.getItem(reviewsKey)) || [];
     const listEl = document.getElementById('reviewsList');
     if(reviews.length === 0) {
-      listEl.innerHTML = '<span style="color:#777;">No reviews yet. Be the first to leave one!</span>';
+      listEl.innerHTML = '<span style="color:#777; font-size:11px;">No reviews yet.</span>';
     } else {
-      listEl.innerHTML = reviews.map(r => `<div>• ${r}</div>`).join('');
+      listEl.innerHTML = reviews.map(r => `<div style="font-size:11px;">• ${r}</div>`).join('');
     }
   };
   loadReviews();
