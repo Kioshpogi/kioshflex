@@ -250,7 +250,7 @@ watchlistNavBtn.addEventListener('click', () => {
 
 // --- SEARCH HISTORY & AUTOCOMPLETE LOGIC ---
 function getSearchHistory() {
-  return JSON.parse(localStorage.getItem('kiosh_history')) || [];
+  return JSON.parse(localStorage.getItem('kiosh_history')) || ['jhjj', 'The Odyssey'];
 }
 
 function saveSearchHistory(query) {
@@ -268,20 +268,46 @@ function saveSearchHistory(query) {
 
 function renderSearchHistory() {
   const history = getSearchHistory();
+  if (!searchHistoryContainer) return;
+  
   searchHistoryContainer.innerHTML = '';
   
+  if (history.length === 0) {
+    searchHistoryContainer.style.display = 'none';
+    return;
+  }
+
   history.forEach(term => {
     const chip = document.createElement('div');
     chip.className = 'history-chip';
     chip.textContent = term;
+    chip.style.cssText = 'background-color: rgba(39, 39, 42, 0.8); border: 1px solid rgba(63, 63, 70, 0.5); color: #d4d4d8; padding: 6px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; display: inline-block;';
+    
     chip.onclick = () => {
       searchInput.value = term;
       suggestionsBox.innerHTML = '';
+      searchHistoryContainer.style.display = 'none';
       executeSearch(term);
     };
     searchHistoryContainer.appendChild(chip);
   });
 }
+
+// Ipakita ang history container kapag na-focus ang search input
+searchInput.addEventListener('focus', () => {
+  renderSearchHistory();
+  if (searchHistoryContainer && searchHistoryContainer.children.length > 0) {
+    searchHistoryContainer.style.display = 'flex';
+  }
+});
+
+// Itago ang history kapag nag-click sa labas
+document.addEventListener('click', (e) => {
+  const isInside = searchInput.contains(e.target) || searchHistoryContainer.contains(e.target);
+  if (!isInside && searchHistoryContainer) {
+    searchHistoryContainer.style.display = 'none';
+  }
+});
 
 searchInput.addEventListener('input', async (e) => {
   const keyword = e.target.value.trim();
@@ -302,6 +328,7 @@ searchInput.addEventListener('input', async (e) => {
         div.onclick = () => {
           searchInput.value = title;
           suggestionsBox.innerHTML = '';
+          searchHistoryContainer.style.display = 'none';
           saveSearchHistory(title);
           executeSearch(title);
         };
@@ -330,6 +357,7 @@ searchBtn.addEventListener('click', () => {
   const query = searchInput.value.trim();
   if(query) {
     suggestionsBox.innerHTML = '';
+    searchHistoryContainer.style.display = 'none';
     saveSearchHistory(query);
     executeSearch(query);
   }
@@ -340,16 +368,11 @@ searchInput.addEventListener('keypress', (e) => {
     suggestionsBox.innerHTML = '';
     const query = searchInput.value.trim();
     if(query) {
+      searchHistoryContainer.style.display = 'none';
       saveSearchHistory(query);
       executeSearch(query);
     }
   } 
-});
-
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.search-wrapper')) {
-    suggestionsBox.innerHTML = '';
-  }
 });
 
 window.addEventListener('scroll', () => {
