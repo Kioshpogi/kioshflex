@@ -25,18 +25,17 @@ const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
 const closeSidebar = document.getElementById('closeSidebar');
 
+const genreSelect = document.getElementById('genreSelect');
+const languageSelect = document.getElementById('languageSelect');
+const sortSelect = document.getElementById('sortSelect');
+const yearSelect = document.getElementById('yearSelect');
+
 let currentType = 'movie';
 let currentPage = 1;
 let currentFetchUrl = '';
 let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
-
-// Filter States
-let selectedGenre = '';
-let selectedLang = '';
-let selectedSort = 'popularity.desc';
-let selectedYear = '';
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
   document.body.classList.add('light-mode');
@@ -47,7 +46,6 @@ themeToggleBtn.addEventListener('click', () => {
   localStorage.setItem('kiosh_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
 });
 
-// Sidebar Toggle Logic
 hamburgerBtn.addEventListener('click', () => {
   sidebar.classList.add('open');
   sidebarOverlay.style.display = 'block';
@@ -69,7 +67,7 @@ async function getMedia(url, type, append = false) {
     if(data.results && data.results.length > 0) {
       showMedia(data.results, type, append);
     } else if (!append) {
-      movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">No results found.</p>';
+      movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">No results found for this filter combination. Try resetting filters.</p>';
     }
   } catch (error) {
     if (!append) movieGrid.innerHTML = '<p style="color:#e50914; padding:20px;">Error loading data.</p>';
@@ -161,16 +159,17 @@ function loadContent(resetPage = true) {
   if (resetPage) currentPage = 1;
   sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
   
-  let queryParams = `api_key=${API_KEY}&sort_by=${selectedSort}&page=`;
-  if (selectedGenre) queryParams += `&with_genres=${selectedGenre}`;
-  if (selectedLang) queryParams += `&with_original_language=${selectedLang}`;
-  if (selectedYear) queryParams += currentType === 'movie' ? `&primary_release_year=${selectedYear}` : `&first_air_date_year=${selectedYear}`;
+  let queryParams = `api_key=${API_KEY}&sort_by=${sortSelect.value}&page=`;
+  if (genreSelect.value) queryParams += `&with_genres=${genreSelect.value}`;
+  if (languageSelect.value) queryParams += `&with_original_language=${languageSelect.value}`;
+  if (yearSelect.value) {
+    queryParams += currentType === 'movie' ? `&primary_release_year=${yearSelect.value}` : `&first_air_date_year=${yearSelect.value}`;
+  }
 
   currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?${queryParams}`;
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
-// Event Listeners for Custom Sidebar Buttons
 document.querySelectorAll('#btnMovies, #btnTV').forEach(btn => {
   btn.addEventListener('click', (e) => {
     document.querySelectorAll('#btnMovies, #btnTV').forEach(b => b.classList.remove('active'));
@@ -181,45 +180,10 @@ document.querySelectorAll('#btnMovies, #btnTV').forEach(btn => {
   });
 });
 
-document.querySelectorAll('#genreList button').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    document.querySelectorAll('#genreList button').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    selectedGenre = e.target.getAttribute('data-genre');
-    loadContent(true);
-    closeSidebarMenu();
-  });
-});
-
-document.querySelectorAll('#languageList button').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    document.querySelectorAll('#languageList button').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    selectedLang = e.target.getAttribute('data-lang');
-    loadContent(true);
-    closeSidebarMenu();
-  });
-});
-
-document.querySelectorAll('#sortList button').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    document.querySelectorAll('#sortList button').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    selectedSort = e.target.getAttribute('data-sort');
-    loadContent(true);
-    closeSidebarMenu();
-  });
-});
-
-document.querySelectorAll('#yearList button').forEach(btn => {
-  btn.addEventListener('click', (e) => {
-    document.querySelectorAll('#yearList button').forEach(b => b.classList.remove('active'));
-    e.target.classList.add('active');
-    selectedYear = e.target.getAttribute('data-year');
-    loadContent(true);
-    closeSidebarMenu();
-  });
-});
+genreSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
+languageSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
+sortSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
+yearSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
 
 function getWatchlist() { return JSON.parse(localStorage.getItem('kiosh_watchlist')) || []; }
 function toggleWatchlist(item) {

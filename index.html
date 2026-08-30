@@ -43,18 +43,14 @@
     .close-sidebar { background: none; border: none; color: var(--text-color); font-size: 22px; cursor: pointer; }
 
     .sidebar-group { display: flex; flex-direction: column; gap: 6px; flex-shrink: 0; }
-    .sidebar-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-    
+    .sidebar-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .sidebar select, .sidebar .type-btn { width: 100%; background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; font-size: 12px; outline: none; cursor: pointer; }
+    .sidebar select option { background: var(--card-bg); color: var(--text-color); }
     .type-switcher { display: flex; gap: 8px; }
-    .filter-opt-btn { width: 100%; background: var(--bg-color); color: var(--text-muted); border: 1px solid var(--border-color); padding: 8px 10px; border-radius: 6px; font-size: 11px; text-align: left; cursor: pointer; transition: 0.2s; font-weight: 500; }
-    .filter-opt-btn:hover { border-color: var(--accent-color); color: var(--text-color); }
-    .filter-opt-btn.active { background: var(--accent-color); color: #fff; border-color: var(--accent-color); font-weight: 700; }
+    .type-btn { flex: 1; text-align: center; font-weight: 600; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-muted); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 11px; }
+    .type-btn.active { background: var(--accent-color); border-color: var(--accent-color); color: #fff; font-weight: 700; }
 
-    .scrollable-options { display: flex; flex-direction: column; gap: 4px; max-height: 140px; overflow-y: auto; padding-right: 4px; }
-    .scrollable-options::-webkit-scrollbar { width: 4px; }
-    .scrollable-options::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-
-    /* Search Bar sa Taas */
+    /* Search Bar */
     .search-container { display: flex; padding: 12px 20px; gap: 8px; background: var(--bg-color); border-bottom: 1px solid var(--border-color); }
     .search-container input { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); padding: 9px 12px; border-radius: 8px; color: var(--text-color); font-size: 12px; outline: none; }
     .search-container button { background: var(--accent-color); color: #fff; border: none; padding: 0 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
@@ -124,59 +120,58 @@
     <div class="sidebar-group">
       <span class="sidebar-label">Category</span>
       <div class="type-switcher">
-        <button class="filter-opt-btn active" id="btnMovies" data-type="movie">Movies</button>
-        <button class="filter-opt-btn" id="btnTV" data-type="tv">TV Series</button>
+        <button class="type-btn active" id="btnMovies" data-type="movie">Movies</button>
+        <button class="type-btn" id="btnTV" data-type="tv">TV Series</button>
       </div>
     </div>
 
     <div class="sidebar-group">
       <span class="sidebar-label">Genre</span>
-      <div class="scrollable-options" id="genreList">
-        <button class="filter-opt-btn active" data-genre="">All Genres</button>
-        <button class="filter-opt-btn" data-genre="28">Action</button>
-        <button class="filter-opt-btn" data-genre="12">Adventure</button>
-        <button class="filter-opt-btn" data-genre="16">Animation</button>
-        <button class="filter-opt-btn" data-genre="35">Comedy</button>
-        <button class="filter-opt-btn" data-genre="80">Crime</button>
-        <button class="filter-opt-btn" data-genre="18">Drama</button>
-        <button class="filter-opt-btn" data-genre="27">Horror</button>
-        <button class="filter-opt-btn" data-genre="10749">Romance</button>
-        <button class="filter-opt-btn" data-genre="878">Sci-Fi</button>
-      </div>
+      <select id="genreSelect">
+        <option value="">All Genres</option>
+        <option value="28">Action</option>
+        <option value="12">Adventure</option>
+        <option value="16">Animation</option>
+        <option value="35">Comedy</option>
+        <option value="80">Crime</option>
+        <option value="18">Drama</option>
+        <option value="27">Horror</option>
+        <option value="10749">Romance</option>
+        <option value="878">Sci-Fi</option>
+      </select>
     </div>
 
     <div class="sidebar-group">
       <span class="sidebar-label">Language</span>
-      <div class="scrollable-options" id="languageList">
-        <button class="filter-opt-btn active" data-lang="">All Languages</button>
-        <button class="filter-opt-btn" data-lang="en">English</button>
-        <button class="filter-opt-btn" data-lang="ko">Korean</button>
-        <button class="filter-opt-btn" data-lang="ja">Japanese</button>
-        <button class="filter-opt-btn" data-lang="tl">Tagalog</button>
-      </div>
+      <select id="languageSelect">
+        <option value="">All Languages</option>
+        <option value="en">English</option>
+        <option value="ko">Korean</option>
+        <option value="ja">Japanese</option>
+        <option value="tl">Tagalog</option>
+      </select>
     </div>
 
     <div class="sidebar-group">
       <span class="sidebar-label">Sort By</span>
-      <div class="scrollable-options" id="sortList">
-        <button class="filter-opt-btn active" data-sort="popularity.desc">Most Popular</button>
-        <button class="filter-opt-btn" data-sort="vote_average.desc">Highest Rated</button>
-        <button class="filter-opt-btn" data-sort="primary_release_date.desc">Latest Release</button>
-      </div>
+      <select id="sortSelect">
+        <option value="popularity.desc">Most Popular</option>
+        <option value="vote_average.desc">Highest Rated</option>
+        <option value="primary_release_date.desc">Latest Release</option>
+      </select>
     </div>
 
     <div class="sidebar-group">
       <span class="sidebar-label">Release Year</span>
-      <div class="scrollable-options" id="yearList">
-        <button class="filter-opt-btn active" data-year="">All Years</button>
-        <button class="filter-opt-btn" data-year="2026">2026</button>
-        <button class="filter-opt-btn" data-year="2025">2025</button>
-        <button class="filter-opt-btn" data-year="2024">2024</button>
-      </div>
+      <select id="yearSelect">
+        <option value="">All Years</option>
+        <option value="2026">2026</option>
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+      </select>
     </div>
   </div>
 
-  <!-- Search Bar sa Taas -->
   <div class="search-container">
     <input type="text" id="searchInput" placeholder="Search movies, TV shows...">
     <button id="searchBtn">Search</button>
