@@ -159,14 +159,17 @@ function loadContent(resetPage = true) {
   if (resetPage) currentPage = 1;
   sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
   
-  let queryParams = `api_key=${API_KEY}&sort_by=${sortSelect.value}&page=`;
-  if (genreSelect.value) queryParams += `&with_genres=${genreSelect.value}`;
-  if (languageSelect.value) queryParams += `&with_original_language=${languageSelect.value}`;
+  let yearParam = '';
   if (yearSelect.value) {
-    queryParams += currentType === 'movie' ? `&primary_release_year=${yearSelect.value}` : `&first_air_date_year=${yearSelect.value}`;
+    yearParam = currentType === 'movie' ? `&primary_release_year=${yearSelect.value}` : `&first_air_date_year=${yearSelect.value}`;
   }
 
-  currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?${queryParams}`;
+  let genreParam = genreSelect.value ? `&with_genres=${genreSelect.value}` : '';
+  let langParam = languageSelect.value ? `&with_original_language=${languageSelect.value}` : '';
+  let sortParam = sortSelect.value ? `&sort_by=${sortSelect.value}` : '&sort_by=popularity.desc';
+
+  currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?api_key=${API_KEY}${sortParam}${genreParam}${langParam}${yearParam}&page=`;
+  
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
