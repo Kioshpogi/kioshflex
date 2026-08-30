@@ -142,12 +142,43 @@ function loadContinueWatching() {
         <img src="${IMG_PATH + item.poster_path}" alt="${title}">
         <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
       `;
+      
+      // Normal click para buksan ang pelikula
       card.addEventListener('click', () => openModal(item, item.media_type || 'movie'));
+
+      // Long press handler para burahin sa history
+      let pressTimer;
+      const startLongPress = (e) => {
+        pressTimer = setTimeout(() => {
+          if (confirm(`Remove "${title}" from Continue Watching?`)) {
+            removeFromContinueWatching(item.id);
+          }
+        }, 600); // 600 milliseconds para sa long press
+      };
+
+      const cancelLongPress = () => {
+        clearTimeout(pressTimer);
+      };
+
+      card.addEventListener('touchstart', startLongPress);
+      card.addEventListener('touchend', cancelLongPress);
+      card.addEventListener('touchmove', cancelLongPress);
+      card.addEventListener('mousedown', startLongPress);
+      card.addEventListener('mouseup', cancelLongPress);
+      card.addEventListener('mouseleave', cancelLongPress);
+      
       continueCarousel.appendChild(card);
     });
   } else {
     continueSection.style.display = 'none';
   }
+}
+
+function removeFromContinueWatching(id) {
+  let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
+  history = history.filter(item => item.id !== id);
+  localStorage.setItem('kiosh_continue', JSON.stringify(history));
+  loadContinueWatching();
 }
 
 function loadContent(resetPage = true) {
@@ -253,15 +284,14 @@ async function openModal(item, type) {
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
     s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
-    s5: `https://autoembed.cc/embed/tv/${id}/${s}/${e}`
+    s5: `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
   } : {
     s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
     s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
     s3: `https://vidlink.pro/movie/${id}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-    s5: `https://autoembed.cc/embed/movie/${id}`
+    s5: `https://www.2embed.cc/embed/${id}`
   };
-
 
   let links = getLinks(season, episode);
   const isInWatchlist = getWatchlist().some(i => i.id === id);
@@ -271,7 +301,7 @@ async function openModal(item, type) {
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
       <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
-      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">🔗 Share</button>
+      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
       ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
     ${type === 'tv' ? `
