@@ -218,14 +218,14 @@ function openModal(item, type) {
   function getLinks(s, e) {
     if (type === 'tv') {
       return {
-        s1: `https://vidsrc.xyz/embed/tv/${id}/${s}/${e}`,
+        s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
         s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
         s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
         s4: `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`
       };
     } else {
       return {
-        s1: `https://vidsrc.xyz/embed/movie/${id}`,
+        s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
         s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
         s3: `https://vidlink.pro/movie/${id}`,
         s4: `https://vidsrc.pro/embed/movie/${id}`
