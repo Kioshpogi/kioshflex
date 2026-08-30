@@ -5,19 +5,61 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+:root {
+  --bg-color: #0f1015;
+  --header-bg: #16181e;
+  --text-color: #fff;
+  --card-bg: #16181e;
+  --nav-bg: #12141a;
+  --btn-bg: #22252f;
+  --border-color: #333;
+}
+
+body.light-mode {
+  --bg-color: #f4f5f7;
+  --header-bg: #ffffff;
+  --text-color: #111;
+  --card-bg: #ffffff;
+  --nav-bg: #eaeef2;
+  --btn-bg: #dde1e5;
+  --border-color: #ccc;
+}
+
 body {
-  background-color: #0f1015;
-  color: #fff;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
 }
 
 header {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  align-items: center;
   padding: 15px 5%;
-  background: #16181e;
-  border-bottom: 1px solid #22252f;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.theme-toggle-btn {
+  background: var(--btn-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
 .logo {
@@ -30,7 +72,6 @@ header {
 .search-bar {
   display: flex;
   width: 100%;
-  max-width: 400px;
   gap: 6px;
 }
 
@@ -38,10 +79,10 @@ header {
   flex: 1;
   padding: 10px 12px;
   border-radius: 6px;
-  border: 1px solid #333;
+  border: 1px solid var(--border-color);
   outline: none;
-  background: #22252f;
-  color: #fff;
+  background: var(--btn-bg);
+  color: var(--text-color);
   font-size: 14px;
 }
 
@@ -64,7 +105,7 @@ header {
   align-items: center;
   gap: 12px;
   padding: 15px 10px;
-  background: #12141a;
+  background: var(--nav-bg);
 }
 
 .type-btns {
@@ -73,8 +114,8 @@ header {
 }
 
 .nav-btn {
-  background: #22252f;
-  color: #aaa;
+  background: var(--btn-bg);
+  color: var(--text-color);
   border: none;
   padding: 8px 16px;
   border-radius: 20px;
@@ -89,9 +130,9 @@ header {
 }
 
 .genre-filter select {
-  background: #22252f;
-  color: #fff;
-  border: 1px solid #333;
+  background: var(--btn-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   padding: 8px 12px;
   border-radius: 20px;
   font-size: 13px;
@@ -108,6 +149,57 @@ header {
   font-size: 1.3rem;
 }
 
+/* Top 10 Carousel */
+.carousel-section {
+  margin-bottom: 25px;
+}
+
+.carousel-container {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
+}
+
+.carousel-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.carousel-container::-webkit-scrollbar-thumb {
+  background: #e50914;
+  border-radius: 3px;
+}
+
+.carousel-card {
+  min-width: 110px;
+  width: 110px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.carousel-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.carousel-card span {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  background: #e50914;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
 .movie-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
@@ -115,11 +207,12 @@ header {
 }
 
 .card {
-  background: #16181e;
+  background: var(--card-bg);
   border-radius: 8px;
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease;
+  border: 1px solid var(--border-color);
 }
 
 .card img {
@@ -156,12 +249,14 @@ header {
 }
 
 .modal-content {
-  background: #16181e;
+  background: var(--header-bg);
   padding: 15px;
   border-radius: 8px;
   max-width: 600px;
   width: 100%;
   position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .close-btn {
@@ -169,10 +264,9 @@ header {
   top: 5px; right: 12px;
   font-size: 28px;
   cursor: pointer;
-  color: #fff;
+  color: var(--text-color);
 }
 
-/* Episode & Season Selector Styling */
 .episode-selector {
   display: flex;
   gap: 10px;
@@ -186,9 +280,9 @@ header {
 }
 
 .episode-selector select {
-  background: #22252f;
-  color: #fff;
-  border: 1px solid #333;
+  background: var(--btn-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   padding: 6px 10px;
   border-radius: 4px;
   font-size: 12px;
@@ -196,3 +290,72 @@ header {
   cursor: pointer;
 }
 
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.watchlist-btn {
+  background: #22252f;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.watchlist-btn.in-watchlist {
+  background: #e50914;
+}
+
+.review-section {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
+}
+
+.review-section h4 {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.review-input-group {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.review-input-group input {
+  flex: 1;
+  padding: 6px;
+  background: var(--btn-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.review-input-group button {
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.reviews-list {
+  max-height: 80px;
+  overflow-y: auto;
+  font-size: 11px;
+  color: #ccc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

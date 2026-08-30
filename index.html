@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KioshFlex - Stream Movies & TV Shows</title>
   <link rel="stylesheet" href="style.css">
-  <!-- PWA Manifest at Icon Links -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#e50914">
   <link rel="apple-touch-icon" href="icon.png">
@@ -14,7 +13,13 @@
 
   <!-- Navigation Bar -->
   <header>
-    <div class="logo">KIOSHFLEX</div>
+    <div class="header-top">
+      <div class="logo">KIOSHFLEX</div>
+      <div class="header-controls">
+        <button id="watchlistNavBtn" class="theme-toggle-btn">⭐ Watchlist</button>
+        <button id="themeToggleBtn" class="theme-toggle-btn">🌓 Theme</button>
+      </div>
+    </div>
     <div class="search-bar">
       <input type="text" id="searchInput" placeholder="Search movies, TV shows...">
       <button id="searchBtn">Search</button>
@@ -28,7 +33,6 @@
       <button id="btnTV" class="nav-btn">TV Series</button>
     </div>
     
-    <!-- Dropdown Filter -->
     <div class="genre-filter">
       <select id="genreSelect">
         <option value="">All Genres</option>
@@ -42,6 +46,12 @@
 
   <!-- Content Container -->
   <main class="container">
+    <!-- Top 10 Carousel Section -->
+    <section id="carouselSection" class="carousel-section">
+      <h2>🔥 Top 10 Trending This Week</h2>
+      <div class="carousel-container" id="top10Carousel"></div>
+    </section>
+
     <h2 id="sectionTitle">Trending Movies</h2>
     <div id="movieGrid" class="movie-grid"></div>
   </main>
@@ -57,3 +67,4 @@
   <script src="script.js"></script>
 </body>
 </html>
+

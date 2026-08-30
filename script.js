@@ -1,8 +1,9 @@
 const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
-
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 
 const movieGrid = document.getElementById('movieGrid');
+const top10Carousel = document.getElementById('top10Carousel');
+const carouselSection = document.getElementById('carouselSection');
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const sectionTitle = document.getElementById('sectionTitle');
@@ -12,9 +13,17 @@ const closeModal = document.getElementById('closeModal');
 const btnMovies = document.getElementById('btnMovies');
 const btnTV = document.getElementById('btnTV');
 const genreSelect = document.getElementById('genreSelect');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
 let currentType = 'movie';
 
+// Dark / Light Mode Toggle
+themeToggleBtn.addEventListener('click', () => {
+  document.body.classList.toggle('light-mode');
+});
+
+// Fetch Media for Grid
 async function getMedia(url, type) {
   try {
     const res = await fetch(url);
@@ -46,12 +55,40 @@ function showMedia(items, type) {
       </div>
     `;
 
-    card.addEventListener('click', () => openModal(title, overview, id, type));
+    card.addEventListener('click', () => openModal(item, type));
     movieGrid.appendChild(card);
   });
 }
 
+// Load Top 10 Carousel
+async function loadTop10() {
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`);
+    const data = await res.json();
+    if(data.results) {
+      top10Carousel.innerHTML = '';
+      data.results.slice(0, 10).forEach((item, index) => {
+        const title = item.title || item.name;
+        const { poster_path, media_type, id } = item;
+        if(!poster_path) return;
+
+        const card = document.createElement('div');
+        card.classList.add('carousel-card');
+        card.innerHTML = `
+          <span>#${index + 1}</span>
+          <img src="${IMG_PATH + poster_path}" alt="${title}">
+        `;
+        card.addEventListener('click', () => openModal(item, media_type === 'tv' ? 'tv' : 'movie'));
+        top10Carousel.appendChild(card);
+      });
+    }
+  } catch (err) {
+    console.error("Carousel error", err);
+  }
+}
+
 function loadContent() {
+  carouselSection.style.display = 'block';
   const genreId = genreSelect ? genreSelect.value : '';
   let url = '';
 
@@ -66,6 +103,33 @@ function loadContent() {
 
   getMedia(url, currentType);
 }
+
+// Watchlist System using localStorage
+function getWatchlist() {
+  return JSON.parse(localStorage.getItem('kiosh_watchlist')) || [];
+}
+
+function toggleWatchlist(item) {
+  let watchlist = getWatchlist();
+  const index = watchlist.findIndex(i => i.id === item.id);
+  if(index > -1) {
+    watchlist.splice(index, 1);
+  } else {
+    watchlist.push(item);
+  }
+  localStorage.setItem('kiosh_watchlist', JSON.stringify(watchlist));
+}
+
+watchlistNavBtn.addEventListener('click', () => {
+  carouselSection.style.display = 'none';
+  sectionTitle.textContent = 'My Watchlist ⭐';
+  const watchlist = getWatchlist();
+  if(watchlist.length > 0) {
+    showMedia(watchlist, currentType);
+  } else {
+    movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Wala pang laman ang iyong Watchlist.</p>';
+  }
+});
 
 // Category Switcher
 if (btnMovies && btnTV) {
@@ -84,7 +148,6 @@ if (btnMovies && btnTV) {
   });
 }
 
-// Genre Dropdown Event
 if (genreSelect) {
   genreSelect.addEventListener('change', loadContent);
 }
@@ -94,6 +157,7 @@ if (searchBtn && searchInput) {
   searchBtn.addEventListener('click', () => {
     const query = searchInput.value.trim();
     if(query) {
+      carouselSection.style.display = 'none';
       sectionTitle.textContent = `Search Results: ${query}`;
       getMedia(`https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${query}`, currentType);
     }
@@ -106,8 +170,12 @@ if (searchBtn && searchInput) {
   });
 }
 
-// Player Modal Na May Season & Episode Selector para sa TV/Anime
-function openModal(title, overview, id, type) {
+// Modal Player with Seasons, Watchlist & Reviews
+function openModal(item, type) {
+  const title = item.title || item.name;
+  const overview = item.overview;
+  const id = item.id;
+  
   let season = 1;
   let episode = 1;
 
@@ -130,10 +198,18 @@ function openModal(title, overview, id, type) {
   }
 
   let links = getLinks(season, episode);
+  const watchlist = getWatchlist();
+  const isInWatchlist = watchlist.some(i => i.id === id);
 
   modalBody.innerHTML = `
-    <h3 style="margin-bottom:8px; font-size:16px; color:#fff;">${title}</h3>
+    <h3 style="margin-bottom:4px; font-size:16px; color:var(--text-color);">${title}</h3>
     
+    <div class="modal-actions">
+      <button id="modalWatchlistBtn" class="watchlist-btn ${isInWatchlist ? 'in-watchlist' : ''}">
+        ${isInWatchlist ? '⭐ Remove from Watchlist' : '⭐ Add to Watchlist'}
+      </button>
+    </div>
+
     ${type === 'tv' ? `
       <div class="episode-selector">
         <div class="select-group">
@@ -152,17 +228,59 @@ function openModal(title, overview, id, type) {
     ` : ''}
 
     <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;" id="serverButtons">
-      <button onclick="changeServer('${links.s1}', this)" class="server-btn active-server" style="padding:6px 12px; font-size:12px; background:#e50914; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 1</button>
-      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:#22252f; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 2</button>
-      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:#22252f; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 3</button>
-      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:#22252f; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 4</button>
+      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:#e50914; color:#fff; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 1</button>
+      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:var(--btn-bg); color:var(--text-color); border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 2</button>
+      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:var(--btn-bg); color:var(--text-color); border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 3</button>
+      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:12px; background:var(--btn-bg); color:var(--text-color); border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Server 4</button>
     </div>
 
     <iframe id="playerIframe" src="${links.s1}" width="100%" height="250" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="border-radius:6px; background:#000;"></iframe>
-    <p style="margin-top:10px; color:#ccc; font-size:12px; max-height:80px; overflow-y:auto;">${overview}</p>
+    <p style="margin-top:8px; color:#ccc; font-size:12px; max-height:60px; overflow-y:auto;">${overview}</p>
+
+    <div class="review-section">
+      <h4>User Reviews & Ratings</h4>
+      <div class="review-input-group">
+        <input type="text" id="reviewInput" placeholder="Mag-iwan ng komento o rating (e.g. 5/5 ⭐)...">
+        <button id="submitReviewBtn">I-post</button>
+      </div>
+      <div id="reviewsList" class="reviews-list"></div>
+    </div>
   `;
 
   modal.style.display = 'flex';
+
+  // Watchlist Button Event inside Modal
+  document.getElementById('modalWatchlistBtn').addEventListener('click', (e) => {
+    toggleWatchlist(item);
+    const updatedList = getWatchlist();
+    const isNowIn = updatedList.some(i => i.id === id);
+    e.target.textContent = isNowIn ? '⭐ Remove from Watchlist' : '⭐ Add to Watchlist';
+    e.target.classList.toggle('in-watchlist', isNowIn);
+  });
+
+  // Load and Save Reviews via localStorage
+  const reviewsKey = `kiosh_reviews_${id}`;
+  const loadReviews = () => {
+    const reviews = JSON.parse(localStorage.getItem(reviewsKey)) || [];
+    const listEl = document.getElementById('reviewsList');
+    if(reviews.length === 0) {
+      listEl.innerHTML = '<span style="color:#777;">Wala pang reviews. Mag-iwan ng sarili mo!</span>';
+    } else {
+      listEl.innerHTML = reviews.map(r => `<div>• ${r}</div>`).join('');
+    }
+  };
+  loadReviews();
+
+  document.getElementById('submitReviewBtn').addEventListener('click', () => {
+    const val = document.getElementById('reviewInput').value.trim();
+    if(val) {
+      const reviews = JSON.parse(localStorage.getItem(reviewsKey)) || [];
+      reviews.push(val);
+      localStorage.setItem(reviewsKey, JSON.stringify(reviews));
+      document.getElementById('reviewInput').value = '';
+      loadReviews();
+    }
+  });
 
   if (type === 'tv') {
     const seasonSelect = document.getElementById('seasonSelect');
@@ -184,10 +302,10 @@ function openModal(title, overview, id, type) {
       buttons.forEach((b, idx) => {
         if(idx === 0) {
           b.style.background = '#e50914';
-          b.classList.add('active-server');
+          b.style.color = '#fff';
         } else {
-          b.style.background = '#22252f';
-          b.classList.remove('active-server');
+          b.style.background = 'var(--btn-bg)';
+          b.style.color = 'var(--text-color)';
         }
       });
     };
@@ -197,14 +315,15 @@ function openModal(title, overview, id, type) {
   }
 }
 
-// Global helper para sa pagpapalit ng server buttons color at iframe
 window.changeServer = function(url, btn) {
   document.getElementById('playerIframe').src = url;
   const buttons = document.querySelectorAll('#serverButtons button');
   buttons.forEach(b => {
-    b.style.background = '#22252f';
+    b.style.background = 'var(--btn-bg)';
+    b.style.color = 'var(--text-color)';
   });
   btn.style.background = '#e50914';
+  btn.style.color = '#fff';
 };
 
 if (closeModal) {
@@ -222,4 +341,5 @@ window.addEventListener('click', (e) => {
 });
 
 // Initial Load
+loadTop10();
 loadContent();
