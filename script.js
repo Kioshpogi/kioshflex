@@ -298,7 +298,7 @@ async function openModal(item, type) {
       <div style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; align-items:center;">
         <select id="seasonSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 10}, (_, i) => `<option value="${i+1}">Season ${i+1}</option>`).join('')}</select>
         <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}">Episode ${i+1}</option>`).join('')}</select>
-        <button id="autoNextToggle" style="background:#e50914; color:#fff; border:none; padding:6px 10px; font-size:11px; border-radius:6px; cursor:pointer;" title="Toggle Episode Notification">Notification: ON</button>
+        <button id="autoNextToggle" style="background:#e50914; color:#fff; border:none; padding:6px 10px; font-size:11px; border-radius:6px; cursor:pointer;" title="Toggle Auto-Next">Auto-Next: ON</button>
       </div>
     ` : ''}
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
@@ -310,11 +310,6 @@ async function openModal(item, type) {
     </div>
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
-      <div id="autoNextOverlay" style="display:none; position:absolute; bottom:15px; right:15px; background:rgba(0,0,0,0.9); border:1px solid #e50914; padding:12px 16px; border-radius:8px; color:#fff; font-size:12px; z-index:5; align-items:center; gap:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-        <span id="countdownText">Natapos na ba ang episode na ito?</span>
-        <button id="confirmNextEp" style="background:#e50914; color:#fff; border:none; padding:6px 10px; border-radius:4px; font-size:11px; font-weight:bold; cursor:pointer;">Next Episode</button>
-        <button id="cancelAutoNext" style="background:#333; color:#aaa; border:none; padding:6px 8px; border-radius:4px; font-size:11px; cursor:pointer;">Dismiss</button>
-      </div>
     </div>
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
     
@@ -353,7 +348,6 @@ async function openModal(item, type) {
     document.getElementById('castSection').style.display = 'none';
   }
 
-  // IN-APP TRAILER MODAL LOGIC
   document.getElementById('trailerBtn').addEventListener('click', async () => {
     const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
     const vidData = await vidRes.json();
@@ -379,13 +373,13 @@ async function openModal(item, type) {
   if (type === 'tv') {
     const sSelect = document.getElementById('seasonSelect');
     const eSelect = document.getElementById('episodeSelect');
-    let notificationTimeout = null;
-    let isAutoNotifyActive = true;
+    let autoNextTimeout = null;
+    let isAutoNextActive = true;
 
     const updateSrc = () => {
       let nl = getLinks(sSelect.value, eSelect.value);
       document.getElementById('playerIframe').src = nl.s1;
-      resetNotificationTimer();
+      resetAutoNextTimer();
     };
 
     sSelect.addEventListener('change', updateSrc);
@@ -399,42 +393,28 @@ async function openModal(item, type) {
       }
     };
 
-    const resetNotificationTimer = () => {
-      clearTimeout(notificationTimeout);
-      document.getElementById('autoNextOverlay').style.display = 'none';
-      if (isAutoNotifyActive) startNotificationTimer();
+    const resetAutoNextTimer = () => {
+      clearTimeout(autoNextTimeout);
+      if (isAutoNextActive) startAutoNextTimer();
     };
 
-    const startNotificationTimer = () => {
-      notificationTimeout = setTimeout(() => {
-        const overlay = document.getElementById('autoNextOverlay');
-        const text = document.getElementById('countdownText');
-        text.textContent = `Natapos na ba ang episode na ito?`;
-        overlay.style.display = 'flex';
-      }, 20 * 60 * 1000); // 20 minutes estimate
+    const startAutoNextTimer = () => {
+      autoNextTimeout = setTimeout(() => {
+        triggerNextEpisode();
+      }, 20 * 60 * 1000); // 20 minutes estimate per episode
     };
 
     const autoToggleBtn = document.getElementById('autoNextToggle');
     autoToggleBtn.addEventListener('click', () => {
-      isAutoNotifyActive = !isAutoNotifyActive;
-      autoToggleBtn.style.background = isAutoNotifyActive ? '#e50914' : '#222';
-      autoToggleBtn.style.color = isAutoNotifyActive ? '#fff' : '#aaa';
-      autoToggleBtn.textContent = `Notification: ${isAutoNotifyActive ? 'ON' : 'OFF'}`;
-      if (isAutoNotifyActive) {
-        startNotificationTimer();
+      isAutoNextActive = !isAutoNextActive;
+      autoToggleBtn.style.background = isAutoNextActive ? '#e50914' : '#222';
+      autoToggleBtn.style.color = isAutoNextActive ? '#fff' : '#aaa';
+      autoToggleBtn.textContent = `Auto-Next: ${isAutoNextActive ? 'ON' : 'OFF'}`;
+      if (isAutoNextActive) {
+        startAutoNextTimer();
       } else {
-        clearTimeout(notificationTimeout);
-        document.getElementById('autoNextOverlay').style.display = 'none';
+        clearTimeout(autoNextTimeout);
       }
-    });
-
-    document.getElementById('cancelAutoNext').addEventListener('click', () => {
-      document.getElementById('autoNextOverlay').style.display = 'none';
-    });
-
-    document.getElementById('confirmNextEp').addEventListener('click', () => {
-      document.getElementById('autoNextOverlay').style.display = 'none';
-      triggerNextEpisode();
     });
 
     document.getElementById('nextEpBtn').addEventListener('click', () => {
@@ -442,7 +422,7 @@ async function openModal(item, type) {
       if(cur < 25) { eSelect.value = cur + 1; updateSrc(); }
     });
 
-    startNotificationTimer();
+    startAutoNextTimer();
   }
 }
 
