@@ -251,11 +251,15 @@ async function openModal(item, type) {
   const getLinks = (s, e) => type === 'tv' ? {
     s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-    s3: `https://vidlink.pro/tv/${id}/${s}/${e}`
+    s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
+    s4: `https://embed.su/embed/tv/${id}/${s}/${e}`,
+    s5: `https://vidsrc.icu/embed/tv/${id}/${s}/${e}`
   } : {
     s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
     s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
-    s3: `https://vidlink.pro/movie/${id}`
+    s3: `https://vidlink.pro/movie/${id}`,
+    s4: `https://embed.su/embed/movie/${id}`,
+    s5: `https://vidsrc.icu/embed/movie/${id}`
   };
 
   let links = getLinks(season, episode);
@@ -275,10 +279,12 @@ async function openModal(item, type) {
         <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}">Episode ${i+1}</option>`).join('')}</select>
       </div>
     ` : ''}
-    <div style="display:flex; gap:6px; margin-bottom:12px;" id="serverButtons">
-      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer;">Server 1</button>
-      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2</button>
-      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 14px; font-size:12px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 3</button>
+    <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
+      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer;">Server 1</button>
+      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2</button>
+      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 3</button>
+      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
+      <button onclick="changeServer('${links.s5}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 5</button>
     </div>
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px;">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
