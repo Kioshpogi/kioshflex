@@ -80,20 +80,23 @@ function showMedia(items, type, append = false) {
   });
 }
 
-// Load Hero Banner & Top 10
+// Load Hero Banner (True Random) & Top 10
 async function loadHeroAndTop10() {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`);
     const data = await res.json();
     if(data.results && data.results.length > 0) {
-      featuredItem = data.results[0];
-      heroTitle.textContent = featuredItem.title || featuredItem.name;
-      if (featuredItem.backdrop_path) {
+      // True random selection from trending results
+      const validItems = data.results.filter(item => item.backdrop_path);
+      if (validItems.length > 0) {
+        const randomIndex = Math.floor(Math.random() * validItems.length);
+        featuredItem = validItems[randomIndex];
+        heroTitle.textContent = featuredItem.title || featuredItem.name;
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
         heroBanner.style.display = 'flex';
+        
+        heroPlayBtn.onclick = () => openModal(featuredItem, featuredItem.media_type === 'tv' ? 'tv' : 'movie');
       }
-      
-      heroPlayBtn.onclick = () => openModal(featuredItem, featuredItem.media_type === 'tv' ? 'tv' : 'movie');
 
       top10Carousel.innerHTML = '';
       data.results.slice(0, 10).forEach((item, index) => {
@@ -243,8 +246,7 @@ async function openModal(item, type) {
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
       <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
-      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">🔗 Share</button>
-      <a href="https://vidsrc.to/embed/${type}/${id}" target="_blank" style="text-decoration:none; padding:7px 12px; font-size:12px; border-radius:8px; background:#222; color:#fff; font-weight:600;">📥 Download / Mirror</a>
+      <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
       ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
     ${type === 'tv' ? `
