@@ -19,6 +19,9 @@ const closeModal = document.getElementById('closeModal');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
+const suggestionsBox = document.getElementById('suggestionsBox');
+const searchHistoryContainer = document.getElementById('searchHistoryContainer');
+
 // Sidebar Elements
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const sidebar = document.getElementById('sidebar');
@@ -30,7 +33,6 @@ const languageSelect = document.getElementById('languageSelect');
 const sortSelect = document.getElementById('sortSelect');
 const yearSelect = document.getElementById('yearSelect');
 
-// Awtomatikong maglagay ng years mula 2026 pababa sa 2000
 for (let y = 2026; y >= 2000; y--) {
   const option = document.createElement('option');
   option.value = y;
@@ -246,8 +248,72 @@ watchlistNavBtn.addEventListener('click', () => {
   else movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
 });
 
-searchBtn.addEventListener('click', () => {
-  const query = searchInput.value.trim();
+// --- SEARCH HISTORY & AUTOCOMPLETE LOGIC ---
+function getSearchHistory() {
+  return JSON.parse(localStorage.getItem('kiosh_history')) || [];
+}
+
+function saveSearchHistory(query) {
+  let history = getSearchHistory();
+  query = query.trim();
+  if (query === '') return;
+  
+  history = history.filter(item => item.toLowerCase() !== query.toLowerCase());
+  history.unshift(query);
+  if (history.length > 5) history.pop();
+  
+  localStorage.setItem('kiosh_history', JSON.stringify(history));
+  renderSearchHistory();
+}
+
+function renderSearchHistory() {
+  const history = getSearchHistory();
+  searchHistoryContainer.innerHTML = '';
+  
+  history.forEach(term => {
+    const chip = document.createElement('div');
+    chip.className = 'history-chip';
+    chip.textContent = term;
+    chip.onclick = () => {
+      searchInput.value = term;
+      suggestionsBox.innerHTML = '';
+      executeSearch(term);
+    };
+    searchHistoryContainer.appendChild(chip);
+  });
+}
+
+searchInput.addEventListener('input', async (e) => {
+  const keyword = e.target.value.trim();
+  suggestionsBox.innerHTML = '';
+  
+  if (keyword.length === 0) return;
+  
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${keyword}`);
+    const data = await res.json();
+    
+    if (data.results && data.results.length > 0) {
+      data.results.slice(0, 5).forEach(item => {
+        const title = item.title || item.name;
+        const div = document.createElement('div');
+        div.className = 'suggestion-item';
+        div.textContent = title;
+        div.onclick = () => {
+          searchInput.value = title;
+          suggestionsBox.innerHTML = '';
+          saveSearchHistory(title);
+          executeSearch(title);
+        };
+        suggestionsBox.appendChild(div);
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+function executeSearch(query) {
   if(query) {
     isSearchMode = true;
     carouselSection.style.display = 'none';
@@ -258,9 +324,33 @@ searchBtn.addEventListener('click', () => {
     currentFetchUrl = `https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${query}&page=`;
     getMedia(currentFetchUrl + currentPage, currentType, false);
   }
+}
+
+searchBtn.addEventListener('click', () => {
+  const query = searchInput.value.trim();
+  if(query) {
+    suggestionsBox.innerHTML = '';
+    saveSearchHistory(query);
+    executeSearch(query);
+  }
 });
 
-searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') searchBtn.click(); });
+searchInput.addEventListener('keypress', (e) => { 
+  if (e.key === 'Enter') {
+    suggestionsBox.innerHTML = '';
+    const query = searchInput.value.trim();
+    if(query) {
+      saveSearchHistory(query);
+      executeSearch(query);
+    }
+  } 
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-wrapper')) {
+    suggestionsBox.innerHTML = '';
+  }
+});
 
 window.addEventListener('scroll', () => {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
@@ -474,3 +564,4 @@ window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.
 
 loadHeroAndTop10();
 loadContent(true);
+renderSearchHistory();
