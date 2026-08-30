@@ -139,7 +139,7 @@ function toggleWatchlist(item) {
 }
 
 watchlistNavBtn.addEventListener('click', () => {
-  isSearchMode = true; // disable infinite scroll for watchlist
+  isSearchMode = true; 
   carouselSection.style.display = 'none';
   sectionTitle.textContent = 'My Watchlist';
   const watchlist = getWatchlist();
@@ -195,9 +195,9 @@ if (searchBtn && searchInput) {
 
 // Infinite Scroll Listener
 window.addEventListener('scroll', () => {
-  if (isSearchMode && watchlistNavBtn === document.activeElement) return; // skip if custom views
+  if (isSearchMode && watchlistNavBtn === document.activeElement) return;
   
-  const { scrollTop, scrollHeight,clientHeight } = document.documentElement;
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
   if (scrollTop + clientHeight >= scrollHeight - 300 && !isLoadingMore) {
     currentPage++;
     if (currentFetchUrl) {
@@ -206,7 +206,7 @@ window.addEventListener('scroll', () => {
   }
 });
 
-// Modal Player with Alternative Servers & Fallbacks
+// Modal Player with Fixed Working Streams
 function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
@@ -218,17 +218,17 @@ function openModal(item, type) {
   function getLinks(s, e) {
     if (type === 'tv') {
       return {
-        s1: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-        s2: `https://vidlink.pro/tv/${id}/${s}/${e}`,
-        s3: `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`,
-        s4: `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
+        s1: `https://vidsrc.xyz/embed/tv/${id}/${s}/${e}`,
+        s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+        s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
+        s4: `https://vidsrc.pro/embed/tv/${id}/${s}/${e}`
       };
     } else {
       return {
-        s1: `https://vidsrc.cc/v2/embed/movie/${id}`,
-        s2: `https://vidlink.pro/movie/${id}`,
-        s3: `https://vidsrc.pro/embed/movie/${id}`,
-        s4: `https://www.2embed.cc/embed/${id}`
+        s1: `https://vidsrc.xyz/embed/movie/${id}`,
+        s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
+        s3: `https://vidlink.pro/movie/${id}`,
+        s4: `https://vidsrc.pro/embed/movie/${id}`
       };
     }
   }
