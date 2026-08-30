@@ -16,16 +16,10 @@ const sectionTitle = document.getElementById('sectionTitle');
 const modal = document.getElementById('movieModal');
 const modalBody = document.getElementById('modalBody');
 const closeModal = document.getElementById('closeModal');
-const btnMovies = document.getElementById('btnMovies');
-const btnTV = document.getElementById('btnTV');
-const genreSelect = document.getElementById('genreSelect');
-const languageSelect = document.getElementById('languageSelect');
-const sortBySelect = document.getElementById('sortBySelect');
-const yearSelect = document.getElementById('yearSelect');
 const themeToggleBtn = document.getElementById('themeToggleBtn');
 const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
-// Hamburger Elements
+// Sidebar Elements
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -37,6 +31,12 @@ let currentFetchUrl = '';
 let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
+
+// Filter States
+let selectedGenre = '';
+let selectedLang = '';
+let selectedSort = 'popularity.desc';
+let selectedYear = '';
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
   document.body.classList.add('light-mode');
@@ -158,22 +158,68 @@ function loadContent(resetPage = true) {
   heroBanner.style.display = featuredItem && featuredItem.backdrop_path ? 'flex' : 'none';
   loadContinueWatching();
   
-  const genreId = genreSelect ? genreSelect.value : '';
-  const lang = languageSelect ? languageSelect.value : '';
-  const sortBy = sortBySelect ? sortBySelect.value : 'popularity.desc';
-  const year = yearSelect ? yearSelect.value : '';
-  
   if (resetPage) currentPage = 1;
   sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
   
-  let queryParams = `api_key=${API_KEY}&sort_by=${sortBy}&page=`;
-  if (genreId) queryParams += `&with_genres=${genreId}`;
-  if (lang) queryParams += `&with_original_language=${lang}`;
-  if (year) queryParams += currentType === 'movie' ? `&primary_release_year=${year}` : `&first_air_date_year=${year}`;
+  let queryParams = `api_key=${API_KEY}&sort_by=${selectedSort}&page=`;
+  if (selectedGenre) queryParams += `&with_genres=${selectedGenre}`;
+  if (selectedLang) queryParams += `&with_original_language=${selectedLang}`;
+  if (selectedYear) queryParams += currentType === 'movie' ? `&primary_release_year=${selectedYear}` : `&first_air_date_year=${selectedYear}`;
 
   currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?${queryParams}`;
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
+
+// Event Listeners for Custom Sidebar Buttons
+document.querySelectorAll('#btnMovies, #btnTV').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('#btnMovies, #btnTV').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    currentType = e.target.getAttribute('data-type');
+    loadContent(true);
+    closeSidebarMenu();
+  });
+});
+
+document.querySelectorAll('#genreList button').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('#genreList button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedGenre = e.target.getAttribute('data-genre');
+    loadContent(true);
+    closeSidebarMenu();
+  });
+});
+
+document.querySelectorAll('#languageList button').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('#languageList button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedLang = e.target.getAttribute('data-lang');
+    loadContent(true);
+    closeSidebarMenu();
+  });
+});
+
+document.querySelectorAll('#sortList button').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('#sortList button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedSort = e.target.getAttribute('data-sort');
+    loadContent(true);
+    closeSidebarMenu();
+  });
+});
+
+document.querySelectorAll('#yearList button').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('#yearList button').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedYear = e.target.getAttribute('data-year');
+    loadContent(true);
+    closeSidebarMenu();
+  });
+});
 
 function getWatchlist() { return JSON.parse(localStorage.getItem('kiosh_watchlist')) || []; }
 function toggleWatchlist(item) {
@@ -203,27 +249,6 @@ watchlistNavBtn.addEventListener('click', () => {
   if(combined.length > 0) showMedia(combined, currentType, false);
   else movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
 });
-
-btnMovies.addEventListener('click', () => { 
-  currentType = 'movie'; 
-  btnMovies.classList.add('active'); 
-  btnTV.classList.remove('active'); 
-  loadContent(true); 
-  closeSidebarMenu();
-});
-
-btnTV.addEventListener('click', () => { 
-  currentType = 'tv'; 
-  btnTV.classList.add('active'); 
-  btnMovies.classList.remove('active'); 
-  loadContent(true); 
-  closeSidebarMenu();
-});
-
-if (genreSelect) genreSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
-if (languageSelect) languageSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
-if (sortBySelect) sortBySelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
-if (yearSelect) yearSelect.addEventListener('change', () => { loadContent(true); closeSidebarMenu(); });
 
 searchBtn.addEventListener('click', () => {
   const query = searchInput.value.trim();
