@@ -138,25 +138,25 @@ function loadContinueWatching() {
       if(!item.poster_path) return;
       const card = document.createElement('div');
       card.classList.add('carousel-card');
-      card.style.position = 'relative'; // Para sa positioning ng delete button
+      card.style.position = 'relative';
+      
+      const progressValue = item.progress || 50;
       
       card.innerHTML = `
         <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
         <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
-        <div class="progress-bar"><div class="progress-fill" style="width: 60%;"></div></div>
+        <div class="progress-bar"><div class="progress-fill" style="width: ${progressValue}%;"></div></div>
       `;
       
-      // Click event para buksan ang pelikula
       card.addEventListener('click', (e) => {
         if (!e.target.classList.contains('delete-history-btn')) {
           openModal(item, item.media_type || 'movie');
         }
       });
 
-      // Delete button event handler
       const deleteBtn = card.querySelector('.delete-history-btn');
       deleteBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Iwas trigger sa modal open
+        e.stopPropagation();
         removeFromContinueWatching(item.id);
       });
       
@@ -165,6 +165,21 @@ function loadContinueWatching() {
   } else {
     continueSection.style.display = 'none';
   }
+}
+
+function saveContinueWatching(item, type) {
+  let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
+  const existingIndex = history.findIndex(i => i.id === item.id);
+  
+  let progress = existingIndex > -1 && history[existingIndex].progress 
+    ? history[existingIndex].progress 
+    : (Math.floor(Math.random() * 70) + 15);
+  
+  history = history.filter(i => i.id !== item.id);
+  history.unshift({ ...item, media_type: type, progress: progress });
+  if (history.length > 10) history.pop();
+  localStorage.setItem('kiosh_continue', JSON.stringify(history));
+  loadContinueWatching();
 }
 
 function removeFromContinueWatching(id) {
@@ -219,15 +234,6 @@ function toggleWatchlist(item) {
   if(index > -1) watchlist.splice(index, 1);
   else watchlist.push(item);
   localStorage.setItem('kiosh_watchlist', JSON.stringify(watchlist));
-}
-
-function saveContinueWatching(item, type) {
-  let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
-  history = history.filter(i => i.id !== item.id);
-  history.unshift({ ...item, media_type: type });
-  if (history.length > 10) history.pop();
-  localStorage.setItem('kiosh_continue', JSON.stringify(history));
-  loadContinueWatching();
 }
 
 watchlistNavBtn.addEventListener('click', () => {
