@@ -50,7 +50,6 @@ let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
 
-// Splash Screen Handling
 window.addEventListener('load', () => {
   setTimeout(() => {
     const splash = document.getElementById('splashScreen');
@@ -136,7 +135,6 @@ function showMedia(items, type, append = false) {
       </div>
     `;
 
-    // Feature 1: Cinematic Backdrop Hover Audio Previews
     let hoverTimeout;
     const previewContainer = card.querySelector('.hover-preview-container');
     
@@ -285,9 +283,8 @@ function loadContinueWatching() {
       card.style.position = 'relative';
       
       const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
-      const progressPercent = item.progress || Math.floor(Math.random() * 60) + 20; // Simulated or stored progress
+      const progressPercent = item.progress || 40;
 
-      // Feature 3: Continue Watching Progress Bar Indicator
       card.innerHTML = `
         <div style="position: relative;">
           <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="width:100%; height:160px; object-fit:cover; border-radius:10px 10px 0 0;">
@@ -548,7 +545,6 @@ async function openModal(item, type) {
       <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
     </div>
     
-    <!-- Feature 4: Interactive Episode Selector & Season Tabs -->
     ${type === 'tv' ? `
       <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:10px; margin-bottom:12px;">
         <div style="display:flex; gap:6px; margin-bottom:8px; overflow-x:auto;" id="seasonTabsContainer">
@@ -567,16 +563,17 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
-    <!-- Feature 5: Custom Dynamic Player Controls Overlay Container -->
+    <!-- Custom Player Controls Overlay Container (Ipinapakita lang kung TV Series) -->
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
+      ${type === 'tv' ? `
       <div class="custom-player-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
         <div style="display: flex; gap: 10px; align-items: center;">
           <button id="customSkipBack" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">↺ 10s</button>
           <button id="customSkipForward" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">10s ↻</button>
         </div>
         <button id="customNextEp" style="background:#e50914; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Next Ep ➔</button>
-      </div>
+      </div>` : ''}
     </div>
     
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
@@ -637,13 +634,16 @@ async function openModal(item, type) {
       };
     });
 
-    document.getElementById('customNextEp').onclick = () => {
-      episode++;
-      saveContinueWatching(item, type, season, episode);
-      let nl = getLinks(season, episode);
-      document.getElementById('playerIframe').src = nl.s1;
-      loadEpisodesForSeason(season);
-    };
+    const nextEpBtn = document.getElementById('customNextEp');
+    if (nextEpBtn) {
+      nextEpBtn.onclick = () => {
+        episode++;
+        saveContinueWatching(item, type, season, episode);
+        let nl = getLinks(season, episode);
+        document.getElementById('playerIframe').src = nl.s1;
+        loadEpisodesForSeason(season);
+      };
+    }
   }
 
   try {
