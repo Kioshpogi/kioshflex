@@ -3,7 +3,7 @@ const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
 
 const movieGrid = document.getElementById('movieGrid');
-const top10Carousel = document.getElementById('top10Carousel');
+const top10Carousl = document.getElementById('top10Carousel');
 const continueCarousel = document.getElementById('continueCarousel');
 const continueSection = document.getElementById('continueSection');
 const carouselSection = document.getElementById('carouselSection');
@@ -60,7 +60,6 @@ themeToggleBtn.addEventListener('click', () => {
   localStorage.setItem('kiosh_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
 });
 
-// Home Logo Click Handler (Babalik sa Home)
 homeLogo.addEventListener('click', () => {
   searchInput.value = '';
   if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
@@ -84,6 +83,14 @@ sidebarOverlay.addEventListener('click', closeSidebarMenu);
 async function getMedia(url, type, append = false) {
   try {
     isLoadingMore = true;
+    if (!append) {
+      movieGrid.innerHTML = '';
+      for (let i = 0; i < 10; i++) {
+        const skeleton = document.createElement('div');
+        skeleton.className = 'skeleton-card';
+        movieGrid.appendChild(skeleton);
+      }
+    }
     const res = await fetch(url);
     const data = await res.json();
     if(data.results && data.results.length > 0) {
@@ -134,7 +141,7 @@ async function loadHeroAndTop10() {
         heroPlayBtn.onclick = () => openModal(featuredItem, featuredItem.media_type === 'tv' ? 'tv' : 'movie');
       }
 
-      top10Carousel.innerHTML = '';
+      top10Carousl.innerHTML = '';
       data.results.slice(0, 10).forEach((item, index) => {
         const title = item.title || item.name;
         if(!item.poster_path) return;
@@ -142,7 +149,7 @@ async function loadHeroAndTop10() {
         card.classList.add('carousel-card');
         card.innerHTML = `<span>#${index + 1}</span><img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">`;
         card.addEventListener('click', () => openModal(item, item.media_type === 'tv' ? 'tv' : 'movie'));
-        top10Carousel.appendChild(card);
+        top10Carousl.appendChild(card);
       });
     }
   } catch (err) {
@@ -161,7 +168,7 @@ function loadContinueWatching() {
       const card = document.createElement('div');
       card.classList.add('carousel-card');
       card.style.position = 'relative';
-      
+
       const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
 
       card.innerHTML = `
@@ -169,7 +176,7 @@ function loadContinueWatching() {
         ${badgeText ? `<span style="position: absolute; bottom: 5px; left: 5px; background: rgba(229, 9, 20, 0.85); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${badgeText}</span>` : ''}
         <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
       `;
-      
+
       card.addEventListener('click', (e) => {
         if (!e.target.classList.contains('delete-history-btn')) {
           openModal(item, item.media_type || 'movie');
@@ -181,7 +188,7 @@ function loadContinueWatching() {
         e.stopPropagation();
         removeFromContinueWatching(item.id);
       });
-      
+
       continueCarousel.appendChild(card);
     });
   } else {
@@ -215,10 +222,10 @@ function loadContent(resetPage = true) {
   carouselSection.style.display = 'block';
   heroBanner.style.display = featuredItem && featuredItem.backdrop_path ? 'flex' : 'none';
   loadContinueWatching();
-  
+
   if (resetPage) currentPage = 1;
   sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
-  
+
   let yearParam = '';
   if (yearSelect.value) {
     yearParam = currentType === 'movie' ? `&primary_release_year=${yearSelect.value}` : `&first_air_date_year=${yearSelect.value}`;
@@ -229,7 +236,7 @@ function loadContent(resetPage = true) {
   let sortParam = sortSelect.value ? `&sort_by=${sortSelect.value}` : '&sort_by=popularity.desc';
 
   currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?api_key=${API_KEY}${sortParam}${genreParam}${langParam}${yearParam}&page=`;
-  
+
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
@@ -268,7 +275,6 @@ watchlistNavBtn.addEventListener('click', () => {
   else movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
 });
 
-// --- SEARCH HISTORY & AUTOCOMPLETE LOGIC ---
 function getSearchHistory() {
   return JSON.parse(localStorage.getItem('kiosh_history')) || [];
 }
@@ -277,11 +283,11 @@ function saveSearchHistory(query) {
   let history = getSearchHistory();
   query = query.trim();
   if (query === '') return;
-  
+
   history = history.filter(item => item.toLowerCase() !== query.toLowerCase());
   history.unshift(query);
   if (history.length > 5) history.pop();
-  
+
   localStorage.setItem('kiosh_history', JSON.stringify(history));
   renderSearchHistory();
 }
@@ -300,7 +306,7 @@ function removeSingleHistory(termToRemove) {
   history = history.filter(item => item !== termToRemove);
   localStorage.setItem('kiosh_history', JSON.stringify(history));
   renderSearchHistory();
-  
+
   if (getSearchHistory().length === 0 && searchInput.value.trim() === '' && searchDropdownWrapper) {
     searchDropdownWrapper.style.display = 'none';
   }
@@ -309,9 +315,9 @@ function removeSingleHistory(termToRemove) {
 function renderSearchHistory() {
   const history = getSearchHistory();
   if (!searchHistoryContainer) return;
-  
+
   searchHistoryContainer.innerHTML = '';
-  
+
   if (history.length === 0) {
     if (historyHeader) historyHeader.style.display = 'none';
     searchHistoryContainer.style.display = 'none';
@@ -320,12 +326,12 @@ function renderSearchHistory() {
 
   if (historyHeader) historyHeader.style.display = 'flex';
   searchHistoryContainer.style.display = 'flex';
-  
+
   history.forEach(term => {
     const chip = document.createElement('div');
     chip.className = 'history-chip';
     chip.style.cssText = 'background-color: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 4px 8px 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
-    
+
     const textSpan = document.createElement('span');
     textSpan.textContent = term;
     textSpan.onclick = () => {
@@ -334,13 +340,13 @@ function renderSearchHistory() {
       executeSearch(term);
     };
     chip.appendChild(textSpan);
-    
+
     const deleteBtn = document.createElement('span');
     deleteBtn.innerHTML = '&times;';
     deleteBtn.style.cssText = 'color: #71717a; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0 2px; border-radius: 4px;';
     deleteBtn.onmouseover = () => deleteBtn.style.color = '#ef4444';
     deleteBtn.onmouseout = () => deleteBtn.style.color = '#71717a';
-    
+
     deleteBtn.onclick = (e) => {
       e.stopPropagation();
       removeSingleHistory(term);
@@ -377,16 +383,16 @@ document.addEventListener('click', (e) => {
 searchInput.addEventListener('input', async (e) => {
   const keyword = e.target.value.trim();
   suggestionsBox.innerHTML = '';
-  
+
   if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
   renderSearchHistory();
 
   if (keyword.length === 0) return;
-  
+
   try {
     const res = await fetch(`https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${keyword}`);
     const data = await res.json();
-    
+
     if (data.results && data.results.length > 0) {
       data.results.slice(0, 5).forEach(item => {
         const title = item.title || item.name;
@@ -456,16 +462,15 @@ async function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
   const id = item.id;
-  
-  // Kunin ang naka-save na progress kung mayroon man
+
   const continueHistory = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
   const existingProgress = continueHistory.find(i => i.id === id);
-  
+
   let season = existingProgress ? (existingProgress.savedSeason || 1) : 1;
   let episode = existingProgress ? (existingProgress.savedEpisode || 1) : 1;
 
   saveContinueWatching(item, type, season, episode);
-  
+
   const getLinks = (s, e) => type === 'tv' ? {
     s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
@@ -508,7 +513,7 @@ async function openModal(item, type) {
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
     </div>
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
-    
+
     <div id="castSection" style="margin-top: 10px;">
       <strong style="font-size:12px; color:#fff;">Top Cast:</strong>
       <div id="castScrollContainer" class="cast-scroll"><span style="font-size:11px; color:#777;">Loading cast...</span></div>
@@ -521,7 +526,7 @@ async function openModal(item, type) {
     const castRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`);
     const castData = await castRes.json();
     const castScrollContainer = document.getElementById('castScrollContainer');
-    
+
     if (castData.cast && castData.cast.length > 0) {
       castScrollContainer.innerHTML = '';
       castData.cast.slice(0, 10).forEach(actor => {
@@ -533,7 +538,7 @@ async function openModal(item, type) {
           <img src="${profileImg}" alt="${actor.name}" style="-webkit-touch-callout: none; user-select: none;">
           <span>${actor.name}</span>
         `;
-        
+
         actorDiv.addEventListener('click', () => openActorModal(actor.id));
         castScrollContainer.appendChild(actorDiv);
       });
@@ -573,12 +578,12 @@ async function openModal(item, type) {
     const updateSrc = () => {
       const curSeason = parseInt(sSelect.value);
       const curEpisode = parseInt(eSelect.value);
-      
+
       saveContinueWatching(item, type, curSeason, curEpisode);
 
       let nl = getLinks(curSeason, curEpisode);
       document.getElementById('playerIframe').src = nl.s1;
-      
+
       document.querySelectorAll('#serverButtons button').forEach((b, idx) => {
         if(idx === 0) {
           b.style.background = '#e50914';
@@ -610,9 +615,9 @@ async function openActorModal(personId) {
 
     const creditsRes = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${API_KEY}`);
     const creditsData = await creditsRes.json();
-    
+
     const profileImg = person.profile_path ? `https://image.tmdb.org/t/p/w300${person.profile_path}` : 'https://via.placeholder.com/150?text=No+Img';
-    
+
     modalBody.innerHTML = `
       <button id="backToMediaBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">← Close</button>
       <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:15px; flex-wrap:wrap;">
