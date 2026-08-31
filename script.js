@@ -328,9 +328,12 @@ function removeFromContinueWatching(id) {
 
 function loadContent(resetPage = true) {
   isSearchMode = false;
-  carouselSection.style.display = 'block';
-  heroBanner.style.display = featuredItem && featuredItem.backdrop_path ? 'flex' : 'none';
+  
+  // SIGURADUHING NAKABukas ANG CAROUSEL AT SECTIONS SA HOME
+  if (carouselSection) carouselSection.style.display = 'block';
   loadContinueWatching();
+  
+  heroBanner.style.display = featuredItem && featuredItem.backdrop_path ? 'flex' : 'none';
   
   if (resetPage) currentPage = 1;
   sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
@@ -559,7 +562,6 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
-    <!-- Custom Player Controls Overlay Container (Ipinapakita lang kung TV Series) -->
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
       ${type === 'tv' ? `
