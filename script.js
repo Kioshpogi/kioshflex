@@ -49,6 +49,7 @@ let currentFetchUrl = '';
 let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
+let watchProgressInterval = null;
 
 window.addEventListener('load', () => {
   setTimeout(() => {
@@ -125,13 +126,13 @@ function showMedia(items, type, append = false) {
     card.classList.add('card');
     card.innerHTML = `
       <div style="position: relative; width: 100%; height: calc(100% - 50px);">
-        <img class="card-img" src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover;">
-        <div class="hover-preview-container" style="position: absolute; inset: 0; background: #000; display: none; z-index: 3; overflow: hidden;"></div>
-        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; z-index: 4; backdrop-filter: blur(4px);">&#9658;</button>
+        <img class="card-img" src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover; border-radius: 12px 12px 0 0;">
+        <div class="hover-preview-container" style="position: absolute; inset: 0; background: #000; display: none; z-index: 3; overflow: hidden; border-radius: 12px 12px 0 0;"></div>
+        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; z-index: 4; backdrop-filter: blur(6px); transition: background 0.2s;">&#9658;</button>
       </div>
-      <div class="card-info">
-        <h3>${title}</h3>
-        <span>★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
+      <div class="card-info" style="padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%; margin:0;">${title}</h3>
+        <span style="font-size: 11px; color: #fbbf24;">★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
       </div>
     `;
 
@@ -147,7 +148,7 @@ function showMedia(items, type, append = false) {
           if (teaser) {
             previewContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${teaser.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${teaser.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; transform: translate(-50%, -50%); pointer-events: none;"></iframe>`;
             previewContainer.style.display = 'block';
-            card.style.boxShadow = '0 0 25px rgba(229,9,20,0.6)';
+            card.style.boxShadow = '0 0 20px rgba(229,9,20,0.5)';
           }
         } catch (e) {}
       }, 600);
@@ -283,13 +284,13 @@ function loadContinueWatching() {
       card.style.position = 'relative';
       
       const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
-      const progressPercent = item.progress || 40;
+      const progressPercent = Math.min(item.progress || 10, 100);
 
       card.innerHTML = `
         <div style="position: relative;">
           <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="width:100%; height:160px; object-fit:cover; border-radius:10px 10px 0 0;">
           <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.2);">
-            <div style="width: ${progressPercent}%; height: 100%; background: #e50914;"></div>
+            <div style="width: ${progressPercent}%; height: 100%; background: #e50914; transition: width 0.4s;"></div>
           </div>
         </div>
         ${badgeText ? `<span style="position: absolute; bottom: 8px; left: 5px; background: rgba(229, 9, 20, 0.85); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${badgeText}</span>` : ''}
@@ -314,10 +315,26 @@ function loadContinueWatching() {
   }
 }
 
+function updateWatchProgress(id, increment = 3) {
+  let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
+  const index = history.findIndex(i => i.id === id);
+  if (index > -1) {
+    let currentProg = history[index].progress || 10;
+    if (currentProg < 95) {
+      history[index].progress = currentProg + increment;
+      localStorage.setItem('kiosh_continue', JSON.stringify(history));
+      loadContinueWatching();
+    }
+  }
+}
+
 function saveContinueWatching(item, type, season = 1, episode = 1) {
   let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
+  const existing = history.find(i => i.id === item.id);
+  const currentProg = existing ? existing.progress : 15;
+  
   history = history.filter(i => i.id !== item.id);
-  history.unshift({ ...item, media_type: type, savedSeason: season, savedEpisode: episode, progress: 45 });
+  history.unshift({ ...item, media_type: type, savedSeason: season, savedEpisode: episode, progress: currentProg });
   if (history.length > 10) history.pop();
   localStorage.setItem('kiosh_continue', JSON.stringify(history));
   loadContinueWatching();
@@ -514,6 +531,8 @@ async function openModal(item, type) {
   const overview = item.overview;
   const id = item.id;
   
+  if (watchProgressInterval) clearInterval(watchProgressInterval);
+  
   const continueHistory = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
   const existingProgress = continueHistory.find(i => i.id === id);
   
@@ -521,6 +540,10 @@ async function openModal(item, type) {
   let episode = existingProgress ? (existingProgress.savedEpisode || 1) : 1;
 
   saveContinueWatching(item, type, season, episode);
+
+  watchProgressInterval = setInterval(() => {
+    updateWatchProgress(id, 2);
+  }, 4000);
   
   const getLinks = (s, e) => type === 'tv' ? {
     s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
@@ -563,16 +586,12 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
-    <!-- Custom Player Controls Overlay Container (Ipinapakita lang kung TV Series) -->
+    <!-- Player Wrapper (May kasamang Next Ep controls kung TV Series lang) -->
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
       ${type === 'tv' ? `
-      <div class="custom-player-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="customSkipBack" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">↺ 10s</button>
-          <button id="customSkipForward" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">10s ↻</button>
-        </div>
-        <button id="customNextEp" style="background:#e50914; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Next Ep ➔</button>
+      <div class="custom-player-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.85), transparent); padding: 10px 14px; display: flex; justify-content: flex-end; align-items: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+        <button id="customNextEp" style="background:#e50914; color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:11px; font-weight:bold; cursor:pointer;">Next Ep ➔</button>
       </div>` : ''}
     </div>
     
@@ -735,8 +754,19 @@ window.changeServer = function(url, btn) {
   btn.style.background = '#e50914'; btn.style.color = '#fff';
 };
 
-closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
-window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
+closeModal.addEventListener('click', () => { 
+  if (watchProgressInterval) clearInterval(watchProgressInterval);
+  modal.style.display = 'none'; 
+  modalBody.innerHTML = ''; 
+});
+
+window.addEventListener('click', (e) => { 
+  if (e.target === modal) { 
+    if (watchProgressInterval) clearInterval(watchProgressInterval);
+    modal.style.display = 'none'; 
+    modalBody.innerHTML = ''; 
+  } 
+});
 
 loadHeroAndTop10();
 loadContent(true);
