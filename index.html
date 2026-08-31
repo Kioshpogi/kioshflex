@@ -4,145 +4,264 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KIOSHFLEX</title>
-  
-  <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#e50914">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
 
-  <link rel="stylesheet" href="style.css">
+    body {
+      background-color: #0f0f0f;
+      color: #fff;
+      padding-bottom: 40px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background: rgba(15, 15, 15, 0.9);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .logo {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: #e50914;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .header-actions button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(5px);
+    }
+
+    .container {
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+
+    /* Grid para maging 3 columns at magkasya ang mas maliit na liquid glass cards */
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .modal-content {
+      background: rgba(20, 20, 20, 0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      width: 100%;
+      max-width: 400px;
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-body {
+      padding: 16px;
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.4;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Netflix-Style Splash Intro Animation -->
-  <div id="splashScreen" style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.6s ease; pointer-events: none;">
-    <div class="splash-logo" style="font-size: 42px; font-weight: 900; color: #e50914; letter-spacing: 3px; text-shadow: 0 0 30px rgba(229,9,20,0.8); animation: splashPulse 1.2s ease-in-out infinite alternate;">KIOSHFLEX</div>
-  </div>
-
   <header>
-    <div class="nav-left">
-      <button id="hamburgerBtn" class="hamburger-btn">&#9776;</button>
-      <div class="logo" id="homeLogo" style="cursor: pointer;">KIOSHFLEX</div>
-    </div>
+    <button class="menu-btn">☰</button>
+    <div class="logo">KIOSHFLEX</div>
     <div class="header-actions">
-      <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
-      <button id="themeToggleBtn" class="header-btn">Theme</button>
+      <button>Watchlist</button>
+      <button>Theme</button>
     </div>
   </header>
 
-  <div id="sidebarOverlay" class="sidebar-overlay"></div>
-  <div id="sidebar" class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-title">Menu & Filters</div>
-      <button id="closeSidebar" class="close-sidebar">&times;</button>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Content Type</div>
-      <div class="type-switcher">
-        <button id="btnMovies" class="type-btn active" data-type="movie">Movies</button>
-        <button id="btnTV" class="type-btn" data-type="tv">TV Series</button>
-      </div>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Genre</div>
-      <select id="genreSelect">
-        <option value="">All Genres</option>
-        <option value="28">Action</option>
-        <option value="12">Adventure</option>
-        <option value="16">Animation</option>
-        <option value="35">Comedy</option>
-        <option value="80">Crime</option>
-        <option value="18">Drama</option>
-        <option value="14">Fantasy</option>
-        <option value="27">Horror</option>
-        <option value="9648">Mystery</option>
-        <option value="10749">Romance</option>
-        <option value="878">Sci-Fi</option>
-        <option value="53">Thriller</option>
-      </select>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Language</div>
-      <select id="languageSelect">
-        <option value="">All Languages</option>
-        <option value="en">English</option>
-        <option value="tl">Tagalog / Filipino</option>
-        <option value="ko">Korean</option>
-        <option value="ja">Japanese</option>
-        <option value="es">Spanish</option>
-        <option value="zh">Chinese</option>
-      </select>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Sort By</div>
-      <select id="sortSelect">
-        <option value="popularity.desc">Most Popular</option>
-        <option value="vote_average.desc">Highest Rated</option>
-        <option value="primary_release_date.desc">Latest Release</option>
-      </select>
-    </div>
-
-    <div class="sidebar-group">
-      <div class="sidebar-label">Year</div>
-      <select id="yearSelect">
-        <option value="">All Years</option>
-      </select>
-    </div>
+  <div class="container">
+    <div class="section-title">Explore Movies</div>
+    <div class="movie-grid" id="movieGrid"></div>
   </div>
 
-  <div class="search-container" style="position: relative; display: flex; gap: 8px; align-items: center;">
-    <div class="search-wrapper" style="position: relative; flex: 1; display: flex; align-items: center; background-color: #121212; border: 1px solid #27272a; border-radius: 9999px; padding: 6px 16px;">
-      <svg style="width: 18px; height: 18px; fill: none; stroke: #a1a1aa; stroke-width: 2; margin-right: 10px; flex-shrink: 0;" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <input type="text" id="searchInput" placeholder="Search movies, TV shows..." autocomplete="off" style="background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 14px;">
-      
-      <div id="searchDropdownWrapper" style="position: absolute; top: calc(100% + 8px); left: 0; right: 0; background-color: #121212; border: 1px solid #27272a; border-radius: 16px; padding: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); z-index: 50; display: none; flex-direction: column; gap: 8px;">
-        <div id="historyHeader" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a1a1aa; padding: 0 4px;">
-          <span>Recent Searches</span>
-          <button id="clearHistoryBtn" style="background: transparent !important; border: none !important; color: #a1a1aa; cursor: pointer; font-size: 12px; font-weight: 500; padding: 0;">Clear All</button>
-        </div>
-        <div id="searchHistoryContainer" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
-        <div id="suggestionsBox" class="suggestions-dropdown" style="position: static; border: none; box-shadow: none; width: 100%; background: transparent; padding: 0;"></div>
-      </div>
-    </div>
-    <button id="searchBtn" style="background-color: #dc2626; color: #fff; border: none; border-radius: 9999px; padding: 10px 20px; font-weight: 500; cursor: pointer;">Search</button>
-  </div>
-
-  <div id="heroBanner" class="hero-banner" style="display: none;">
-    <div class="hero-content">
-      <h2 id="heroTitle" class="hero-title">Loading Featured...</h2>
-      <button id="heroPlayBtn" class="hero-btn">&#9658; Play</button>
-    </div>
-  </div>
-
-  <div id="continueSection" class="carousel-section" style="display: none;">
-    <div class="section-title">Continue Watching</div>
-    <div id="continueCarousel" class="carousel"></div>
-  </div>
-
-  <div id="carouselSection" class="carousel-section">
-    <div class="section-title">Trending Top 10</div>
-    <div id="top10Carousel" class="carousel"></div>
-  </div>
-
-  <div>
-    <div id="sectionTitle" class="section-title">Explore Movies</div>
-    <div id="movieGrid" class="movie-grid"></div>
-  </div>
-
-  <div id="movieModal" class="modal">
+  <div class="modal" id="mediaModal">
     <div class="modal-content">
-      <button id="closeModal" class="close-modal">&times;</button>
-      <div id="modalBody"></div>
+      <div class="modal-header">
+        <h3 id="modalTitle" style="font-size: 16px; color: #fff;"></h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+    const API_KEY = 'c752044810757a552bfd400e9debebe6'; // Palitan kung kinakailangan
+    const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
+    const movieGrid = document.getElementById('movieGrid');
+    const mediaModal = document.getElementById('mediaModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+
+    async function fetchMovies() {
+      try {
+        const res = await fetch(`https://api.themoviedb.org/3/trending/all/day?api_key=${API_KEY}`);
+        const data = await res.json();
+        showMedia(data.results, 'movie');
+      } catch (err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+
+    function showMedia(items, type, append = false) {
+      if (!append) movieGrid.innerHTML = '';
+      items.forEach(item => {
+        const title = item.title || item.name;
+        const { poster_path, vote_average } = item;
+        if (!poster_path) return;
+
+        const card = document.createElement('div');
+        card.classList.add('card');
+        
+        // Liquid Glass Styling + Mas Maliit na Sukat
+        card.style.cssText = `
+          background: rgba(255, 255, 255, 0.04);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          cursor: pointer;
+          width: 100%;
+        `;
+
+        card.innerHTML = `
+          <div style="position: relative; width: 100%; height: 160px;">
+            <img class="card-img" src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover;">
+            <div class="hover-preview-container" style="position: absolute; inset: 0; background: #000; display: none; z-index: 3; overflow: hidden;"></div>
+            <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 6px; right: 6px; background: rgba(20, 20, 20, 0.6); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 4; backdrop-filter: blur(6px);">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+          </div>
+          <div class="card-info" style="padding: 6px 8px;">
+            <h3 style="font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; margin: 0 0 2px 0;">${title}</h3>
+            <span style="font-size: 10px; color: #aaa;">★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
+          </div>
+        `;
+
+        // Hover Trailer Preview
+        let hoverTimeout;
+        const previewContainer = card.querySelector('.hover-preview-container');
+        
+        card.addEventListener('mouseenter', () => {
+          hoverTimeout = setTimeout(async () => {
+            try {
+              const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${item.id}/videos?api_key=${API_KEY}`);
+              const vidData = await vidRes.json();
+              const teaser = vidData.results.find(v => (v.type === 'Trailer' || v.type === 'Teaser') && v.site === 'YouTube');
+              if (teaser) {
+                previewContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${teaser.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${teaser.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; transform: translate(-50%, -50%); pointer-events: none;"></iframe>`;
+                previewContainer.style.display = 'block';
+              }
+            } catch (e) {}
+          }, 600);
+        });
+
+        card.addEventListener('mouseleave', () => {
+          clearTimeout(hoverTimeout);
+          previewContainer.innerHTML = '';
+          previewContainer.style.display = 'none';
+        });
+
+        card.addEventListener('click', () => openModal(item, type));
+        movieGrid.appendChild(card);
+      });
+    }
+
+    function openModal(item, type) {
+      modalTitle.textContent = item.title || item.name;
+      modalBody.innerHTML = `
+        <p style="margin-bottom: 10px;">${item.overview || 'Wala pang deskripsyon para sa palabas na ito.'}</p>
+        <p style="color: #aaa; font-size: 12px;">Petsa ng Paglabas: ${item.release_date || item.first_air_date || 'N/A'}</p>
+      `;
+      mediaModal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      mediaModal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+      if (event.target == mediaModal) {
+        closeModal();
+      }
+    }
+
+    fetchMovies();
+  </script>
 </body>
 </html>
