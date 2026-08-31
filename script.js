@@ -307,16 +307,11 @@ function renderSearchHistory() {
   if (history.length === 0) {
     if (historyHeader) historyHeader.style.display = 'none';
     searchHistoryContainer.style.display = 'none';
-    
-    if (searchInput.value.trim() === '' && searchDropdownWrapper) {
-      searchDropdownWrapper.style.display = 'none';
-    }
     return;
   }
 
   if (historyHeader) historyHeader.style.display = 'flex';
   searchHistoryContainer.style.display = 'flex';
-  if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
   
   history.forEach(term => {
     const chip = document.createElement('div');
