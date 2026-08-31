@@ -136,9 +136,24 @@ async function loadHeroAndTop10() {
         const randomIndex = Math.floor(Math.random() * validItems.length);
         featuredItem = validItems[randomIndex];
         heroTitle.textContent = featuredItem.title || featuredItem.name;
-        heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
+        
+        const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
+        const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${featuredItem.id}/videos?api_key=${API_KEY}`);
+        const vidData = await vidRes.json();
+        const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+        
+        if (trailer) {
+          heroBanner.innerHTML = `
+            <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;">
+              <iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
+            </div>
+          `;
+        } else {
+          heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
+        }
+        
         heroBanner.style.display = 'flex';
-        heroPlayBtn.onclick = () => openModal(featuredItem, featuredItem.media_type === 'tv' ? 'tv' : 'movie');
+        heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
       }
 
       top10Carousl.innerHTML = '';
@@ -168,7 +183,7 @@ function loadContinueWatching() {
       const card = document.createElement('div');
       card.classList.add('carousel-card');
       card.style.position = 'relative';
-
+      
       const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
 
       card.innerHTML = `
@@ -176,7 +191,7 @@ function loadContinueWatching() {
         ${badgeText ? `<span style="position: absolute; bottom: 5px; left: 5px; background: rgba(229, 9, 20, 0.85); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${badgeText}</span>` : ''}
         <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
       `;
-
+      
       card.addEventListener('click', (e) => {
         if (!e.target.classList.contains('delete-history-btn')) {
           openModal(item, item.media_type || 'movie');
@@ -188,7 +203,7 @@ function loadContinueWatching() {
         e.stopPropagation();
         removeFromContinueWatching(item.id);
       });
-
+      
       continueCarousel.appendChild(card);
     });
   } else {
@@ -222,10 +237,10 @@ function loadContent(resetPage = true) {
   carouselSection.style.display = 'block';
   heroBanner.style.display = featuredItem && featuredItem.backdrop_path ? 'flex' : 'none';
   loadContinueWatching();
-
+  
   if (resetPage) currentPage = 1;
   sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
-
+  
   let yearParam = '';
   if (yearSelect.value) {
     yearParam = currentType === 'movie' ? `&primary_release_year=${yearSelect.value}` : `&first_air_date_year=${yearSelect.value}`;
@@ -236,7 +251,7 @@ function loadContent(resetPage = true) {
   let sortParam = sortSelect.value ? `&sort_by=${sortSelect.value}` : '&sort_by=popularity.desc';
 
   currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?api_key=${API_KEY}${sortParam}${genreParam}${langParam}${yearParam}&page=`;
-
+  
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
@@ -283,11 +298,11 @@ function saveSearchHistory(query) {
   let history = getSearchHistory();
   query = query.trim();
   if (query === '') return;
-
+  
   history = history.filter(item => item.toLowerCase() !== query.toLowerCase());
   history.unshift(query);
   if (history.length > 5) history.pop();
-
+  
   localStorage.setItem('kiosh_history', JSON.stringify(history));
   renderSearchHistory();
 }
@@ -306,7 +321,7 @@ function removeSingleHistory(termToRemove) {
   history = history.filter(item => item !== termToRemove);
   localStorage.setItem('kiosh_history', JSON.stringify(history));
   renderSearchHistory();
-
+  
   if (getSearchHistory().length === 0 && searchInput.value.trim() === '' && searchDropdownWrapper) {
     searchDropdownWrapper.style.display = 'none';
   }
@@ -315,9 +330,9 @@ function removeSingleHistory(termToRemove) {
 function renderSearchHistory() {
   const history = getSearchHistory();
   if (!searchHistoryContainer) return;
-
+  
   searchHistoryContainer.innerHTML = '';
-
+  
   if (history.length === 0) {
     if (historyHeader) historyHeader.style.display = 'none';
     searchHistoryContainer.style.display = 'none';
@@ -326,12 +341,12 @@ function renderSearchHistory() {
 
   if (historyHeader) historyHeader.style.display = 'flex';
   searchHistoryContainer.style.display = 'flex';
-
+  
   history.forEach(term => {
     const chip = document.createElement('div');
     chip.className = 'history-chip';
     chip.style.cssText = 'background-color: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 4px 8px 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
-
+    
     const textSpan = document.createElement('span');
     textSpan.textContent = term;
     textSpan.onclick = () => {
@@ -340,13 +355,13 @@ function renderSearchHistory() {
       executeSearch(term);
     };
     chip.appendChild(textSpan);
-
+    
     const deleteBtn = document.createElement('span');
     deleteBtn.innerHTML = '&times;';
     deleteBtn.style.cssText = 'color: #71717a; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0 2px; border-radius: 4px;';
     deleteBtn.onmouseover = () => deleteBtn.style.color = '#ef4444';
     deleteBtn.onmouseout = () => deleteBtn.style.color = '#71717a';
-
+    
     deleteBtn.onclick = (e) => {
       e.stopPropagation();
       removeSingleHistory(term);
@@ -383,16 +398,16 @@ document.addEventListener('click', (e) => {
 searchInput.addEventListener('input', async (e) => {
   const keyword = e.target.value.trim();
   suggestionsBox.innerHTML = '';
-
+  
   if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
   renderSearchHistory();
 
   if (keyword.length === 0) return;
-
+  
   try {
     const res = await fetch(`https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${keyword}`);
     const data = await res.json();
-
+    
     if (data.results && data.results.length > 0) {
       data.results.slice(0, 5).forEach(item => {
         const title = item.title || item.name;
@@ -462,15 +477,15 @@ async function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
   const id = item.id;
-
+  
   const continueHistory = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
   const existingProgress = continueHistory.find(i => i.id === id);
-
+  
   let season = existingProgress ? (existingProgress.savedSeason || 1) : 1;
   let episode = existingProgress ? (existingProgress.savedEpisode || 1) : 1;
 
   saveContinueWatching(item, type, season, episode);
-
+  
   const getLinks = (s, e) => type === 'tv' ? {
     s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
@@ -493,6 +508,7 @@ async function openModal(item, type) {
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
       <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
+      <button id="downloadBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">📥 Download</button>
       <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
       ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
@@ -513,7 +529,7 @@ async function openModal(item, type) {
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
     </div>
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
-
+    
     <div id="castSection" style="margin-top: 10px;">
       <strong style="font-size:12px; color:#fff;">Top Cast:</strong>
       <div id="castScrollContainer" class="cast-scroll"><span style="font-size:11px; color:#777;">Loading cast...</span></div>
@@ -526,7 +542,7 @@ async function openModal(item, type) {
     const castRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`);
     const castData = await castRes.json();
     const castScrollContainer = document.getElementById('castScrollContainer');
-
+    
     if (castData.cast && castData.cast.length > 0) {
       castScrollContainer.innerHTML = '';
       castData.cast.slice(0, 10).forEach(actor => {
@@ -538,7 +554,7 @@ async function openModal(item, type) {
           <img src="${profileImg}" alt="${actor.name}" style="-webkit-touch-callout: none; user-select: none;">
           <span>${actor.name}</span>
         `;
-
+        
         actorDiv.addEventListener('click', () => openActorModal(actor.id));
         castScrollContainer.appendChild(actorDiv);
       });
@@ -560,6 +576,16 @@ async function openModal(item, type) {
     }
   });
 
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const dummyUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
+    const a = document.createElement('a');
+    a.href = dummyUrl;
+    a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+
   document.getElementById('shareBtn').addEventListener('click', () => {
     navigator.clipboard.writeText(window.location.href).then(() => alert('Link copied to clipboard!'));
   });
@@ -578,12 +604,12 @@ async function openModal(item, type) {
     const updateSrc = () => {
       const curSeason = parseInt(sSelect.value);
       const curEpisode = parseInt(eSelect.value);
-
+      
       saveContinueWatching(item, type, curSeason, curEpisode);
 
       let nl = getLinks(curSeason, curEpisode);
       document.getElementById('playerIframe').src = nl.s1;
-
+      
       document.querySelectorAll('#serverButtons button').forEach((b, idx) => {
         if(idx === 0) {
           b.style.background = '#e50914';
@@ -615,9 +641,9 @@ async function openActorModal(personId) {
 
     const creditsRes = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${API_KEY}`);
     const creditsData = await creditsRes.json();
-
+    
     const profileImg = person.profile_path ? `https://image.tmdb.org/t/p/w300${person.profile_path}` : 'https://via.placeholder.com/150?text=No+Img';
-
+    
     modalBody.innerHTML = `
       <button id="backToMediaBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">← Close</button>
       <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:15px; flex-wrap:wrap;">
