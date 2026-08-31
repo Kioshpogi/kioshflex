@@ -466,7 +466,6 @@ async function openModal(item, type) {
 
   saveContinueWatching(item, type, season, episode);
   
-  let season = 1, episode = 1;
   const getLinks = (s, e) => type === 'tv' ? {
     s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
