@@ -143,10 +143,15 @@ async function loadHeroAndTop10() {
         const vidData = await vidRes.json();
         const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
         
+        // Gamitin muna ang backdrop image bilang pangunahing background para iwas "Video unavailable" block ng YouTube
+        heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
+        heroBanner.style.backgroundSize = 'cover';
+        heroBanner.style.backgroundPosition = 'center';
+
         if (trailer) {
           heroBanner.innerHTML = `
             <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
-              <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
+              <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
             </div>
             <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
             <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
@@ -170,9 +175,14 @@ async function loadHeroAndTop10() {
               };
             }
           }, 500);
-
         } else {
-          heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
+          heroBanner.innerHTML = `
+            <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
+            <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:center; gap: 12px;">
+              <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
+              <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
+            </div>
+          `;
         }
         
         heroBanner.style.display = 'flex';
