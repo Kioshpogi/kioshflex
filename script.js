@@ -135,7 +135,8 @@ async function loadHeroAndTop10() {
       if (validItems.length > 0) {
         const randomIndex = Math.floor(Math.random() * validItems.length);
         featuredItem = validItems[randomIndex];
-        heroTitle.textContent = featuredItem.title || featuredItem.name;
+        const title = featuredItem.title || featuredItem.name;
+        heroTitle.textContent = title;
         
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${featuredItem.id}/videos?api_key=${API_KEY}`);
@@ -146,6 +147,9 @@ async function loadHeroAndTop10() {
           heroBanner.innerHTML = `
             <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;">
               <iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
+            </div>
+            <div style="position: absolute; bottom: 20px; left: 20px; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+              <h1 style="font-size: 22px; color: #fff; margin-bottom: 0;">${title}</h1>
             </div>
           `;
         } else {
@@ -508,7 +512,6 @@ async function openModal(item, type) {
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
       <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
-      <button id="downloadBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">📥 Download</button>
       <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
       ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
@@ -574,16 +577,6 @@ async function openModal(item, type) {
     } else {
       alert('Trailer not available.');
     }
-  });
-
-  document.getElementById('downloadBtn').addEventListener('click', () => {
-    const dummyUrl = 'https://www.w3schools.com/html/mov_bbb.mp4';
-    const a = document.createElement('a');
-    a.href = dummyUrl;
-    a.download = `${title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.mp4`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
   });
 
   document.getElementById('shareBtn').addEventListener('click', () => {
