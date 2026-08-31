@@ -109,61 +109,18 @@ function showMedia(items, type, append = false) {
   if (!append) movieGrid.innerHTML = '';
   items.forEach(item => {
     const title = item.title || item.name;
-    const { poster_path, vote_average, id, backdrop_path } = item;
+    const { poster_path, vote_average } = item;
     if(!poster_path) return;
 
     const card = document.createElement('div');
     card.classList.add('card');
-    // Sinigurong may sapat na min-height para hindi pumayat/mapatag ang card
-    card.style.cssText = 'position: relative; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; min-height: 250px; background: #18181b; border-radius: 8px;';
-
     card.innerHTML = `
-      <div class="card-poster" style="width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; transition: opacity 0.3s ease; display: flex; flex-direction: column;">
-        <img src="${IMG_PATH + poster_path}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover; -webkit-touch-callout: none; user-select: none;">
-        <div class="card-info" style="position: absolute; bottom: 0; width: 100%; background: linear-gradient(0deg, rgba(0,0,0,0.9), transparent); padding: 10px; box-sizing: border-box;">
-          <h3 style="font-size: 14px; margin: 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</h3>
-          <span style="font-size: 12px; color: #f5c518;">★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
-        </div>
+      <img src="${IMG_PATH + poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
+      <div class="card-info">
+        <h3>${title}</h3>
+        <span>★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
       </div>
-      <div class="card-trailer-container" style="position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; background: #000;"></div>
     `;
-
-    let trailerLoaded = false;
-
-    const handleHoverOrFocus = async () => {
-      const posterDiv = card.querySelector('.card-poster');
-      posterDiv.style.opacity = '0';
-      
-      if (!trailerLoaded && backdrop_path) {
-        try {
-          const mediaType = item.media_type || type;
-          const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${id}/videos?api_key=${API_KEY}`);
-          const vidData = await vidRes.json();
-          const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-          
-          const container = card.querySelector('.card-trailer-container');
-          if (trailer) {
-            container.innerHTML = `<iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}" width="100%" height="100%" frameborder="0" style="width: 100%; height: 100%; pointer-events: none;" allow="autoplay"></iframe>`;
-          } else {
-            container.innerHTML = `<img src="${BACKDROP_PATH + backdrop_path}" style="width: 100%; height: 100%; object-fit: cover;">`;
-          }
-          trailerLoaded = true;
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    };
-
-    const handleLeaveOrBlur = () => {
-      const posterDiv = card.querySelector('.card-poster');
-      posterDiv.style.opacity = '1';
-    };
-
-    card.addEventListener('mouseenter', handleHoverOrFocus);
-    card.addEventListener('mouseleave', handleLeaveOrBlur);
-    card.addEventListener('focusin', handleHoverOrFocus);
-    card.addEventListener('focusout', handleLeaveOrBlur);
-
     card.addEventListener('click', () => openModal(item, type));
     movieGrid.appendChild(card);
   });
