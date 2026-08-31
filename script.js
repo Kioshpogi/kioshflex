@@ -309,7 +309,7 @@ function renderSearchHistory() {
   history.forEach(term => {
     const chip = document.createElement('div');
     chip.className = 'history-chip';
-    chip.style.cssText = 'background-color: rgba(39, 39, 42, 0.8); border: 1px solid rgba(63, 63, 70, 0.5); color: #d4d4d8; padding: 4px 8px 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+    chip.style.cssText = 'background-color: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 4px 8px 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
     
     const textSpan = document.createElement('span');
     textSpan.textContent = term;
@@ -322,9 +322,9 @@ function renderSearchHistory() {
     
     const deleteBtn = document.createElement('span');
     deleteBtn.innerHTML = '&times;';
-    deleteBtn.style.cssText = 'color: #a1a1aa; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0 2px; border-radius: 4px;';
-    deleteBtn.onmouseover = () => deleteBtn.style.color = '#e50914';
-    deleteBtn.onmouseout = () => deleteBtn.style.color = '#a1a1aa';
+    deleteBtn.style.cssText = 'color: #71717a; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0 2px; border-radius: 4px;';
+    deleteBtn.onmouseover = () => deleteBtn.style.color = '#ef4444';
+    deleteBtn.onmouseout = () => deleteBtn.style.color = '#71717a';
     
     deleteBtn.onclick = (e) => {
       e.stopPropagation();
