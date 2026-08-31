@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KIOSHFLEX</title>
   
-  <!-- PWA Manifest & Theme Color for Installation -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#e50914">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,6 +13,11 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+  <!-- Netflix-Style Splash Intro Animation -->
+  <div id="splashScreen" style="position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.6s ease; pointer-events: none;">
+    <div class="splash-logo" style="font-size: 42px; font-weight: 900; color: #e50914; letter-spacing: 3px; text-shadow: 0 0 30px rgba(229,9,20,0.8); animation: splashPulse 1.2s ease-in-out infinite alternate;">KIOSHFLEX</div>
+  </div>
 
   <header>
     <div class="nav-left">
@@ -90,7 +94,6 @@
     </div>
   </div>
 
-  <!-- Redesigned Search & History Container -->
   <div class="search-container" style="position: relative; display: flex; gap: 8px; align-items: center;">
     <div class="search-wrapper" style="position: relative; flex: 1; display: flex; align-items: center; background-color: #121212; border: 1px solid #27272a; border-radius: 9999px; padding: 6px 16px;">
       <svg style="width: 18px; height: 18px; fill: none; stroke: #a1a1aa; stroke-width: 2; margin-right: 10px; flex-shrink: 0;" viewBox="0 0 24 24">
@@ -99,11 +102,10 @@
       </svg>
       <input type="text" id="searchInput" placeholder="Search movies, TV shows..." autocomplete="off" style="background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 14px;">
       
-      <!-- Combined Search Dropdown Wrapper -->
       <div id="searchDropdownWrapper" style="position: absolute; top: calc(100% + 8px); left: 0; right: 0; background-color: #121212; border: 1px solid #27272a; border-radius: 16px; padding: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); z-index: 50; display: none; flex-direction: column; gap: 8px;">
         <div id="historyHeader" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a1a1aa; padding: 0 4px;">
           <span>Recent Searches</span>
-          <button id="clearHistoryBtn" style="background: transparent !important; border: none !important; box-shadow: none !important; text-shadow: none !important; outline: none !important; color: #a1a1aa; cursor: pointer; font-size: 12px; font-weight: 500; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#a1a1aa'">Clear All</button>
+          <button id="clearHistoryBtn" style="background: transparent !important; border: none !important; color: #a1a1aa; cursor: pointer; font-size: 12px; font-weight: 500; padding: 0;">Clear All</button>
         </div>
         <div id="searchHistoryContainer" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
         <div id="suggestionsBox" class="suggestions-dropdown" style="position: static; border: none; box-shadow: none; width: 100%; background: transparent; padding: 0;"></div>
@@ -115,7 +117,7 @@
   <div id="heroBanner" class="hero-banner" style="display: none;">
     <div class="hero-content">
       <h2 id="heroTitle" class="hero-title">Loading Featured...</h2>
-      <button id="heroPlayBtn" class="hero-btn">▶ Play</button>
+      <button id="heroPlayBtn" class="hero-btn">&#9658; Play</button>
     </div>
   </div>
 

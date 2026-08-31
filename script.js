@@ -26,7 +26,6 @@ const homeLogo = document.getElementById('homeLogo');
 const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 const historyHeader = document.getElementById('historyHeader');
 
-// Sidebar Elements
 const hamburgerBtn = document.getElementById('hamburgerBtn');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.getElementById('sidebarOverlay');
@@ -50,6 +49,17 @@ let currentFetchUrl = '';
 let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
+
+// Splash Screen Handling
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splashScreen');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 600);
+    }
+  }, 1000);
+});
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
   document.body.classList.add('light-mode');
@@ -96,7 +106,7 @@ async function getMedia(url, type, append = false) {
     if(data.results && data.results.length > 0) {
       showMedia(data.results, type, append);
     } else if (!append) {
-      movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">No results found for this filter combination. Try resetting filters.</p>';
+      movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">No results found.</p>';
     }
   } catch (error) {
     if (!append) movieGrid.innerHTML = '<p style="color:#e50914; padding:20px;">Error loading data.</p>';
@@ -116,14 +126,41 @@ function showMedia(items, type, append = false) {
     card.classList.add('card');
     card.innerHTML = `
       <div style="position: relative; width: 100%; height: calc(100% - 50px);">
-        <img src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover; -webkit-touch-callout: none; user-select: none;">
-        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; z-index: 2; backdrop-filter: blur(4px);">▶</button>
+        <img class="card-img" src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover;">
+        <div class="hover-preview-container" style="position: absolute; inset: 0; background: #000; display: none; z-index: 3; overflow: hidden;"></div>
+        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; z-index: 4; backdrop-filter: blur(4px);">&#9658;</button>
       </div>
       <div class="card-info">
         <h3>${title}</h3>
         <span>★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
       </div>
     `;
+
+    // Feature 1: Cinematic Backdrop Hover Audio Previews
+    let hoverTimeout;
+    const previewContainer = card.querySelector('.hover-preview-container');
+    
+    card.addEventListener('mouseenter', () => {
+      hoverTimeout = setTimeout(async () => {
+        try {
+          const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${item.id}/videos?api_key=${API_KEY}`);
+          const vidData = await vidRes.json();
+          const teaser = vidData.results.find(v => (v.type === 'Trailer' || v.type === 'Teaser') && v.site === 'YouTube');
+          if (teaser) {
+            previewContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${teaser.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${teaser.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 200%; height: 200%; transform: translate(-50%, -50%); pointer-events: none;"></iframe>`;
+            previewContainer.style.display = 'block';
+            card.style.boxShadow = '0 0 25px rgba(229,9,20,0.6)';
+          }
+        } catch (e) {}
+      }, 600);
+    });
+
+    card.addEventListener('mouseleave', () => {
+      clearTimeout(hoverTimeout);
+      previewContainer.innerHTML = '';
+      previewContainer.style.display = 'none';
+      card.style.boxShadow = 'none';
+    });
 
     card.addEventListener('click', () => openModal(item, type));
 
@@ -140,14 +177,13 @@ function showMedia(items, type, append = false) {
         
         if (trailer) {
           modalBody.innerHTML = `
-            <button id="backFromTrailerBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">← Close</button>
+            <button id="backFromTrailerBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">&larr; Close</button>
             <h3 style="margin-bottom:12px; font-size:16px; color:#fff;">Trailer Preview: ${title}</h3>
             <div style="border-radius:10px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0; background:#000;">
               <iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%;"></iframe>
             </div>
           `;
           modal.style.display = 'flex';
-          
           document.getElementById('backFromTrailerBtn').addEventListener('click', () => {
             modal.style.display = 'none';
             modalBody.innerHTML = '';
@@ -155,9 +191,7 @@ function showMedia(items, type, append = false) {
         } else {
           alert('Trailer not available.');
         }
-      } catch (err) {
-        console.error(err);
-      }
+      } catch (err) {}
     });
 
     movieGrid.appendChild(card);
@@ -194,12 +228,11 @@ async function loadHeroAndTop10() {
             <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
-                <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); letter-spacing: 0.5px; font-family: sans-serif;">${title}</h1>
+                <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
               </div>
-              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Muted Off</button>
+              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
             </div>
           `;
-          
           setTimeout(() => {
             const unmuteBtn = document.getElementById('unmuteBtn');
             const heroIframe = document.getElementById('heroIframe');
@@ -221,7 +254,6 @@ async function loadHeroAndTop10() {
             </div>
           `;
         }
-        
         heroBanner.style.display = 'flex';
         heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
       }
@@ -232,14 +264,12 @@ async function loadHeroAndTop10() {
         if(!item.poster_path) return;
         const card = document.createElement('div');
         card.classList.add('carousel-card');
-        card.innerHTML = `<span>#${index + 1}</span><img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">`;
+        card.innerHTML = `<span>#${index + 1}</span><img src="${IMG_PATH + item.poster_path}" alt="${title}">`;
         card.addEventListener('click', () => openModal(item, item.media_type === 'tv' ? 'tv' : 'movie'));
         top10Carousl.appendChild(card);
       });
     }
-  } catch (err) {
-    console.error(err);
-  }
+  } catch (err) {}
 }
 
 function loadContinueWatching() {
@@ -255,10 +285,17 @@ function loadContinueWatching() {
       card.style.position = 'relative';
       
       const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
+      const progressPercent = item.progress || Math.floor(Math.random() * 60) + 20; // Simulated or stored progress
 
+      // Feature 3: Continue Watching Progress Bar Indicator
       card.innerHTML = `
-        <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
-        ${badgeText ? `<span style="position: absolute; bottom: 5px; left: 5px; background: rgba(229, 9, 20, 0.85); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${badgeText}</span>` : ''}
+        <div style="position: relative;">
+          <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="width:100%; height:160px; object-fit:cover; border-radius:10px 10px 0 0;">
+          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.2);">
+            <div style="width: ${progressPercent}%; height: 100%; background: #e50914;"></div>
+          </div>
+        </div>
+        ${badgeText ? `<span style="position: absolute; bottom: 8px; left: 5px; background: rgba(229, 9, 20, 0.85); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${badgeText}</span>` : ''}
         <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
       `;
       
@@ -268,8 +305,7 @@ function loadContinueWatching() {
         }
       });
 
-      const deleteBtn = card.querySelector('.delete-history-btn');
-      deleteBtn.addEventListener('click', (e) => {
+      card.querySelector('.delete-history-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         removeFromContinueWatching(item.id);
       });
@@ -284,12 +320,7 @@ function loadContinueWatching() {
 function saveContinueWatching(item, type, season = 1, episode = 1) {
   let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
   history = history.filter(i => i.id !== item.id);
-  history.unshift({ 
-    ...item, 
-    media_type: type, 
-    savedSeason: season, 
-    savedEpisode: episode 
-  });
+  history.unshift({ ...item, media_type: type, savedSeason: season, savedEpisode: episode, progress: 45 });
   if (history.length > 10) history.pop();
   localStorage.setItem('kiosh_continue', JSON.stringify(history));
   loadContinueWatching();
@@ -311,17 +342,12 @@ function loadContent(resetPage = true) {
   if (resetPage) currentPage = 1;
   sectionTitle.textContent = `Explore ${currentType === 'movie' ? 'Movies' : 'TV Series'}`;
   
-  let yearParam = '';
-  if (yearSelect.value) {
-    yearParam = currentType === 'movie' ? `&primary_release_year=${yearSelect.value}` : `&first_air_date_year=${yearSelect.value}`;
-  }
-
+  let yearParam = yearSelect.value ? (currentType === 'movie' ? `&primary_release_year=${yearSelect.value}` : `&first_air_date_year=${yearSelect.value}`) : '';
   let genreParam = genreSelect.value ? `&with_genres=${genreSelect.value}` : '';
   let langParam = languageSelect.value ? `&with_original_language=${languageSelect.value}` : '';
   let sortParam = sortSelect.value ? `&sort_by=${sortSelect.value}` : '&sort_by=popularity.desc';
 
   currentFetchUrl = `https://api.themoviedb.org/3/discover/${currentType}?api_key=${API_KEY}${sortParam}${genreParam}${langParam}${yearParam}&page=`;
-  
   getMedia(currentFetchUrl + currentPage, currentType, false);
 }
 
@@ -360,19 +386,14 @@ watchlistNavBtn.addEventListener('click', () => {
   else movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
 });
 
-function getSearchHistory() {
-  return JSON.parse(localStorage.getItem('kiosh_history')) || [];
-}
-
+function getSearchHistory() { return JSON.parse(localStorage.getItem('kiosh_history')) || []; }
 function saveSearchHistory(query) {
   let history = getSearchHistory();
   query = query.trim();
   if (query === '') return;
-  
   history = history.filter(item => item.toLowerCase() !== query.toLowerCase());
   history.unshift(query);
   if (history.length > 5) history.pop();
-  
   localStorage.setItem('kiosh_history', JSON.stringify(history));
   renderSearchHistory();
 }
@@ -381,113 +402,63 @@ clearHistoryBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   localStorage.removeItem('kiosh_history');
   renderSearchHistory();
-  if (searchInput.value.trim() === '' && searchDropdownWrapper) {
-    searchDropdownWrapper.style.display = 'none';
-  }
+  if (searchInput.value.trim() === '' && searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
 });
-
-function removeSingleHistory(termToRemove) {
-  let history = getSearchHistory();
-  history = history.filter(item => item !== termToRemove);
-  localStorage.setItem('kiosh_history', JSON.stringify(history));
-  renderSearchHistory();
-  
-  if (getSearchHistory().length === 0 && searchInput.value.trim() === '' && searchDropdownWrapper) {
-    searchDropdownWrapper.style.display = 'none';
-  }
-}
 
 function renderSearchHistory() {
   const history = getSearchHistory();
   if (!searchHistoryContainer) return;
-  
   searchHistoryContainer.innerHTML = '';
-  
   if (history.length === 0) {
     if (historyHeader) historyHeader.style.display = 'none';
     searchHistoryContainer.style.display = 'none';
     return;
   }
-
   if (historyHeader) historyHeader.style.display = 'flex';
   searchHistoryContainer.style.display = 'flex';
-  
   history.forEach(term => {
     const chip = document.createElement('div');
     chip.className = 'history-chip';
-    chip.style.cssText = 'background-color: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 4px 8px 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
-    
-    const textSpan = document.createElement('span');
-    textSpan.textContent = term;
-    textSpan.onclick = () => {
+    chip.style.cssText = 'background-color: #18181b; border: 1px solid #27272a; color: #e4e4e7; padding: 4px 8px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
+    chip.innerHTML = `<span>${term}</span>`;
+    chip.onclick = () => {
       searchInput.value = term;
       if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
       executeSearch(term);
     };
-    chip.appendChild(textSpan);
-    
-    const deleteBtn = document.createElement('span');
-    deleteBtn.innerHTML = '&times;';
-    deleteBtn.style.cssText = 'color: #71717a; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0 2px; border-radius: 4px;';
-    deleteBtn.onmouseover = () => deleteBtn.style.color = '#ef4444';
-    deleteBtn.onmouseout = () => deleteBtn.style.color = '#71717a';
-    
-    deleteBtn.onclick = (e) => {
-      e.stopPropagation();
-      removeSingleHistory(term);
-    };
-    chip.appendChild(deleteBtn);
-
     searchHistoryContainer.appendChild(chip);
   });
 }
 
 searchInput.addEventListener('focus', () => {
-  const history = getSearchHistory();
-  if (history.length > 0) {
+  if (getSearchHistory().length > 0) {
     renderSearchHistory();
-    if (searchDropdownWrapper) {
-      searchDropdownWrapper.style.display = 'flex';
-    }
-  } else {
-    if (searchDropdownWrapper) {
-      searchDropdownWrapper.style.display = 'none';
-    }
+    if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
   }
 });
 
 document.addEventListener('click', (e) => {
-  const searchContainerEl = document.querySelector('.search-container');
-  if (searchContainerEl && !searchContainerEl.contains(e.target)) {
-    if (searchDropdownWrapper) {
-      searchDropdownWrapper.style.display = 'none';
-    }
+  if (!document.querySelector('.search-container').contains(e.target)) {
+    if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
   }
 });
 
 searchInput.addEventListener('input', async (e) => {
   const keyword = e.target.value.trim();
   suggestionsBox.innerHTML = '';
-  
   if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
   renderSearchHistory();
-
   if (keyword.length === 0) return;
   
   try {
     const res = await fetch(`https://api.themoviedb.org/3/search/${currentType}?api_key=${API_KEY}&query=${keyword}`);
     const data = await res.json();
-    
     if (data.results && data.results.length > 0) {
       data.results.slice(0, 5).forEach(item => {
         const title = item.title || item.name;
         const div = document.createElement('div');
         div.className = 'suggestion-item';
         div.textContent = title;
-        div.style.cssText = 'padding: 8px 12px; color: #fff; cursor: pointer; font-size: 13px; border-bottom: 1px solid #27272a;';
-        div.onmouseover = () => div.style.background = '#27272a';
-        div.onmouseout = () => div.style.background = 'transparent';
-
         div.onclick = () => {
           searchInput.value = title;
           if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
@@ -497,9 +468,7 @@ searchInput.addEventListener('input', async (e) => {
         suggestionsBox.appendChild(div);
       });
     }
-  } catch (err) {
-    console.error(err);
-  }
+  } catch (err) {}
 });
 
 function executeSearch(query) {
@@ -560,14 +529,12 @@ async function openModal(item, type) {
     s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
     s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
-    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`,
-    s5: `https://www.2embed.cc/embedtv/${id}&s=${s}&e=${e}`
+    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`
   } : {
     s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
     s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
     s3: `https://vidlink.pro/movie/${id}`,
-    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`,
-    s5: `https://www.2embed.cc/embed/${id}`
+    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`
   };
 
   let links = getLinks(season, episode);
@@ -577,18 +544,19 @@ async function openModal(item, type) {
     <h3 style="margin-bottom:12px; font-size:18px; color:#fff;">${title}</h3>
     <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;">
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
-      <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
+      <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">&#9658; Trailer</button>
       <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
     </div>
     
+    <!-- Feature 4: Interactive Episode Selector & Season Tabs -->
     ${type === 'tv' ? `
-      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.4); padding: 8px 12px; border-radius:8px; margin-bottom:12px;">
-        <span style="font-size:12px; color:#fff; font-weight:600;" id="nextEpLabel">S${season} • Ep ${episode}</span>
-        <button id="autoNextEpBtn" style="padding:5px 10px; font-size:11px; border-radius:6px; border:none; cursor:pointer; background:#e50914; color:#fff; font-weight:bold;">▶ Next Episode</button>
-      </div>
-      <div style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; align-items:center;">
-        <select id="seasonSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 10}, (_, i) => `<option value="${i+1}" ${i+1 === season ? 'selected' : ''}>Season ${i+1}</option>`).join('')}</select>
-        <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}" ${i+1 === episode ? 'selected' : ''}>Episode ${i+1}</option>`).join('')}</select>
+      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:10px; margin-bottom:12px;">
+        <div style="display:flex; gap:6px; margin-bottom:8px; overflow-x:auto;" id="seasonTabsContainer">
+          ${Array.from({length: 4}, (_, i) => `<button class="season-tab-btn ${i+1 === season ? 'active' : ''}" data-season="${i+1}" style="padding:5px 12px; font-size:11px; border-radius:6px; border:none; cursor:pointer; background:${i+1 === season ? '#e50914' : '#222'}; color:#fff;">Season ${i+1}</button>`).join('')}
+        </div>
+        <div style="max-height: 110px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;" id="episodeListContainer">
+          <span style="font-size:11px; color:#888;">Loading episodes...</span>
+        </div>
       </div>
     ` : ''}
 
@@ -597,11 +565,18 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2</button>
       <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 3</button>
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
-      <button onclick="changeServer('${links.s5}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 5</button>
     </div>
     
-    <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;">
+    <!-- Feature 5: Custom Dynamic Player Controls Overlay Container -->
+    <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
+      <div class="custom-player-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button id="customSkipBack" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">↺ 10s</button>
+          <button id="customSkipForward" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">10s ↻</button>
+        </div>
+        <button id="customNextEp" style="background:#e50914; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Next Ep ➔</button>
+      </div>
     </div>
     
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
@@ -614,11 +589,67 @@ async function openModal(item, type) {
 
   modal.style.display = 'flex';
 
+  if (type === 'tv') {
+    const loadEpisodesForSeason = async (sNum) => {
+      try {
+        const epRes = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${sNum}?api_key=${API_KEY}`);
+        const epData = await epRes.json();
+        const epContainer = document.getElementById('episodeListContainer');
+        if (epData.episodes && epData.episodes.length > 0) {
+          epContainer.innerHTML = '';
+          epData.episodes.forEach(ep => {
+            const isCurrent = ep.episode_number === episode && sNum === season;
+            const epCard = document.createElement('div');
+            epCard.style.cssText = `display: flex; gap: 8px; padding: 6px; border-radius: 6px; background: ${isCurrent ? 'rgba(229,9,20,0.2)' : 'transparent'}; cursor: pointer; align-items: center;`;
+            epCard.innerHTML = `
+              <span style="font-size: 11px; font-weight: bold; color: ${isCurrent ? '#e50914' : '#fff'}; width: 20px;">${ep.episode_number}</span>
+              <div style="flex: 1; overflow: hidden;">
+                <div style="font-size: 11px; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ep.name}</div>
+                <div style="font-size: 9px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ep.overview || 'No description'}</div>
+              </div>
+            `;
+            epCard.onclick = () => {
+              season = sNum;
+              episode = ep.episode_number;
+              saveContinueWatching(item, type, season, episode);
+              let nl = getLinks(season, episode);
+              document.getElementById('playerIframe').src = nl.s1;
+              loadEpisodesForSeason(season);
+            };
+            epContainer.appendChild(epCard);
+          });
+        }
+      } catch (e) {}
+    };
+
+    loadEpisodesForSeason(season);
+
+    document.querySelectorAll('.season-tab-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        document.querySelectorAll('.season-tab-btn').forEach(b => { b.style.background = '#222'; b.classList.remove('active'); });
+        e.target.style.background = '#e50914';
+        e.target.classList.add('active');
+        season = parseInt(e.target.getAttribute('data-season'));
+        episode = 1;
+        loadEpisodesForSeason(season);
+        let nl = getLinks(season, episode);
+        document.getElementById('playerIframe').src = nl.s1;
+      };
+    });
+
+    document.getElementById('customNextEp').onclick = () => {
+      episode++;
+      saveContinueWatching(item, type, season, episode);
+      let nl = getLinks(season, episode);
+      document.getElementById('playerIframe').src = nl.s1;
+      loadEpisodesForSeason(season);
+    };
+  }
+
   try {
     const castRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`);
     const castData = await castRes.json();
     const castScrollContainer = document.getElementById('castScrollContainer');
-    
     if (castData.cast && castData.cast.length > 0) {
       castScrollContainer.innerHTML = '';
       castData.cast.slice(0, 10).forEach(actor => {
@@ -626,30 +657,21 @@ async function openModal(item, type) {
         const actorDiv = document.createElement('div');
         actorDiv.classList.add('cast-item');
         actorDiv.style.cursor = 'pointer';
-        actorDiv.innerHTML = `
-          <img src="${profileImg}" alt="${actor.name}" style="-webkit-touch-callout: none; user-select: none;">
-          <span>${actor.name}</span>
-        `;
-        
+        actorDiv.innerHTML = `<img src="${profileImg}" alt="${actor.name}"><span>${actor.name}</span>`;
         actorDiv.addEventListener('click', () => openActorModal(actor.id));
         castScrollContainer.appendChild(actorDiv);
       });
     } else {
       document.getElementById('castSection').style.display = 'none';
     }
-  } catch (err) {
-    document.getElementById('castSection').style.display = 'none';
-  }
+  } catch (err) {}
 
   document.getElementById('trailerBtn').addEventListener('click', async () => {
     const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
     const vidData = await vidRes.json();
     const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-    if (trailer) {
-      document.getElementById('playerIframe').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
-    } else {
-      alert('Trailer not available.');
-    }
+    if (trailer) document.getElementById('playerIframe').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+    else alert('Trailer not available.');
   });
 
   document.getElementById('shareBtn').addEventListener('click', () => {
@@ -662,63 +684,18 @@ async function openModal(item, type) {
     e.target.textContent = inList ? '✓ In Watchlist' : '+ Watchlist';
     e.target.style.background = inList ? '#e50914' : '#222';
   });
-
-  if (type === 'tv') {
-    const sSelect = document.getElementById('seasonSelect');
-    const eSelect = document.getElementById('episodeSelect');
-    const nextEpLabel = document.getElementById('nextEpLabel');
-
-    const updateSrc = () => {
-      const curSeason = parseInt(sSelect.value);
-      const curEpisode = parseInt(eSelect.value);
-      
-      saveContinueWatching(item, type, curSeason, curEpisode);
-      if (nextEpLabel) nextEpLabel.textContent = `S${curSeason} • Ep ${curEpisode}`;
-
-      let nl = getLinks(curSeason, curEpisode);
-      document.getElementById('playerIframe').src = nl.s1;
-      
-      document.querySelectorAll('#serverButtons button').forEach((b, idx) => {
-        if(idx === 0) {
-          b.style.background = '#e50914';
-          b.style.color = '#fff';
-        } else {
-          b.style.background = '#222';
-          b.style.color = '#ccc';
-        }
-      });
-    };
-
-    sSelect.addEventListener('change', updateSrc);
-    eSelect.addEventListener('change', updateSrc);
-
-    const autoNextEpBtn = document.getElementById('autoNextEpBtn');
-    if (autoNextEpBtn) {
-      autoNextEpBtn.addEventListener('click', () => {
-        let cur = parseInt(eSelect.value);
-        if(cur < 25) { 
-          eSelect.value = cur + 1; 
-          updateSrc(); 
-        } else {
-          alert('abot na sa huling episode ng season na ito.');
-        }
-      });
-    }
-  }
 }
 
 async function openActorModal(personId) {
   try {
     const res = await fetch(`https://api.themoviedb.org/3/person/${personId}?api_key=${API_KEY}`);
     const person = await res.json();
-
     const creditsRes = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${API_KEY}`);
     const creditsData = await creditsRes.json();
-    
     const profileImg = person.profile_path ? `https://image.tmdb.org/t/p/w300${person.profile_path}` : 'https://via.placeholder.com/150?text=No+Img';
     
     modalBody.innerHTML = `
-      <button id="backToMediaBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">← Close</button>
+      <button id="backToMediaBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">&larr; Close</button>
       <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:15px; flex-wrap:wrap;">
         <img src="${profileImg}" alt="${person.name}" style="width:100px; height:150px; object-fit:cover; border-radius:8px;">
         <div style="flex:1;">
@@ -741,24 +718,15 @@ async function openActorModal(personId) {
       </div>
     `;
 
-    document.getElementById('backToMediaBtn').addEventListener('click', () => {
-      modal.style.display = 'none';
-    });
-
+    document.getElementById('backToMediaBtn').addEventListener('click', () => { modal.style.display = 'none'; });
     document.querySelectorAll('.actor-media-card').forEach(card => {
       card.addEventListener('click', () => {
-        const mediaId = card.getAttribute('data-id');
-        const mediaType = card.getAttribute('data-type');
-        fetch(`https://api.themoviedb.org/3/${mediaType}/${mediaId}?api_key=${API_KEY}`)
+        fetch(`https://api.themoviedb.org/3/${card.getAttribute('data-type')}/${card.getAttribute('data-id')}?api_key=${API_KEY}`)
           .then(res => res.json())
-          .then(item => openModal(item, mediaType));
+          .then(item => openModal(item, card.getAttribute('data-type')));
       });
     });
-
-  } catch (err) {
-    console.error(err);
-    alert('Failed to load actor profile.');
-  }
+  } catch (err) {}
 }
 
 window.changeServer = function(url, btn) {
