@@ -162,8 +162,11 @@ function loadContinueWatching() {
       card.classList.add('carousel-card');
       card.style.position = 'relative';
       
+      const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
+
       card.innerHTML = `
         <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
+        ${badgeText ? `<span style="position: absolute; bottom: 5px; left: 5px; background: rgba(229, 9, 20, 0.85); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${badgeText}</span>` : ''}
         <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
       `;
       
@@ -186,10 +189,15 @@ function loadContinueWatching() {
   }
 }
 
-function saveContinueWatching(item, type) {
+function saveContinueWatching(item, type, season = 1, episode = 1) {
   let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
   history = history.filter(i => i.id !== item.id);
-  history.unshift({ ...item, media_type: type });
+  history.unshift({ 
+    ...item, 
+    media_type: type, 
+    savedSeason: season, 
+    savedEpisode: episode 
+  });
   if (history.length > 10) history.pop();
   localStorage.setItem('kiosh_continue', JSON.stringify(history));
   loadContinueWatching();
@@ -448,7 +456,15 @@ async function openModal(item, type) {
   const title = item.title || item.name;
   const overview = item.overview;
   const id = item.id;
-  saveContinueWatching(item, type);
+  
+  // Kunin ang naka-save na progress kung mayroon man
+  const continueHistory = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
+  const existingProgress = continueHistory.find(i => i.id === id);
+  
+  let season = existingProgress ? (existingProgress.savedSeason || 1) : 1;
+  let episode = existingProgress ? (existingProgress.savedEpisode || 1) : 1;
+
+  saveContinueWatching(item, type, season, episode);
   
   let season = 1, episode = 1;
   const getLinks = (s, e) => type === 'tv' ? {
@@ -478,8 +494,8 @@ async function openModal(item, type) {
     </div>
     ${type === 'tv' ? `
       <div style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; align-items:center;">
-        <select id="seasonSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 10}, (_, i) => `<option value="${i+1}">Season ${i+1}</option>`).join('')}</select>
-        <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}">Episode ${i+1}</option>`).join('')}</select>
+        <select id="seasonSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 10}, (_, i) => `<option value="${i+1}" ${i+1 === season ? 'selected' : ''}>Season ${i+1}</option>`).join('')}</select>
+        <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}" ${i+1 === episode ? 'selected' : ''}>Episode ${i+1}</option>`).join('')}</select>
       </div>
     ` : ''}
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
@@ -556,7 +572,12 @@ async function openModal(item, type) {
     const eSelect = document.getElementById('episodeSelect');
 
     const updateSrc = () => {
-      let nl = getLinks(sSelect.value, eSelect.value);
+      const curSeason = parseInt(sSelect.value);
+      const curEpisode = parseInt(eSelect.value);
+      
+      saveContinueWatching(item, type, curSeason, curEpisode);
+
+      let nl = getLinks(curSeason, curEpisode);
       document.getElementById('playerIframe').src = nl.s1;
       
       document.querySelectorAll('#serverButtons button').forEach((b, idx) => {
