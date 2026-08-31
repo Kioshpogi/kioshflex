@@ -537,7 +537,8 @@ searchInput.addEventListener('keypress', (e) => {
 
 window.addEventListener('scroll', () => {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-  if (scrollTop + clientHeight >= scrollHeight - 300 && !isLoadingMore) {
+  // Sinigurong hindi mag-i-infinite scroll kapag nasa Watchlist o Search mode
+  if (scrollTop + clientHeight >= scrollHeight - 300 && !isLoadingMore && !isSearchMode) {
     currentPage++;
     if (currentFetchUrl) getMedia(currentFetchUrl + currentPage, currentType, true);
   }
