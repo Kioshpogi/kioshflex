@@ -2,7 +2,7 @@ const API_KEY = '5959ee7103e0456dc8c681afb1462d4a';
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
 
-const movieGrid = document.getElementById('movieGrid');
+const movieGrid = document.getElementById('movierid');
 const top10Carousl = document.getElementById('top10Carousel');
 const continueCarousel = document.getElementById('continueCarousel');
 const continueSection = document.getElementById('continueSection');
@@ -223,12 +223,12 @@ async function loadHeroAndTop10() {
               <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
             </div>
             <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
-            <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
+            <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-width; width: calc(100% - 48px); width: 100%;">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
                 <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
               </div>
-              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
+              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; margin-right: 24px;">Muted Off</button>
             </div>
           `;
           setTimeout(() => {
@@ -283,14 +283,10 @@ function loadContinueWatching() {
       card.style.position = 'relative';
       
       const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
-      const progressPercent = item.progress || 40;
 
       card.innerHTML = `
         <div style="position: relative;">
           <img src="${IMG_PATH + item.poster_path}" alt="${title}" style="width:100%; height:160px; object-fit:cover; border-radius:10px 10px 0 0;">
-          <div style="position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: rgba(255,255,255,0.2);">
-            <div style="width: ${progressPercent}%; height: 100%; background: #e50914;"></div>
-          </div>
         </div>
         ${badgeText ? `<span style="position: absolute; bottom: 8px; left: 5px; background: rgba(229, 9, 20, 0.85); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${badgeText}</span>` : ''}
         <button class="delete-history-btn" title="Remove" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2;">&times;</button>
@@ -317,7 +313,7 @@ function loadContinueWatching() {
 function saveContinueWatching(item, type, season = 1, episode = 1) {
   let history = JSON.parse(localStorage.getItem('kiosh_continue')) || [];
   history = history.filter(i => i.id !== item.id);
-  history.unshift({ ...item, media_type: type, savedSeason: season, savedEpisode: episode, progress: 45 });
+  history.unshift({ ...item, media_type: type, savedSeason: season, savedEpisode: episode });
   if (history.length > 10) history.pop();
   localStorage.setItem('kiosh_continue', JSON.stringify(history));
   loadContinueWatching();
