@@ -54,10 +54,11 @@ window.addEventListener('load', () => {
   setTimeout(() => {
     const splash = document.getElementById('splashScreen');
     if (splash) {
+      splash.style.transition = 'opacity 0.5s ease-out';
       splash.style.opacity = '0';
-      setTimeout(() => splash.remove(), 600);
+      setTimeout(() => splash.remove(), 500);
     }
-  }, 1000);
+  }, 400);
 });
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
@@ -220,51 +221,47 @@ async function loadHeroAndTop10() {
         heroTitle.textContent = title;
         
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
-        const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${featuredItem.id}/videos?api_key=${API_KEY}`);
-        const vidData = await vidRes.json();
-        const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
         
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
         heroBanner.style.backgroundSize = 'cover';
         heroBanner.style.backgroundPosition = 'center';
-
-        if (trailer) {
-          heroBanner.innerHTML = `
-            <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
-              <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
-            </div>
-            <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
-            <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
-                <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
-              </div>
-              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
-            </div>
-          `;
-          setTimeout(() => {
-            const unmuteBtn = document.getElementById('unmuteBtn');
-            const heroIframe = document.getElementById('heroIframe');
-            if (unmuteBtn && heroIframe) {
-              let isMuted = true;
-              unmuteBtn.onclick = () => {
-                isMuted = !isMuted;
-                heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
-                unmuteBtn.textContent = isMuted ? 'Muted Off' : 'Muted On';
-              };
-            }
-          }, 500);
-        } else {
-          heroBanner.innerHTML = `
-            <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
-            <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:center; gap: 12px;">
-              <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
-              <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
-            </div>
-          `;
-        }
         heroBanner.style.display = 'flex';
         heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
+
+        setTimeout(async () => {
+          try {
+            const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${featuredItem.id}/videos?api_key=${API_KEY}`);
+            const vidData = await vidRes.json();
+            const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+            
+            if (trailer) {
+              heroBanner.innerHTML = `
+                <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
+                  <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
+                </div>
+                <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
+                <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
+                    <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
+                  </div>
+                  <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
+                </div>
+              `;
+              
+              const unmuteBtn = document.getElementById('unmuteBtn');
+              const heroIframe = document.getElementById('heroIframe');
+              if (unmuteBtn && heroIframe) {
+                let isMuted = true;
+                unmuteBtn.onclick = () => {
+                  isMuted = !isMuted;
+                  heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
+                  unmuteBtn.textContent = isMuted ? 'Muted Off' : 'Muted On';
+                };
+              }
+            }
+          } catch (e) {}
+        }, 800);
       }
 
       top10Carousl.innerHTML = '';
@@ -570,7 +567,6 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
-    <!-- Custom Player Controls Overlay Container -->
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
       ${type === 'tv' ? `
