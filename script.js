@@ -1,3 +1,4 @@
+
 const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
@@ -127,7 +128,9 @@ function showMedia(items, type, append = false) {
       <div style="position: relative; width: 100%; height: calc(100% - 50px);">
         <img class="card-img" src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover;">
         <div class="hover-preview-container" style="position: absolute; inset: 0; background: #000; display: none; z-index: 3; overflow: hidden;"></div>
-        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; z-index: 4; backdrop-filter: blur(4px);">&#9658;</button>
+        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 10px; right: 10px; background: rgba(20, 20, 20, 0.65); color: #fff; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 4; backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-left: 1px;"><path d="M8 5v14l11-7z"/></svg>
+        </button>
       </div>
       <div class="card-info">
         <h3>${title}</h3>
@@ -163,10 +166,21 @@ function showMedia(items, type, append = false) {
     card.addEventListener('click', () => openModal(item, type));
 
     const quickBtn = card.querySelector('.quick-trailer-btn');
+    quickBtn.addEventListener('mouseenter', () => {
+      quickBtn.style.transform = 'scale(1.1)';
+      quickBtn.style.background = 'rgba(229, 9, 20, 0.85)';
+      quickBtn.style.borderColor = 'rgba(229, 9, 20, 1)';
+    });
+    quickBtn.addEventListener('mouseleave', () => {
+      quickBtn.style.transform = 'scale(1)';
+      quickBtn.style.background = 'rgba(20, 20, 20, 0.65)';
+      quickBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+    });
+
     quickBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const mediaId = e.target.getAttribute('data-id');
-      const mediaType = e.target.getAttribute('data-type');
+      const mediaId = e.target.getAttribute('data-id') || e.target.closest('.quick-trailer-btn').getAttribute('data-id');
+      const mediaType = e.target.getAttribute('data-type') || e.target.closest('.quick-trailer-btn').getAttribute('data-type');
       
       try {
         const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${mediaId}/videos?api_key=${API_KEY}`);
@@ -176,7 +190,7 @@ function showMedia(items, type, append = false) {
         if (trailer) {
           modalBody.innerHTML = `
             <button id="backFromTrailerBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">&larr; Close</button>
-            <h3 style="margin-bottom:12px; font-size:16px; color:#fff;">Trailer Preview: ${title}</h3>
+            <h3 style="margin-bottom:12px; font-size:16px; color:#fff;">Trailer Preview</h3>
             <div style="border-radius:10px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0; background:#000;">
               <iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%;"></iframe>
             </div>
