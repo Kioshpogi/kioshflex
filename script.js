@@ -145,13 +145,30 @@ async function loadHeroAndTop10() {
         
         if (trailer) {
           heroBanner.innerHTML = `
-            <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;">
-              <iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
+            <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
+              <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
             </div>
-            <div style="position: absolute; bottom: 20px; left: 20px; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
-              <h1 style="font-size: 22px; color: #fff; margin-bottom: 0;">${title}</h1>
+            <div style="position: absolute; bottom: 20px; left: 20px; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8); display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 40px);">
+              <div>
+                <h1 style="font-size: 22px; color: #fff; margin-bottom: 0;">${title}</h1>
+              </div>
+              <button id="unmuteBtn" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; z-index: 3;">🔇 Unmute</button>
             </div>
           `;
+          
+          setTimeout(() => {
+            const unmuteBtn = document.getElementById('unmuteBtn');
+            const heroIframe = document.getElementById('heroIframe');
+            if (unmuteBtn && heroIframe) {
+              let isMuted = true;
+              unmuteBtn.onclick = () => {
+                isMuted = !isMuted;
+                heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
+                unmuteBtn.textContent = isMuted ? '🔇 Unmute' : '🔊 Muted Off';
+              };
+            }
+          }, 500);
+
         } else {
           heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
         }
