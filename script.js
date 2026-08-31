@@ -282,6 +282,9 @@ clearHistoryBtn.addEventListener('click', (e) => {
   e.stopPropagation();
   localStorage.removeItem('kiosh_history');
   renderSearchHistory();
+  if (searchInput.value.trim() === '' && searchDropdownWrapper) {
+    searchDropdownWrapper.style.display = 'none';
+  }
 });
 
 function removeSingleHistory(termToRemove) {
@@ -289,6 +292,10 @@ function removeSingleHistory(termToRemove) {
   history = history.filter(item => item !== termToRemove);
   localStorage.setItem('kiosh_history', JSON.stringify(history));
   renderSearchHistory();
+  
+  if (getSearchHistory().length === 0 && searchInput.value.trim() === '' && searchDropdownWrapper) {
+    searchDropdownWrapper.style.display = 'none';
+  }
 }
 
 function renderSearchHistory() {
@@ -300,11 +307,16 @@ function renderSearchHistory() {
   if (history.length === 0) {
     if (historyHeader) historyHeader.style.display = 'none';
     searchHistoryContainer.style.display = 'none';
+    
+    if (searchInput.value.trim() === '' && searchDropdownWrapper) {
+      searchDropdownWrapper.style.display = 'none';
+    }
     return;
   }
 
   if (historyHeader) historyHeader.style.display = 'flex';
   searchHistoryContainer.style.display = 'flex';
+  if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
   
   history.forEach(term => {
     const chip = document.createElement('div');
