@@ -349,9 +349,16 @@ function renderSearchHistory() {
 }
 
 searchInput.addEventListener('focus', () => {
-  renderSearchHistory();
-  if (searchDropdownWrapper) {
-    searchDropdownWrapper.style.display = 'flex';
+  const history = getSearchHistory();
+  if (history.length > 0) {
+    renderSearchHistory();
+    if (searchDropdownWrapper) {
+      searchDropdownWrapper.style.display = 'flex';
+    }
+  } else {
+    if (searchDropdownWrapper) {
+      searchDropdownWrapper.style.display = 'none';
+    }
   }
 });
 
