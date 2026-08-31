@@ -52,13 +52,20 @@ let featuredItem = null;
 let watchProgressInterval = null;
 
 window.addEventListener('load', () => {
+  const splash = document.getElementById('splashScreen');
+  const audio = document.getElementById('splashAudio');
+  
+  if (audio) {
+    audio.play().catch(e => console.log("Audio autoplay restricted:", e));
+  }
+
+  // Pinahaba ang intro duration to 3.5 seconds para malasap ang tunog
   setTimeout(() => {
-    const splash = document.getElementById('splashScreen');
     if (splash) {
       splash.style.opacity = '0';
-      setTimeout(() => splash.remove(), 600);
+      setTimeout(() => splash.remove(), 800);
     }
-  }, 1000);
+  }, 3500);
 });
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
@@ -586,7 +593,7 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
-    <!-- Player Wrapper (May kasamang Next Ep controls kung TV Series lang) -->
+    <!-- Player Wrapper -->
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
       ${type === 'tv' ? `
