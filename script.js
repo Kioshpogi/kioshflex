@@ -21,6 +21,8 @@ const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
 const suggestionsBox = document.getElementById('suggestionsBox');
 const searchHistoryContainer = document.getElementById('searchHistoryContainer');
+const searchDropdownWrapper = document.getElementById('searchDropdownWrapper');
+const homeLogo = document.getElementById('homeLogo');
 
 // Sidebar Elements
 const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -54,6 +56,14 @@ if (localStorage.getItem('kiosh_theme') === 'light') {
 themeToggleBtn.addEventListener('click', () => {
   document.body.classList.toggle('light-mode');
   localStorage.setItem('kiosh_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+});
+
+// Home Logo Click Handler (Babalik sa Home)
+homeLogo.addEventListener('click', () => {
+  searchInput.value = '';
+  if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
+  loadContent(true);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
 hamburgerBtn.addEventListener('click', () => {
@@ -250,7 +260,7 @@ watchlistNavBtn.addEventListener('click', () => {
 
 // --- SEARCH HISTORY & AUTOCOMPLETE LOGIC ---
 function getSearchHistory() {
-  return JSON.parse(localStorage.getItem('kiosh_history')) || ['jhjj', 'The Odyssey'];
+  return JSON.parse(localStorage.getItem('kiosh_history')) || [];
 }
 
 function saveSearchHistory(query) {
@@ -277,35 +287,35 @@ function renderSearchHistory() {
     return;
   }
 
+  searchHistoryContainer.style.display = 'flex';
   history.forEach(term => {
     const chip = document.createElement('div');
     chip.className = 'history-chip';
     chip.textContent = term;
-    chip.style.cssText = 'background-color: rgba(39, 39, 42, 0.8); border: 1px solid rgba(63, 63, 70, 0.5); color: #d4d4d8; padding: 6px 12px; border-radius: 10px; font-size: 12px; cursor: pointer; display: inline-block;';
+    chip.style.cssText = 'background-color: rgba(39, 39, 42, 0.8); border: 1px solid rgba(63, 63, 70, 0.5); color: #d4d4d8; padding: 5px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-block;';
     
     chip.onclick = () => {
       searchInput.value = term;
-      suggestionsBox.innerHTML = '';
-      searchHistoryContainer.style.display = 'none';
+      if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
       executeSearch(term);
     };
     searchHistoryContainer.appendChild(chip);
   });
 }
 
-// Ipakita ang history container kapag na-focus ang search input
 searchInput.addEventListener('focus', () => {
   renderSearchHistory();
-  if (searchHistoryContainer && searchHistoryContainer.children.length > 0) {
-    searchHistoryContainer.style.display = 'flex';
+  if (searchDropdownWrapper) {
+    searchDropdownWrapper.style.display = 'flex';
   }
 });
 
-// Itago ang history kapag nag-click sa labas
 document.addEventListener('click', (e) => {
-  const isInside = searchInput.contains(e.target) || searchHistoryContainer.contains(e.target);
-  if (!isInside && searchHistoryContainer) {
-    searchHistoryContainer.style.display = 'none';
+  const searchContainerEl = document.querySelector('.search-container');
+  if (searchContainerEl && !searchContainerEl.contains(e.target)) {
+    if (searchDropdownWrapper) {
+      searchDropdownWrapper.style.display = 'none';
+    }
   }
 });
 
@@ -313,6 +323,9 @@ searchInput.addEventListener('input', async (e) => {
   const keyword = e.target.value.trim();
   suggestionsBox.innerHTML = '';
   
+  if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
+  renderSearchHistory();
+
   if (keyword.length === 0) return;
   
   try {
@@ -325,10 +338,13 @@ searchInput.addEventListener('input', async (e) => {
         const div = document.createElement('div');
         div.className = 'suggestion-item';
         div.textContent = title;
+        div.style.cssText = 'padding: 8px 12px; color: #fff; cursor: pointer; font-size: 13px; border-bottom: 1px solid #27272a;';
+        div.onmouseover = () => div.style.background = '#27272a';
+        div.onmouseout = () => div.style.background = 'transparent';
+
         div.onclick = () => {
           searchInput.value = title;
-          suggestionsBox.innerHTML = '';
-          searchHistoryContainer.style.display = 'none';
+          if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
           saveSearchHistory(title);
           executeSearch(title);
         };
@@ -356,8 +372,7 @@ function executeSearch(query) {
 searchBtn.addEventListener('click', () => {
   const query = searchInput.value.trim();
   if(query) {
-    suggestionsBox.innerHTML = '';
-    searchHistoryContainer.style.display = 'none';
+    if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
     saveSearchHistory(query);
     executeSearch(query);
   }
@@ -365,10 +380,9 @@ searchBtn.addEventListener('click', () => {
 
 searchInput.addEventListener('keypress', (e) => { 
   if (e.key === 'Enter') {
-    suggestionsBox.innerHTML = '';
     const query = searchInput.value.trim();
     if(query) {
-      searchHistoryContainer.style.display = 'none';
+      if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
       saveSearchHistory(query);
       executeSearch(query);
     }

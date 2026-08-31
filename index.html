@@ -18,7 +18,7 @@
   <header>
     <div class="nav-left">
       <button id="hamburgerBtn" class="hamburger-btn">&#9776;</button>
-      <div class="logo">KIOSHFLEX</div>
+      <div class="logo" id="homeLogo" style="cursor: pointer;">KIOSHFLEX</div>
     </div>
     <div class="header-actions">
       <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
@@ -90,7 +90,7 @@
   </div>
 
   <!-- Redesigned Search & History Container -->
-  <div class="search-container" style="position: relative;">
+  <div class="search-container" style="position: relative; display: flex; gap: 8px; align-items: center;">
     <div class="search-wrapper" style="position: relative; flex: 1; display: flex; align-items: center; background-color: #121212; border: 1px solid #27272a; border-radius: 9999px; padding: 6px 16px;">
       <svg style="width: 18px; height: 18px; fill: none; stroke: #a1a1aa; stroke-width: 2; margin-right: 10px; flex-shrink: 0;" viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="8"></circle>
@@ -98,13 +98,13 @@
       </svg>
       <input type="text" id="searchInput" placeholder="Search movies, TV shows..." autocomplete="off" style="background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 14px;">
       
-      <!-- Suggestions dropdown -->
-      <div id="suggestionsBox" class="suggestions-dropdown"></div>
+      <!-- Combined Search Dropdown Wrapper (History sa taas, Suggestions sa baba) -->
+      <div id="searchDropdownWrapper" style="position: absolute; top: calc(100% + 8px); left: 0; right: 0; background-color: #121212; border: 1px solid #27272a; border-radius: 16px; padding: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); z-index: 50; display: none; flex-direction: column; gap: 8px;">
+        <div id="searchHistoryContainer" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        <div id="suggestionsBox" class="suggestions-dropdown" style="position: static; border: none; box-shadow: none; width: 100%; background: transparent; padding: 0;"></div>
+      </div>
     </div>
     <button id="searchBtn" style="background-color: #dc2626; color: #fff; border: none; border-radius: 9999px; padding: 10px 20px; font-weight: 500; cursor: pointer;">Search</button>
-
-    <!-- Search History Dropdown -->
-    <div id="searchHistoryContainer" class="history-container" style="position: absolute; top: 100%; left: 0; right: 0; margin-top: 8px; background-color: #121212; border: 1px solid #27272a; border-radius: 16px; padding: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); z-index: 50; display: none; gap: 8px; flex-wrap: wrap;"></div>
   </div>
 
   <div id="heroBanner" class="hero-banner" style="display: none;">
