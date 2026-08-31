@@ -23,6 +23,8 @@ const suggestionsBox = document.getElementById('suggestionsBox');
 const searchHistoryContainer = document.getElementById('searchHistoryContainer');
 const searchDropdownWrapper = document.getElementById('searchDropdownWrapper');
 const homeLogo = document.getElementById('homeLogo');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+const historyHeader = document.getElementById('historyHeader');
 
 // Sidebar Elements
 const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -276,6 +278,19 @@ function saveSearchHistory(query) {
   renderSearchHistory();
 }
 
+clearHistoryBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  localStorage.removeItem('kiosh_history');
+  renderSearchHistory();
+});
+
+function removeSingleHistory(termToRemove) {
+  let history = getSearchHistory();
+  history = history.filter(item => item !== termToRemove);
+  localStorage.setItem('kiosh_history', JSON.stringify(history));
+  renderSearchHistory();
+}
+
 function renderSearchHistory() {
   const history = getSearchHistory();
   if (!searchHistoryContainer) return;
@@ -283,22 +298,40 @@ function renderSearchHistory() {
   searchHistoryContainer.innerHTML = '';
   
   if (history.length === 0) {
+    if (historyHeader) historyHeader.style.display = 'none';
     searchHistoryContainer.style.display = 'none';
     return;
   }
 
+  if (historyHeader) historyHeader.style.display = 'flex';
   searchHistoryContainer.style.display = 'flex';
+  
   history.forEach(term => {
     const chip = document.createElement('div');
     chip.className = 'history-chip';
-    chip.textContent = term;
-    chip.style.cssText = 'background-color: rgba(39, 39, 42, 0.8); border: 1px solid rgba(63, 63, 70, 0.5); color: #d4d4d8; padding: 5px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-block;';
+    chip.style.cssText = 'background-color: rgba(39, 39, 42, 0.8); border: 1px solid rgba(63, 63, 70, 0.5); color: #d4d4d8; padding: 4px 8px 4px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;';
     
-    chip.onclick = () => {
+    const textSpan = document.createElement('span');
+    textSpan.textContent = term;
+    textSpan.onclick = () => {
       searchInput.value = term;
       if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
       executeSearch(term);
     };
+    chip.appendChild(textSpan);
+    
+    const deleteBtn = document.createElement('span');
+    deleteBtn.innerHTML = '&times;';
+    deleteBtn.style.cssText = 'color: #a1a1aa; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0 2px; border-radius: 4px;';
+    deleteBtn.onmouseover = () => deleteBtn.style.color = '#e50914';
+    deleteBtn.onmouseout = () => deleteBtn.style.color = '#a1a1aa';
+    
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation();
+      removeSingleHistory(term);
+    };
+    chip.appendChild(deleteBtn);
+
     searchHistoryContainer.appendChild(chip);
   });
 }
