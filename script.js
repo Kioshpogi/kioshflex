@@ -52,25 +52,13 @@ let featuredItem = null;
 let watchProgressInterval = null;
 
 window.addEventListener('load', () => {
-  const splash = document.getElementById('splashScreen');
-  const audio = document.getElementById('splashAudio');
-  const startBtn = document.getElementById('startIntroBtn');
-
-  const dismissSplash = () => {
-    if (audio) {
-      audio.play().catch(e => console.log("Audio play error:", e));
-    }
+  setTimeout(() => {
+    const splash = document.getElementById('splashScreen');
     if (splash) {
       splash.style.opacity = '0';
-      setTimeout(() => splash.remove(), 800);
+      setTimeout(() => splash.remove(), 600);
     }
-  };
-
-  if (startBtn) {
-    startBtn.addEventListener('click', dismissSplash);
-  } else {
-    setTimeout(dismissSplash, 3500);
-  }
+  }, 1000);
 });
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
@@ -137,14 +125,14 @@ function showMedia(items, type, append = false) {
     const card = document.createElement('div');
     card.classList.add('card');
     card.innerHTML = `
-      <div style="position: relative; width: 100%; height: calc(100% - 44px);">
-        <img class="card-img" src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover; border-radius: 10px 10px 0 0;">
-        <div class="hover-preview-container" style="position: absolute; inset: 0; background: #000; display: none; z-index: 3; overflow: hidden; border-radius: 10px 10px 0 0;"></div>
-        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer">&#9658;</button>
+      <div style="position: relative; width: 100%; height: calc(100% - 50px);">
+        <img class="card-img" src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover; border-radius: 12px 12px 0 0;">
+        <div class="hover-preview-container" style="position: absolute; inset: 0; background: #000; display: none; z-index: 3; overflow: hidden; border-radius: 12px 12px 0 0;"></div>
+        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; z-index: 4; backdrop-filter: blur(6px); transition: background 0.2s;">&#9658;</button>
       </div>
-      <div class="card-info">
-        <h3>${title}</h3>
-        <span>★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
+      <div class="card-info" style="padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 75%; margin:0;">${title}</h3>
+        <span style="font-size: 11px; color: #fbbf24;">★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
       </div>
     `;
 
@@ -598,7 +586,7 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
-    <!-- Player Wrapper -->
+    <!-- Player Wrapper (May kasamang Next Ep controls kung TV Series lang) -->
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
       ${type === 'tv' ? `

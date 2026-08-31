@@ -58,26 +58,7 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .hero-banner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, var(--bg-color) 10%, rgba(0,0,0,0.2) 80%); }
 .hero-content { position: relative; z-index: 2; max-width: 100%; }
 .hero-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
-
-.hero-btn { 
-  background: var(--accent-color); 
-  color: #fff; 
-  border: none; 
-  padding: 9px 18px; 
-  border-radius: 8px; 
-  font-weight: 700; 
-  cursor: pointer; 
-  font-size: 12px; 
-  display: inline-flex; 
-  align-items: center; 
-  gap: 6px; 
-  box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4); 
-  transition: background 0.2s, transform 0.2s; 
-}
-.hero-btn:hover { 
-  background: #f40612; 
-  transform: scale(1.03); 
-}
+.hero-btn { background: var(--accent-color); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 11px; }
 
 .section-title { font-size: 15px; font-weight: 700; padding: 14px 20px 10px 20px; color: var(--text-color); }
 .carousel-section { padding: 0 20px 16px 20px; }
@@ -94,60 +75,9 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; border: 1px solid var(--border-color); display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
 .card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.6); }
 .card img { width: 100%; aspect-ratio: 2/3; object-fit: cover; }
-
-/* Inayos ang card info at maayos na alignment ng title at rating */
-.card-info { 
-  padding: 8px 10px; 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  gap: 6px;
-  height: 44px;
-}
-.card-info h3 { 
-  font-size: 11px; 
-  font-weight: 600; 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis; 
-  flex: 1;
-  margin: 0; 
-  color: var(--text-color); 
-}
-.card-info span { 
-  font-size: 10px; 
-  color: var(--text-muted); 
-  flex-shrink: 0;
-}
-
-/* Inayos ang Quick Play button para hindi ma-compress o maging oblong */
-.quick-trailer-btn {
-  position: absolute; 
-  top: 8px; 
-  right: 8px; 
-  background: rgba(0,0,0,0.6); 
-  color: #fff; 
-  border: 1px solid rgba(255,255,255,0.2); 
-  border-radius: 50%; 
-  width: 28px; 
-  height: 28px; 
-  min-width: 28px;
-  min-height: 28px;
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  cursor: pointer; 
-  font-size: 10px; 
-  z-index: 4; 
-  backdrop-filter: blur(6px); 
-  transition: background 0.2s, transform 0.2s;
-  padding: 0;
-  line-height: 1;
-}
-.quick-trailer-btn:hover {
-  background: var(--accent-color);
-  transform: scale(1.1);
-}
+.card-info { padding: 8px; }
+.card-info h3 { font-size: 11px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; color: var(--text-color); }
+.card-info span { font-size: 10px; color: var(--text-muted); }
 
 .skeleton-card { background-color: #1a1a1a; border-radius: 8px; height: 300px; animation: skeletonPulse 1.5s infinite ease-in-out; }
 @keyframes skeletonPulse { 0% { background-color: #1a1a1a; } 50% { background-color: #27272a; } 100% { background-color: #1a1a1a; } }
