@@ -3,58 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KioshFlex</title>
+  <title>KIOSHFLEX</title>
+  
+  <!-- PWA Manifest & Theme Color for Installation -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#e50914">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Navigation / Header -->
   <header>
-    <div style="display: flex; align-items: center; gap: 12px;">
-      <button id="hamburgerBtn" style="background:none; border:none; color:#fff; font-size:20px; cursor:pointer;">☰</button>
-      <span id="homeLogo" style="font-weight:bold; color:#e50914; font-size:18px; cursor:pointer;">KioshFlex</span>
+    <div class="nav-left">
+      <button id="hamburgerBtn" class="hamburger-btn">&#9776;</button>
+      <div class="logo" id="homeLogo" style="cursor: pointer;">KIOSHFLEX</div>
     </div>
-    
-    <div class="search-container" style="position: relative; display: flex; align-items: center; gap: 6px;">
-      <input type="text" id="searchInput" placeholder="Search movies, tv..." style="background:#18181b; border:1px solid #27272a; color:#fff; padding:6px 12px; border-radius:8px; font-size:13px; outline:none;">
-      <button id="searchBtn" style="background:#e50914; color:#fff; border:none; padding:6px 12px; border-radius:8px; cursor:pointer; font-size:13px;">Search</button>
-      
-      <!-- Search Dropdown & History Wrapper -->
-      <div id="searchDropdownWrapper" style="display: none; position: absolute; top: 38px; left: 0; right: 0; background: #18181b; border: 1px solid #27272a; border-radius: 8px; flex-direction: column; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.5); overflow: hidden;">
-        <div id="historyHeader" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid #27272a; font-size: 11px; color: #a1a1aa;">
-          <span>Recent Searches</span>
-          <button id="clearHistoryBtn" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 11px;">Clear All</button>
-        </div>
-        <div id="searchHistoryContainer" style="display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border-bottom: 1px solid #27272a;"></div>
-        <div id="suggestionsBox"></div>
-      </div>
-    </div>
-
-    <div style="display: flex; gap: 8px;">
-      <button id="watchlistNavBtn" style="background:#222; color:#fff; border:none; padding:6px 10px; border-radius:8px; font-size:12px; cursor:pointer;">Watchlist</button>
-      <button id="themeToggleBtn" style="background:#222; color:#fff; border:none; padding:6px 10px; border-radius:8px; font-size:12px; cursor:pointer;">🌙</button>
+    <div class="header-actions">
+      <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
+      <button id="themeToggleBtn" class="header-btn">Theme</button>
     </div>
   </header>
 
-  <!-- Sidebar Overlay & Menu -->
-  <div id="sidebarOverlay" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 998;"></div>
-  <div id="sidebar" style="position: fixed; top: 0; left: -280px; width: 280px; height: 100%; background: #121212; z-index: 999; transition: left 0.3s ease; padding: 20px; box-sizing: border-box; overflow-y: auto;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h2 style="color: #fff; font-size: 18px; margin: 0;">Menu & Filters</h2>
-      <button id="closeSidebar" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+  <div id="sidebarOverlay" class="sidebar-overlay"></div>
+  <div id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">Menu & Filters</div>
+      <button id="closeSidebar" class="close-sidebar">&times;</button>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="color: #aaa; font-size: 12px; display: block; margin-bottom: 5px;">Content Type</label>
-      <div style="display: flex; gap: 6px;">
-        <button id="btnMovies" class="active" data-type="movie" style="flex:1; padding:8px; background:#e50914; color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:12px;">Movies</button>
-        <button id="btnTV" data-type="tv" style="flex:1; padding:8px; background:#222; color:#ccc; border:none; border-radius:6px; cursor:pointer; font-size:12px;">TV Series</button>
+    <div class="sidebar-group">
+      <div class="sidebar-label">Content Type</div>
+      <div class="type-switcher">
+        <button id="btnMovies" class="type-btn active" data-type="movie">Movies</button>
+        <button id="btnTV" class="type-btn" data-type="tv">TV Series</button>
       </div>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="color: #aaa; font-size: 12px; display: block; margin-bottom: 5px;">Language</label>
-      <select id="languageSelect" style="width: 100%; background: #1a1a1a; color: #fff; padding: 8px; border-radius: 6px; border: 1px solid #333; font-size: 12px;">
+    <div class="sidebar-group">
+      <div class="sidebar-label">Genre</div>
+      <select id="genreSelect">
+        <option value="">All Genres</option>
+        <option value="28">Action</option>
+        <option value="12">Adventure</option>
+        <option value="16">Animation</option>
+        <option value="35">Comedy</option>
+        <option value="80">Crime</option>
+        <option value="18">Drama</option>
+        <option value="14">Fantasy</option>
+        <option value="27">Horror</option>
+        <option value="9648">Mystery</option>
+        <option value="10749">Romance</option>
+        <option value="878">Sci-Fi</option>
+        <option value="53">Thriller</option>
+      </select>
+    </div>
+
+    <div class="sidebar-group">
+      <div class="sidebar-label">Language</div>
+      <select id="languageSelect">
         <option value="">All Languages</option>
         <option value="en">English</option>
         <option value="tl">Tagalog / Filipino</option>
@@ -65,64 +73,70 @@
       </select>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="color: #aaa; font-size: 12px; display: block; margin-bottom: 5px;">Genre</label>
-      <select id="genreSelect" style="width: 100%; background: #1a1a1a; color: #fff; padding: 8px; border-radius: 6px; border: 1px solid #333; font-size: 12px;">
-        <option value="">All Genres</option>
-        <option value="28">Action</option>
-        <option value="12">Adventure</option>
-        <option value="16">Animation</option>
-        <option value="35">Comedy</option>
-        <option value="80">Crime</option>
-        <option value="18">Drama</option>
-        <option value="27">Horror</option>
-        <option value="10749">Romance</option>
-        <option value="878">Sci-Fi</option>
-      </select>
-    </div>
-
-    <div style="margin-bottom: 15px;">
-      <label style="color: #aaa; font-size: 12px; display: block; margin-bottom: 5px;">Sort By</label>
-      <select id="sortSelect" style="width: 100%; background: #1a1a1a; color: #fff; padding: 8px; border-radius: 6px; border: 1px solid #333; font-size: 12px;">
+    <div class="sidebar-group">
+      <div class="sidebar-label">Sort By</div>
+      <select id="sortSelect">
         <option value="popularity.desc">Most Popular</option>
         <option value="vote_average.desc">Highest Rated</option>
-        <option value="primary_release_date.desc">Newest</option>
+        <option value="primary_release_date.desc">Latest Release</option>
       </select>
     </div>
 
-    <div style="margin-bottom: 15px;">
-      <label style="color: #aaa; font-size: 12px; display: block; margin-bottom: 5px;">Year</label>
-      <select id="yearSelect" style="width: 100%; background: #1a1a1a; color: #fff; padding: 8px; border-radius: 6px; border: 1px solid #333; font-size: 12px;">
+    <div class="sidebar-group">
+      <div class="sidebar-label">Year</div>
+      <select id="yearSelect">
         <option value="">All Years</option>
       </select>
     </div>
   </div>
 
-  <!-- Hero Banner -->
-  <div id="heroBanner" style="position: relative; height: 380px; width: 100%; display: none; background-color: #000;"></div>
-
-  <!-- Main Content Area -->
-  <main style="padding: 16px;">
-    <!-- Continue Watching Section -->
-    <div id="continueSection" style="display: none; margin-bottom: 24px;">
-      <h2 style="font-size: 16px; color: #fff; margin-bottom: 10px;">Continue Watching</h2>
-      <div id="continueCarousel" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;"></div>
+  <!-- Redesigned Search & History Container -->
+  <div class="search-container" style="position: relative; display: flex; gap: 8px; align-items: center;">
+    <div class="search-wrapper" style="position: relative; flex: 1; display: flex; align-items: center; background-color: #121212; border: 1px solid #27272a; border-radius: 9999px; padding: 6px 16px;">
+      <svg style="width: 18px; height: 18px; fill: none; stroke: #a1a1aa; stroke-width: 2; margin-right: 10px; flex-shrink: 0;" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search movies, TV shows..." autocomplete="off" style="background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 14px;">
+      
+      <!-- Combined Search Dropdown Wrapper -->
+      <div id="searchDropdownWrapper" style="position: absolute; top: calc(100% + 8px); left: 0; right: 0; background-color: #121212; border: 1px solid #27272a; border-radius: 16px; padding: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); z-index: 50; display: none; flex-direction: column; gap: 8px;">
+        <div id="historyHeader" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a1a1aa; padding: 0 4px;">
+          <span>Recent Searches</span>
+          <button id="clearHistoryBtn" style="background: transparent !important; border: none !important; box-shadow: none !important; text-shadow: none !important; outline: none !important; color: #a1a1aa; cursor: pointer; font-size: 12px; font-weight: 500; padding: 0; transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#a1a1aa'">Clear All</button>
+        </div>
+        <div id="searchHistoryContainer" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
+        <div id="suggestionsBox" class="suggestions-dropdown" style="position: static; border: none; box-shadow: none; width: 100%; background: transparent; padding: 0;"></div>
+      </div>
     </div>
+    <button id="searchBtn" style="background-color: #dc2626; color: #fff; border: none; border-radius: 9999px; padding: 10px 20px; font-weight: 500; cursor: pointer;">Search</button>
+  </div>
 
-    <!-- Carousel Section (Top 10) -->
-    <div id="carouselSection" style="margin-bottom: 24px;">
-      <h2 style="font-size: 16px; color: #fff; margin-bottom: 10px;">Top 10 This Week</h2>
-      <div id="top10Carousel" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;"></div>
+  <div id="heroBanner" class="hero-banner" style="display: none;">
+    <div class="hero-content">
+      <h2 id="heroTitle" class="hero-title">Loading Featured...</h2>
+      <button id="heroPlayBtn" class="hero-btn">▶ Play</button>
     </div>
+  </div>
 
-    <h2 id="sectionTitle" style="font-size: 16px; color: #fff; margin-bottom: 12px;">Explore Movies</h2>
-    <div id="movieGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px;"></div>
-  </main>
+  <div id="continueSection" class="carousel-section" style="display: none;">
+    <div class="section-title">Continue Watching</div>
+    <div id="continueCarousel" class="carousel"></div>
+  </div>
 
-  <!-- Modal Details / Player -->
-  <div id="movieModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; padding: 16px;">
-    <div style="background: #18181b; width: 100%; max-width: 600px; border-radius: 12px; padding: 16px; position: relative; max-height: 90vh; overflow-y: auto;">
-      <button id="closeModal" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+  <div id="carouselSection" class="carousel-section">
+    <div class="section-title">Trending Top 10</div>
+    <div id="top10Carousel" class="carousel"></div>
+  </div>
+
+  <div>
+    <div id="sectionTitle" class="section-title">Explore Movies</div>
+    <div id="movieGrid" class="movie-grid"></div>
+  </div>
+
+  <div id="movieModal" class="modal">
+    <div class="modal-content">
+      <button id="closeModal" class="close-modal">&times;</button>
       <div id="modalBody"></div>
     </div>
   </div>

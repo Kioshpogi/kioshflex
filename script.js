@@ -174,6 +174,7 @@ async function loadHeroAndTop10() {
         const randomIndex = Math.floor(Math.random() * validItems.length);
         featuredItem = validItems[randomIndex];
         const title = featuredItem.title || featuredItem.name;
+        heroTitle.textContent = title;
         
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${featuredItem.id}/videos?api_key=${API_KEY}`);
@@ -193,9 +194,9 @@ async function loadHeroAndTop10() {
             <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
               <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
-                <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
+                <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); letter-spacing: 0.5px; font-family: sans-serif;">${title}</h1>
               </div>
-              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
+              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Muted Off</button>
             </div>
           `;
           
@@ -222,6 +223,7 @@ async function loadHeroAndTop10() {
         }
         
         heroBanner.style.display = 'flex';
+        heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
       }
 
       top10Carousl.innerHTML = '';
@@ -325,15 +327,8 @@ function loadContent(resetPage = true) {
 
 document.querySelectorAll('#btnMovies, #btnTV').forEach(btn => {
   btn.addEventListener('click', (e) => {
-    document.querySelectorAll('#btnMovies, #btnTV').forEach(b => {
-      b.style.background = '#222';
-      b.style.color = '#ccc';
-      b.classList.remove('active');
-    });
-    e.target.style.background = '#e50914';
-    e.target.style.color = '#fff';
+    document.querySelectorAll('#btnMovies, #btnTV').forEach(b => b.classList.remove('active'));
     e.target.classList.add('active');
-    
     currentType = e.target.getAttribute('data-type');
     loadContent(true);
     closeSidebarMenu();
@@ -434,6 +429,8 @@ function renderSearchHistory() {
     const deleteBtn = document.createElement('span');
     deleteBtn.innerHTML = '&times;';
     deleteBtn.style.cssText = 'color: #71717a; font-size: 14px; font-weight: bold; cursor: pointer; padding: 0 2px; border-radius: 4px;';
+    deleteBtn.onmouseover = () => deleteBtn.style.color = '#ef4444';
+    deleteBtn.onmouseout = () => deleteBtn.style.color = '#71717a';
     
     deleteBtn.onclick = (e) => {
       e.stopPropagation();
@@ -449,14 +446,22 @@ searchInput.addEventListener('focus', () => {
   const history = getSearchHistory();
   if (history.length > 0) {
     renderSearchHistory();
-    if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'flex';
+    if (searchDropdownWrapper) {
+      searchDropdownWrapper.style.display = 'flex';
+    }
+  } else {
+    if (searchDropdownWrapper) {
+      searchDropdownWrapper.style.display = 'none';
+    }
   }
 });
 
 document.addEventListener('click', (e) => {
   const searchContainerEl = document.querySelector('.search-container');
   if (searchContainerEl && !searchContainerEl.contains(e.target)) {
-    if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
+    if (searchDropdownWrapper) {
+      searchDropdownWrapper.style.display = 'none';
+    }
   }
 });
 
@@ -480,7 +485,9 @@ searchInput.addEventListener('input', async (e) => {
         div.className = 'suggestion-item';
         div.textContent = title;
         div.style.cssText = 'padding: 8px 12px; color: #fff; cursor: pointer; font-size: 13px; border-bottom: 1px solid #27272a;';
-        
+        div.onmouseover = () => div.style.background = '#27272a';
+        div.onmouseout = () => div.style.background = 'transparent';
+
         div.onclick = () => {
           searchInput.value = title;
           if (searchDropdownWrapper) searchDropdownWrapper.style.display = 'none';
@@ -530,7 +537,7 @@ searchInput.addEventListener('keypress', (e) => {
 
 window.addEventListener('scroll', () => {
   const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
-  if (scrollTop + clientHeight >= scrollHeight - 300 && !isLoadingMore && !isSearchMode) {
+  if (scrollTop + clientHeight >= scrollHeight - 300 && !isLoadingMore) {
     currentPage++;
     if (currentFetchUrl) getMedia(currentFetchUrl + currentPage, currentType, true);
   }
@@ -598,9 +605,41 @@ async function openModal(item, type) {
     </div>
     
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
+    
+    <div id="castSection" style="margin-top: 10px;">
+      <strong style="font-size:12px; color:#fff;">Top Cast:</strong>
+      <div id="castScrollContainer" class="cast-scroll"><span style="font-size:11px; color:#777;">Loading cast...</span></div>
+    </div>
   `;
 
   modal.style.display = 'flex';
+
+  try {
+    const castRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/credits?api_key=${API_KEY}`);
+    const castData = await castRes.json();
+    const castScrollContainer = document.getElementById('castScrollContainer');
+    
+    if (castData.cast && castData.cast.length > 0) {
+      castScrollContainer.innerHTML = '';
+      castData.cast.slice(0, 10).forEach(actor => {
+        const profileImg = actor.profile_path ? `https://image.tmdb.org/t/p/w185${actor.profile_path}` : 'https://via.placeholder.com/50x50?text=No+Img';
+        const actorDiv = document.createElement('div');
+        actorDiv.classList.add('cast-item');
+        actorDiv.style.cursor = 'pointer';
+        actorDiv.innerHTML = `
+          <img src="${profileImg}" alt="${actor.name}" style="-webkit-touch-callout: none; user-select: none;">
+          <span>${actor.name}</span>
+        `;
+        
+        actorDiv.addEventListener('click', () => openActorModal(actor.id));
+        castScrollContainer.appendChild(actorDiv);
+      });
+    } else {
+      document.getElementById('castSection').style.display = 'none';
+    }
+  } catch (err) {
+    document.getElementById('castSection').style.display = 'none';
+  }
 
   document.getElementById('trailerBtn').addEventListener('click', async () => {
     const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
@@ -665,6 +704,60 @@ async function openModal(item, type) {
         }
       });
     }
+  }
+}
+
+async function openActorModal(personId) {
+  try {
+    const res = await fetch(`https://api.themoviedb.org/3/person/${personId}?api_key=${API_KEY}`);
+    const person = await res.json();
+
+    const creditsRes = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${API_KEY}`);
+    const creditsData = await creditsRes.json();
+    
+    const profileImg = person.profile_path ? `https://image.tmdb.org/t/p/w300${person.profile_path}` : 'https://via.placeholder.com/150?text=No+Img';
+    
+    modalBody.innerHTML = `
+      <button id="backToMediaBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">← Close</button>
+      <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:15px; flex-wrap:wrap;">
+        <img src="${profileImg}" alt="${person.name}" style="width:100px; height:150px; object-fit:cover; border-radius:8px;">
+        <div style="flex:1;">
+          <h3 style="color:#fff; font-size:18px; margin-bottom:5px;">${person.name}</h3>
+          <p style="color:#aaa; font-size:12px; margin-bottom:8px;"><strong>Born:</strong> ${person.birthday || 'N/A'}</p>
+          <p style="color:#bbb; font-size:11px; max-height:80px; overflow-y:auto; line-height:1.4;">${person.biography || 'No biography available.'}</p>
+        </div>
+      </div>
+      <h4 style="color:#fff; font-size:14px; margin-bottom:8px;">Filmography:</h4>
+      <div id="actorMoviesGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:8px; max-height:200px; overflow-y:auto;">
+        ${creditsData.cast && creditsData.cast.length > 0 ? creditsData.cast.map(media => {
+          if(!media.poster_path) return '';
+          return `
+            <div class="actor-media-card" data-id="${media.id}" data-type="${media.media_type || 'movie'}" style="cursor:pointer;">
+              <img src="https://image.tmdb.org/t/p/w185${media.poster_path}" style="width:100%; border-radius:6px;" alt="${media.title || media.name}">
+              <span style="font-size:10px; color:#aaa; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${media.title || media.name}</span>
+            </div>
+          `;
+        }).join('') : '<p style="color:#aaa; font-size:11px;">No filmography found.</p>'}
+      </div>
+    `;
+
+    document.getElementById('backToMediaBtn').addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    document.querySelectorAll('.actor-media-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const mediaId = card.getAttribute('data-id');
+        const mediaType = card.getAttribute('data-type');
+        fetch(`https://api.themoviedb.org/3/${mediaType}/${mediaId}?api_key=${API_KEY}`)
+          .then(res => res.json())
+          .then(item => openModal(item, mediaType));
+      });
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert('Failed to load actor profile.');
   }
 }
 
