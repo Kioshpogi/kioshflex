@@ -115,13 +115,51 @@ function showMedia(items, type, append = false) {
     const card = document.createElement('div');
     card.classList.add('card');
     card.innerHTML = `
-      <img src="${IMG_PATH + poster_path}" alt="${title}" style="-webkit-touch-callout: none; user-select: none;">
+      <div style="position: relative; width: 100%; height: calc(100% - 50px);">
+        <img src="${IMG_PATH + poster_path}" alt="${title}" style="width:100%; height:100%; object-fit:cover; -webkit-touch-callout: none; user-select: none;">
+        <button class="quick-trailer-btn" data-id="${item.id}" data-type="${type}" title="Quick Trailer" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 11px; z-index: 2; backdrop-filter: blur(4px);">▶</button>
+      </div>
       <div class="card-info">
         <h3>${title}</h3>
         <span>★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
       </div>
     `;
+
     card.addEventListener('click', () => openModal(item, type));
+
+    const quickBtn = card.querySelector('.quick-trailer-btn');
+    quickBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      const mediaId = e.target.getAttribute('data-id');
+      const mediaType = e.target.getAttribute('data-type');
+      
+      try {
+        const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${mediaId}/videos?api_key=${API_KEY}`);
+        const vidData = await vidRes.json();
+        const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+        
+        if (trailer) {
+          modalBody.innerHTML = `
+            <button id="backFromTrailerBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">← Close</button>
+            <h3 style="margin-bottom:12px; font-size:16px; color:#fff;">Trailer Preview: ${title}</h3>
+            <div style="border-radius:10px; overflow:hidden; position:relative; padding-bottom:56.25%; height:0; background:#000;">
+              <iframe src="https://www.youtube.com/embed/${trailer.key}?autoplay=1" width="100%" height="100%" frameborder="0" allowfullscreen style="position:absolute; top:0; left:0; width:100%; height:100%;"></iframe>
+            </div>
+          `;
+          modal.style.display = 'flex';
+          
+          document.getElementById('backFromTrailerBtn').addEventListener('click', () => {
+            modal.style.display = 'none';
+            modalBody.innerHTML = '';
+          });
+        } else {
+          alert('Trailer not available.');
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    });
+
     movieGrid.appendChild(card);
   });
 }
@@ -143,7 +181,6 @@ async function loadHeroAndTop10() {
         const vidData = await vidRes.json();
         const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
         
-        // Gamitin muna ang backdrop image bilang pangunahing background para iwas "Video unavailable" block ng YouTube
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
         heroBanner.style.backgroundSize = 'cover';
         heroBanner.style.backgroundPosition = 'center';
@@ -542,14 +579,19 @@ async function openModal(item, type) {
       <button id="modalWatchlistBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:${isInWatchlist ? '#e50914' : '#222'}; color:#fff;">${isInWatchlist ? '✓ In Watchlist' : '+ Watchlist'}</button>
       <button id="trailerBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">▶ Trailer</button>
       <button id="shareBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#222; color:#fff;">Share</button>
-      ${type === 'tv' ? `<button id="nextEpBtn" style="padding:7px 12px; font-size:12px; border-radius:8px; border:none; cursor:pointer; background:#e50914; color:#fff;">⏭ Next Ep</button>` : ''}
     </div>
+    
     ${type === 'tv' ? `
+      <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(229, 9, 20, 0.15); border: 1px solid rgba(229, 9, 20, 0.4); padding: 8px 12px; border-radius:8px; margin-bottom:12px;">
+        <span style="font-size:12px; color:#fff; font-weight:600;" id="nextEpLabel">S${season} • Ep ${episode}</span>
+        <button id="autoNextEpBtn" style="padding:5px 10px; font-size:11px; border-radius:6px; border:none; cursor:pointer; background:#e50914; color:#fff; font-weight:bold;">▶ Next Episode</button>
+      </div>
       <div style="display:flex; gap:10px; margin-bottom:12px; background:rgba(255,255,255,0.03); padding:10px; border-radius:10px; align-items:center;">
         <select id="seasonSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 10}, (_, i) => `<option value="${i+1}" ${i+1 === season ? 'selected' : ''}>Season ${i+1}</option>`).join('')}</select>
         <select id="episodeSelect" style="flex:1; background:#1a1a1a; color:#fff; padding:6px; border-radius:6px;">${Array.from({length: 25}, (_, i) => `<option value="${i+1}" ${i+1 === episode ? 'selected' : ''}>Episode ${i+1}</option>`).join('')}</select>
       </div>
     ` : ''}
+
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
       <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer;">Server 1</button>
       <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2</button>
@@ -557,9 +599,11 @@ async function openModal(item, type) {
       <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
       <button onclick="changeServer('${links.s5}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 5</button>
     </div>
+    
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
     </div>
+    
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
     
     <div id="castSection" style="margin-top: 10px;">
@@ -622,12 +666,14 @@ async function openModal(item, type) {
   if (type === 'tv') {
     const sSelect = document.getElementById('seasonSelect');
     const eSelect = document.getElementById('episodeSelect');
+    const nextEpLabel = document.getElementById('nextEpLabel');
 
     const updateSrc = () => {
       const curSeason = parseInt(sSelect.value);
       const curEpisode = parseInt(eSelect.value);
       
       saveContinueWatching(item, type, curSeason, curEpisode);
+      if (nextEpLabel) nextEpLabel.textContent = `S${curSeason} • Ep ${curEpisode}`;
 
       let nl = getLinks(curSeason, curEpisode);
       document.getElementById('playerIframe').src = nl.s1;
@@ -646,13 +692,18 @@ async function openModal(item, type) {
     sSelect.addEventListener('change', updateSrc);
     eSelect.addEventListener('change', updateSrc);
 
-    document.getElementById('nextEpBtn').addEventListener('click', () => {
-      let cur = parseInt(eSelect.value);
-      if(cur < 25) { 
-        eSelect.value = cur + 1; 
-        updateSrc(); 
-      }
-    });
+    const autoNextEpBtn = document.getElementById('autoNextEpBtn');
+    if (autoNextEpBtn) {
+      autoNextEpBtn.addEventListener('click', () => {
+        let cur = parseInt(eSelect.value);
+        if(cur < 25) { 
+          eSelect.value = cur + 1; 
+          updateSrc(); 
+        } else {
+          alert('abot na sa huling episode ng season na ito.');
+        }
+      });
+    }
   }
 }
 
