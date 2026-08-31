@@ -74,14 +74,12 @@
       color: #fff;
     }
 
-    /* Grid para maging 3 columns at magkasya ang mas maliit na liquid glass cards */
     .movie-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
     }
 
-    /* Modal styles */
     .modal {
       display: none;
       position: fixed;
@@ -158,7 +156,7 @@
   </div>
 
   <script>
-    const API_KEY = 'c752044810757a552bfd400e9debebe6'; // Palitan kung kinakailangan
+    const API_KEY = 'c752044810757a552bfd400e9debebe6';
     const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
     const movieGrid = document.getElementById('movieGrid');
     const mediaModal = document.getElementById('mediaModal');
@@ -185,12 +183,12 @@
         const card = document.createElement('div');
         card.classList.add('card');
         
-        // Liquid Glass Styling + Mas Maliit na Sukat
+        // Liquid Glass Styling
         card.style.cssText = `
-          background: rgba(255, 255, 255, 0.04);
+          background: rgba(255, 255, 255, 0.05);
           backdrop-filter: blur(12px);
           -webkit-backdrop-filter: blur(12px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           border-radius: 12px;
           overflow: hidden;
           display: flex;
@@ -213,7 +211,6 @@
           </div>
         `;
 
-        // Hover Trailer Preview
         let hoverTimeout;
         const previewContainer = card.querySelector('.hover-preview-container');
         
@@ -245,7 +242,7 @@
     function openModal(item, type) {
       modalTitle.textContent = item.title || item.name;
       modalBody.innerHTML = `
-        <p style="margin-bottom: 10px;">${item.overview || 'Wala pang deskripsyon para sa palabas na ito.'}</p>
+        <p style="margin-bottom: 10px;">${item.overview || 'Wala pang deskripsyon.'}</p>
         <p style="color: #aaa; font-size: 12px;">Petsa ng Paglabas: ${item.release_date || item.first_air_date || 'N/A'}</p>
       `;
       mediaModal.style.display = 'flex';
