@@ -354,9 +354,9 @@ watchlistNavBtn.addEventListener('click', () => {
   carouselSection.style.display = 'none';
   continueSection.style.display = 'none';
   heroBanner.style.display = 'none';
-  sectionTitle.textContent = 'My Watchlist & History';
-  const combined = [...getWatchlist(), ...(JSON.parse(localStorage.getItem('kiosh_continue')) || [])];
-  if(combined.length > 0) showMedia(combined, currentType, false);
+  sectionTitle.textContent = 'My Watchlist';
+  const watchlistItems = getWatchlist();
+  if(watchlistItems.length > 0) showMedia(watchlistItems, currentType, false);
   else movieGrid.innerHTML = '<p style="color:#aaa; padding:20px;">Your Watchlist is empty.</p>';
 });
 
