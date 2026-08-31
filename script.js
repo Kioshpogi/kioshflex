@@ -114,14 +114,13 @@ function showMedia(items, type, append = false) {
 
     const card = document.createElement('div');
     card.classList.add('card');
-    card.style.position = 'relative';
-    card.style.overflow = 'hidden';
-    card.style.cursor = 'pointer';
+    // Sinigurong may sapat na min-height para hindi pumayat/mapatag ang card
+    card.style.cssText = 'position: relative; overflow: hidden; cursor: pointer; display: flex; flex-direction: column; min-height: 250px; background: #18181b; border-radius: 8px;';
 
     card.innerHTML = `
-      <div class="card-poster" style="width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; transition: opacity 0.3s ease;">
+      <div class="card-poster" style="width: 100%; height: 100%; position: absolute; inset: 0; z-index: 2; transition: opacity 0.3s ease; display: flex; flex-direction: column;">
         <img src="${IMG_PATH + poster_path}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover; -webkit-touch-callout: none; user-select: none;">
-        <div class="card-info" style="position: absolute; bottom: 0; width: 100%; background: linear-gradient(0deg, rgba(0,0,0,0.9), transparent); padding: 10px;">
+        <div class="card-info" style="position: absolute; bottom: 0; width: 100%; background: linear-gradient(0deg, rgba(0,0,0,0.9), transparent); padding: 10px; box-sizing: border-box;">
           <h3 style="font-size: 14px; margin: 0; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${title}</h3>
           <span style="font-size: 12px; color: #f5c518;">★ ${vote_average ? vote_average.toFixed(1) : 'N/A'}</span>
         </div>
