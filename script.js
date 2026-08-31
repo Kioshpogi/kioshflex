@@ -148,11 +148,13 @@ async function loadHeroAndTop10() {
             <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
               <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
             </div>
-            <div style="position: absolute; bottom: 20px; left: 20px; z-index: 2; text-shadow: 0 2px 4px rgba(0,0,0,0.8); display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 40px);">
-              <div>
-                <h1 style="font-size: 22px; color: #fff; margin-bottom: 0;">${title}</h1>
+            <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
+            <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
+                <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9); letter-spacing: 0.5px; font-family: sans-serif;">${title}</h1>
               </div>
-              <button id="unmuteBtn" style="background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; z-index: 3;">🔇 Unmute</button>
+              <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;">Muted Off</button>
             </div>
           `;
           
@@ -164,7 +166,7 @@ async function loadHeroAndTop10() {
               unmuteBtn.onclick = () => {
                 isMuted = !isMuted;
                 heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
-                unmuteBtn.textContent = isMuted ? '🔇 Unmute' : '🔊 Muted Off';
+                unmuteBtn.textContent = isMuted ? 'Muted Off' : 'Muted On';
               };
             }
           }, 500);
