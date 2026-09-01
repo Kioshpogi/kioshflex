@@ -741,6 +741,79 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
+// --- AI Chat Assistant Integration ---
+const aiChatToggleBtn = document.getElementById('aiChatToggleBtn');
+const aiChatBox = document.getElementById('aiChatBox');
+const aiChatClose = document.getElementById('aiChatClose');
+const aiChatSend = document.getElementById('aiChatSend');
+const aiChatInput = document.getElementById('aiChatInput');
+const aiChatMessages = document.getElementById('aiChatMessages');
+
+if (aiChatToggleBtn && aiChatBox) {
+  aiChatToggleBtn.addEventListener('click', () => {
+    aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
+  });
+
+  aiChatClose.addEventListener('click', () => {
+    aiChatBox.style.display = 'none';
+  });
+
+  aiChatSend.addEventListener('click', handleUserMessage);
+  aiChatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleUserMessage();
+  });
+}
+
+async function handleUserMessage() {
+  const text = aiChatInput.value.trim();
+  if (!text) return;
+
+  appendMessage(text, 'user');
+  aiChatInput.value = '';
+
+  const lowerText = text.toLowerCase();
+  let reply = "Hmm, hindi ko masyadong naintindihan. Subukan mong magtanong ng tulad ng: 'Gusto ko ng comedy movie' o 'Anong trending ngayon?'";
+  let fetchQueryUrl = '';
+
+  if (lowerText.includes('comedy') || lowerText.includes('nakakatawa') || lowerText.includes('funny')) {
+    reply = "Eto ang ilang comedy movies na siguradong magpapasaya sa'yo:";
+    fetchQueryUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=35`;
+  } else if (lowerText.includes('horror') || lowerText.includes('matakot') || lowerText.includes('multo') || lowerText.includes('scary')) {
+    reply = "Kaya mo bang tapusin ang mga horror movies na ito? Eto para sa'yo:";
+    fetchQueryUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=27`;
+  } else if (lowerText.includes('action') || lowerText.includes('barilan') || lowerText.includes('pulis')) {
+    reply = "Narito ang mga action-packed movies na puno ng bakbakan:";
+    fetchQueryUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=28`;
+  } else if (lowerText.includes('trending') || lowerText.includes('sikat') || lowerText.includes('panoodin')) {
+    reply = "Eto ang mga pinakasikat at trending ngayong linggo:";
+    fetchQueryUrl = `https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`;
+  }
+
+  appendMessage(reply, 'bot');
+
+  if (fetchQueryUrl) {
+    try {
+      const res = await fetch(fetchQueryUrl);
+      const data = await res.json();
+      if (data.results && data.results.length > 0) {
+        showMedia(data.results.slice(0, 6), currentType, false);
+        sectionTitle.textContent = `AI Recommendation: "${text}"`;
+        carouselSection.style.display = 'none';
+        heroBanner.style.display = 'none';
+      }
+    } catch (e) {}
+  }
+}
+
+function appendMessage(text, sender) {
+  if (!aiChatMessages) return;
+  const msgDiv = document.createElement('div');
+  msgDiv.style.cssText = `padding: 8px 12px; border-radius: 8px; max-width: 80%; line-height: 1.4; ${sender === 'user' ? 'background: #e50914; color: #fff; align-self: flex-end;' : 'background: #222; color: #ddd; align-self: flex-start;'}`;
+  msgDiv.textContent = text;
+  aiChatMessages.appendChild(msgDiv);
+  aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+}
+
 loadHeroAndTop10();
 loadContent(true);
 renderSearchHistory();
