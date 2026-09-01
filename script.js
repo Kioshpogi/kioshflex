@@ -749,7 +749,7 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration (Vercel Serverless API) ---
+// --- AI Chat Assistant Integration (Vercel Edge Streaming) ---
 if (aiChatToggleBtn && aiChatBox) {
   aiChatToggleBtn.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
@@ -765,7 +765,6 @@ if (aiChatToggleBtn && aiChatBox) {
   });
 }
 
-// Updated Markdown parser for headers, bold, and italics
 function parseMarkdown(text) {
   if (!text) return '';
   return text
@@ -778,10 +777,8 @@ async function handleUserMessage() {
   const text = aiChatInput.value.trim();
   if (!text) return;
 
-  appendMessage(text, 'user');
+  appendMessageToUI('user', text);
   aiChatInput.value = '';
-
-  appendMessage("Thinking...", 'bot');
 
   try {
     const response = await fetch('/api/chat', {
@@ -790,30 +787,43 @@ async function handleUserMessage() {
       body: JSON.stringify({ text: text })
     });
 
-    const data = await response.json();
-    if (aiChatMessages.lastChild) aiChatMessages.lastChild.remove();
+    if (!response.ok) throw new Error('May problema sa pagkuha ng sagot.');
 
-    let aiReply = '';
-    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-      aiReply = data.candidates[0].content.parts[0].text;
-    } else if (data.text) {
-      aiReply = data.text;
-    } else if (data.reply) {
-      aiReply = data.reply;
-    } else if (data.error) {
-      aiReply = `Error: ${data.error.message || data.error}`;
-    } else {
-      aiReply = "Sorry, I couldn't process that response.";
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    
+    let aiMessageElement = appendMessageToUI('bot', '');
+    let accumulatedText = '';
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, { stream: true });
+      const lines = chunk.split('\n');
+      
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const jsonStr = line.replace('data: ', '').trim();
+          if (jsonStr === '[DONE]') continue;
+          
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const textPart = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (textPart) {
+              accumulatedText += textPart;
+              updateMessageInUI(aiMessageElement, accumulatedText);
+            }
+          } catch (e) {}
+        }
+      }
     }
-
-    appendMessage(aiReply, 'bot');
   } catch (error) {
-    if (aiChatMessages.lastChild) aiChatMessages.lastChild.remove();
-    appendMessage("Sorry, network error connecting to the AI API.", 'bot');
+    appendMessageToUI('bot', 'Pasensya na, nagka-error habang kumokonekta.');
   }
 }
 
-function appendMessage(text, sender) {
+function appendMessageToUI(sender, text) {
   if (!aiChatMessages) return;
   const msgDiv = document.createElement('div');
   msgDiv.style.cssText = `padding: 8px 12px; border-radius: 8px; max-width: 85%; line-height: 1.4; word-break: break-word; white-space: pre-wrap; ${sender === 'user' ? 'background: #e50914; color: #fff; align-self: flex-end;' : 'background: #222; color: #ddd; align-self: flex-start;'}`;
@@ -825,6 +835,13 @@ function appendMessage(text, sender) {
   }
 
   aiChatMessages.appendChild(msgDiv);
+  aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+  return msgDiv;
+}
+
+function updateMessageInUI(msgDiv, text) {
+  if (!msgDiv) return;
+  msgDiv.innerHTML = parseMarkdown(text);
   aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
 }
 
