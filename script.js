@@ -749,7 +749,7 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration (Vercel Edge Streaming) ---
+// --- AI Chat Assistant Integration (Vercel Edge Non-Streaming JSON) ---
 if (aiChatToggleBtn && aiChatBox) {
   aiChatToggleBtn.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
@@ -779,6 +779,8 @@ async function handleUserMessage() {
 
   appendMessageToUI('user', text);
   aiChatInput.value = '';
+  
+  let aiMessageElement = appendMessageToUI('bot', 'Nag-iisip...');
 
   try {
     const response = await fetch('/api/chat', {
@@ -787,39 +789,15 @@ async function handleUserMessage() {
       body: JSON.stringify({ text: text })
     });
 
-    if (!response.ok) throw new Error('May problema sa pagkuha ng sagot.');
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+    const data = await response.json();
     
-    let aiMessageElement = appendMessageToUI('bot', '');
-    let accumulatedText = '';
+    if (!response.ok) throw new Error(data.error || 'May problema sa API.');
 
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
+    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Walang naging sagot.';
+    updateMessageInUI(aiMessageElement, replyText);
 
-      const chunk = decoder.decode(value, { stream: true });
-      const lines = chunk.split('\n');
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const jsonStr = line.replace('data: ', '').trim();
-          if (jsonStr === '[DONE]') continue;
-          
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const textPart = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (textPart) {
-              accumulatedText += textPart;
-              updateMessageInUI(aiMessageElement, accumulatedText);
-            }
-          } catch (e) {}
-        }
-      }
-    }
   } catch (error) {
-    appendMessageToUI('bot', 'Pasensya na, nagka-error habang kumokonekta.');
+    updateMessageInUI(aiMessageElement, 'Pasensya na, nagka-error: ' + error.message);
   }
 }
 
