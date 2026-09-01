@@ -1,6 +1,13 @@
-const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; // TMDB API Key para sa mga Pelikula
-const AI_API_KEY = 'AQ.Ab8RN6J3WhDG-r8zfmfXiz-yIYMCUjDqgYViGPvm0AtlkK_l6A'; // I-replace ito ng iyong totoong Gemini AI API Key
+// Kioshflex AI Chat Script
+const aiChatInput = document.getElementById('aiChatInput');
+const aiChatSend = document.getElementById('aiChatSend');
+const aiChatMessages = document.getElementById('aiChatMessages');
+const aiChatToggleBtn = document.getElementById('aiChatToggleBtn');
+const aiChatBox = document.getElementById('aiChatBox');
+const aiChatClose = document.getElementById('aiChatClose');
 
+// Iba pang mga element at TMDB functions mo rito...
+const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
 
@@ -743,14 +750,7 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration (Gemini AI API) ---
-const aiChatToggleBtn = document.getElementById('aiChatToggleBtn');
-const aiChatBox = document.getElementById('aiChatBox');
-const aiChatClose = document.getElementById('aiChatClose');
-const aiChatSend = document.getElementById('aiChatSend');
-const aiChatInput = document.getElementById('aiChatInput');
-const aiChatMessages = document.getElementById('aiChatMessages');
-
+// --- AI Chat Assistant Integration (Vercel Serverless API) ---
 if (aiChatToggleBtn && aiChatBox) {
   aiChatToggleBtn.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
@@ -776,17 +776,10 @@ async function handleUserMessage() {
   appendMessage("Thinking...", 'bot');
 
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent`, {
+    const response = await fetch('/api/chat', {
       method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'x-goog-api-key': AI_API_KEY
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{ text: `You are the AI assistant for KIOSHFLEX, a streaming website. Answer concisely and in English: ${text}` }]
-        }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
     });
 
     const data = await response.json();
@@ -796,7 +789,7 @@ async function handleUserMessage() {
       const aiReply = data.candidates[0].content.parts[0].text;
       appendMessage(aiReply, 'bot');
     } else if (data.error) {
-      appendMessage(`Error: ${data.error.message}`, 'bot');
+      appendMessage(`Error: ${data.error.message || 'Maling configuration'}`, 'bot');
     } else {
       appendMessage("Sorry, there was an error processing the AI response.", 'bot');
     }
