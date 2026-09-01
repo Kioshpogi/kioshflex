@@ -562,10 +562,10 @@ async function openModal(item, type) {
     ${type === 'tv' ? `
       <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:10px; border-radius:10px; margin-bottom:12px;">
         <div style="display:flex; gap:6px; margin-bottom:8px; overflow-x:auto;" id="seasonTabsContainer">
-          ${Array.from({length: 4}, (_, i) => `<button class="season-tab-btn ${i+1 === season ? 'active' : ''}" data-season="${i+1}" style="padding:5px 12px; font-size:11px; border-radius:6px; border:none; cursor:pointer; background:${i+1 === season ? '#e50914' : '#222'}; color:#fff;">Season ${i+1}</button>`).join('')}
+          <span style="font-size:11px; color:#888; align-self:center;">Loading seasons...</span>
         </div>
         <div style="max-height: 110px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px;" id="episodeListContainer">
-          <span style="font-size:11px; color:#888;">Loading episodes...</span>
+          <span style="font-size:11px; color:#888;">Select a season...</span>
         </div>
       </div>
     ` : ''}
@@ -600,6 +600,36 @@ async function openModal(item, type) {
   modal.style.display = 'flex';
 
   if (type === 'tv') {
+    fetch(`https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}`)
+      .then(res => res.json())
+      .then(tvDetails => {
+        const seasons = tvDetails.seasons ? tvDetails.seasons.filter(s => s.season_number > 0) : [];
+        const seasonTabsContainer = document.getElementById('seasonTabsContainer');
+        
+        if (seasons.length > 0) {
+          seasonTabsContainer.innerHTML = '';
+          seasons.forEach(sObj => {
+            const sNum = sObj.season_number;
+            const btn = document.createElement('button');
+            btn.className = `season-tab-btn ${sNum === season ? 'active' : ''}`;
+            btn.textContent = sObj.name || `Season ${sNum}`;
+            btn.style.cssText = `padding:5px 12px; font-size:11px; border-radius:6px; border:none; cursor:pointer; background:${sNum === season ? '#e50914' : '#222'}; color:#fff; white-space:nowrap;`;
+            
+            btn.onclick = () => {
+              document.querySelectorAll('.season-tab-btn').forEach(b => { b.style.background = '#222'; b.classList.remove('active'); });
+              btn.style.background = '#e50914';
+              btn.classList.add('active');
+              season = sNum;
+              episode = 1;
+              loadEpisodesForSeason(season);
+              let nl = getLinks(season, episode);
+              document.getElementById('playerIframe').src = nl.s1;
+            };
+            seasonTabsContainer.appendChild(btn);
+          });
+        }
+      }).catch(e => {});
+
     const loadEpisodesForSeason = async (sNum) => {
       try {
         const epRes = await fetch(`https://api.themoviedb.org/3/tv/${id}/season/${sNum}?api_key=${API_KEY}`);
@@ -628,24 +658,13 @@ async function openModal(item, type) {
             };
             epContainer.appendChild(epCard);
           });
+        } else {
+          epContainer.innerHTML = '<span style="font-size:11px; color:#888;">No episodes available.</span>';
         }
       } catch (e) {}
     };
 
     loadEpisodesForSeason(season);
-
-    document.querySelectorAll('.season-tab-btn').forEach(btn => {
-      btn.onclick = (e) => {
-        document.querySelectorAll('.season-tab-btn').forEach(b => { b.style.background = '#222'; b.classList.remove('active'); });
-        e.target.style.background = '#e50914';
-        e.target.classList.add('active');
-        season = parseInt(e.target.getAttribute('data-season'));
-        episode = 1;
-        loadEpisodesForSeason(season);
-        let nl = getLinks(season, episode);
-        document.getElementById('playerIframe').src = nl.s1;
-      };
-    });
 
     const nextEpBtn = document.getElementById('customNextEp');
     if (nextEpBtn) {
