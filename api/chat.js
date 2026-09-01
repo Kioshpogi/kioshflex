@@ -11,11 +11,18 @@ export default async function handler(req) {
     const { text } = await req.json();
     const API_KEY = process.env.GEMINI_API_KEY; 
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key=${API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:streamGenerateContent?alt=sse&key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: text }] }]
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: "You are Kioshflex AI Assistant, a helpful movie streaming assistant. Always reply concisely in English. " + text }
+            ]
+          }
+        ]
       })
     });
 
