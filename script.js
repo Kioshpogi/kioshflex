@@ -773,29 +773,33 @@ async function handleUserMessage() {
   appendMessage(text, 'user');
   aiChatInput.value = '';
 
-  appendMessage("Nag-iisip...", 'bot');
+  appendMessage("Thinking...", 'bot');
 
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: `Ikaw ang AI assistant ng KIOSHFLEX, isang streaming website. Sagutin ito nang maikli at nasa Filipino: ${text}` }] }]
+        contents: [{
+          parts: [{ text: `You are the AI assistant for KIOSHFLEX, a streaming website. Answer concisely and in English: ${text}` }]
+        }]
       })
     });
 
     const data = await response.json();
-    if (data.candidates && data.candidates[0].content) {
+    aiChatMessages.lastChild.remove();
+
+    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
       const aiReply = data.candidates[0].content.parts[0].text;
-      aiChatMessages.lastChild.remove();
       appendMessage(aiReply, 'bot');
+    } else if (data.error) {
+      appendMessage(`Error: ${data.error.message}`, 'bot');
     } else {
-      aiChatMessages.lastChild.remove();
-      appendMessage("May error sa pag-proseso ng tugon mula sa AI.", 'bot');
+      appendMessage("Sorry, there was an error processing the AI response.", 'bot');
     }
   } catch (error) {
     aiChatMessages.lastChild.remove();
-    appendMessage("Pasensya na, nagkaproblema sa pagkonekta sa AI API key.", 'bot');
+    appendMessage("Sorry, network error connecting to the AI API.", 'bot');
   }
 }
 
