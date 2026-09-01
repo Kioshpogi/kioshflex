@@ -4,14 +4,17 @@ export const config = {
 
 export default async function handler(req) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
     const { text } = await req.json();
     const API_KEY = process.env.GEMINI_API_KEY; 
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent?alt=sse&key=${API_KEY}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -19,17 +22,17 @@ export default async function handler(req) {
       })
     });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(errText);
-    }
+    const data = await response.json();
 
-    return new Response(response.body, {
+    return new Response(JSON.stringify(data), {
       status: 200,
-      headers: { 'Content-Type': 'text/event-stream' },
+      headers: { 'Content-Type': 'application/json' },
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 }
