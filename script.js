@@ -765,10 +765,11 @@ if (aiChatToggleBtn && aiChatBox) {
   });
 }
 
-// Simple Markdown parser for bold and italics
+// Updated Markdown parser for headers, bold, and italics
 function parseMarkdown(text) {
   if (!text) return '';
   return text
+    .replace(/###\s*(.*?)/g, '<strong style="display:block; margin-top:8px; color:#fff;">$1</strong>')
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>');
 }
