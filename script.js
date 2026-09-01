@@ -1,5 +1,5 @@
 const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; // TMDB API Key para sa mga Pelikula
-const AI_API_KEY = 'AQ.Ab8RN6J_DjeS2KxDMN22m87aRdm-bIO0G-5ruyLzeAI1URaQKQ'; // I-replace ito ng iyong totoong Gemini AI API Key
+const AI_API_KEY = 'AQ.Ab8RN6IReDuLLKU2SmjZGI0owmp3hDWv6CCmfog5ysNj14Xq2Q'; // I-replace ito ng iyong totoong Gemini AI API Key
 
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
