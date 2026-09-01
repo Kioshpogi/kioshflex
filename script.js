@@ -785,10 +785,14 @@ async function handleUserMessage() {
     });
 
     const data = await response.json();
-    const aiReply = data.candidates[0].content.parts[0].text;
-    
-    aiChatMessages.lastChild.remove();
-    appendMessage(aiReply, 'bot');
+    if (data.candidates && data.candidates[0].content) {
+      const aiReply = data.candidates[0].content.parts[0].text;
+      aiChatMessages.lastChild.remove();
+      appendMessage(aiReply, 'bot');
+    } else {
+      aiChatMessages.lastChild.remove();
+      appendMessage("May error sa pag-proseso ng tugon mula sa AI.", 'bot');
+    }
   } catch (error) {
     aiChatMessages.lastChild.remove();
     appendMessage("Pasensya na, nagkaproblema sa pagkonekta sa AI API key.", 'bot');
