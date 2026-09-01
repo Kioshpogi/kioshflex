@@ -765,6 +765,14 @@ if (aiChatToggleBtn && aiChatBox) {
   });
 }
 
+// Simple Markdown parser for bold and italics
+function parseMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+}
+
 async function handleUserMessage() {
   const text = aiChatInput.value.trim();
   if (!text) return;
@@ -808,7 +816,13 @@ function appendMessage(text, sender) {
   if (!aiChatMessages) return;
   const msgDiv = document.createElement('div');
   msgDiv.style.cssText = `padding: 8px 12px; border-radius: 8px; max-width: 85%; line-height: 1.4; word-break: break-word; white-space: pre-wrap; ${sender === 'user' ? 'background: #e50914; color: #fff; align-self: flex-end;' : 'background: #222; color: #ddd; align-self: flex-start;'}`;
-  msgDiv.textContent = text;
+  
+  if (sender === 'user') {
+    msgDiv.textContent = text;
+  } else {
+    msgDiv.innerHTML = parseMarkdown(text);
+  }
+
   aiChatMessages.appendChild(msgDiv);
   aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
 }
