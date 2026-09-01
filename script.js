@@ -2,7 +2,7 @@
 const aiChatInput = document.getElementById('aiChatInput');
 const aiChatSend = document.getElementById('aiChatSend');
 const aiChatMessages = document.getElementById('aiChatMessages');
-const aiChatToggleBt = document.getElementById('aiChatToggleBtn');
+const aiChatToggleBtn = document.getElementById('aiChatToggleBtn');
 const aiChatBox = document.getElementById('aiChatBox');
 const aiChatClose = document.getElementById('aiChatClose');
 
@@ -253,18 +253,10 @@ async function loadHeroAndTop10() {
                     <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
                     <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
                   </div>
-                  <div style="display: flex; gap: 10px; align-items: center;">
-                    <button id="heroPlayBtnDynamic" style="background: #e50914; color: #fff; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px;">▶ Play</button>
-                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
-                  </div>
+                  <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
                 </div>
               `;
               
-              const dynamicPlayBtn = document.getElementById('heroPlayBtnDynamic');
-              if (dynamicPlayBtn && featuredItem) {
-                dynamicPlayBtn.onclick = () => openModal(featuredItem, mediaType);
-              }
-
               const unmuteBtn = document.getElementById('unmuteBtn');
               const heroIframe = document.getElementById('heroIframe');
               if (unmuteBtn && heroIframe) {
@@ -758,8 +750,8 @@ closeModal.addEventListener('click', () => { modal.style.display = 'none'; modal
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
 // --- AI Chat Assistant Integration ---
-if (aiChatToggleBt && aiChatBox) {
-  aiChatToggleBt.addEventListener('click', () => {
+if (aiChatToggleBtn && aiChatBox) {
+  aiChatToggleBtn.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
   });
 
@@ -811,6 +803,7 @@ async function handleUserMessage() {
       throw new Error(errorMsg);
     }
 
+    // Handle potential standard JSON responses or fallbacks
     if (rawText.trim().startsWith('{')) {
       try {
         const parsedJson = JSON.parse(rawText);
@@ -828,6 +821,7 @@ async function handleUserMessage() {
       }
     }
 
+    // Parse Server-Sent Events (SSE) stream chunks
     const lines = rawText.split('\n');
     for (const line of lines) {
       const trimmed = line.trim();
