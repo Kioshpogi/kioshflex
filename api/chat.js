@@ -19,10 +19,16 @@ export default async function handler(req) {
           {
             role: "user",
             parts: [
-              { text: "You are Kioshflex AI Assistant, a helpful movie streaming assistant. Always reply concisely in English. " + text }
+              // Tinanggal na natin yung pilit na pag-uulit ng greeting at ginawang system instruction na lang
+              { text: text }
             ]
           }
-        ]
+        ],
+        systemInstruction: {
+          parts: [
+            { text: "You are Kioshflex AI Assistant, a helpful movie streaming assistant. Always reply concisely in English. Do not repeat a full introduction greeting unless it is the very first message." }
+          ]
+        }
       })
     });
 
