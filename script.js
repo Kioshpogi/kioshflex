@@ -1,4 +1,4 @@
-// Kioshflex AI Chat Script & Main Functionality
+// Kioshflex AI Chat Script & Main Functionality (Streaming Enabled)
 const aiChatInput = document.getElementById('aiChatInput');
 const aiChatSend = document.getElementById('aiChatSend');
 const aiChatMessages = document.getElementById('aiChatMessages');
@@ -749,7 +749,7 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration (Vercel Edge Non-Streaming JSON) ---
+// --- AI Chat Assistant Integration (Vercel Edge Streaming SSE) ---
 if (aiChatToggleBtn && aiChatBox) {
   aiChatToggleBtn.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
@@ -781,6 +781,7 @@ async function handleUserMessage() {
   aiChatInput.value = '';
   
   let aiMessageElement = appendMessageToUI('bot', 'Nag-iisip...');
+  let fullResponseText = '';
 
   try {
     const response = await fetch('/api/chat', {
@@ -789,12 +790,43 @@ async function handleUserMessage() {
       body: JSON.stringify({ text: text })
     });
 
-    const data = await response.json();
-    
-    if (!response.ok) throw new Error(data.error || 'May problema sa API.');
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.error || 'May problema sa API.');
+    }
 
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Walang naging sagot.';
-    updateMessageInUI(aiMessageElement, replyText);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.startsWith('data:')) {
+          const jsonStr = trimmed.replace(/^data:\s*/, '');
+          if (jsonStr === '[DONE]') continue;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const chunkText = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (chunkText) {
+              fullResponseText += chunkText;
+              updateMessageInUI(aiMessageElement, fullResponseText);
+            }
+          } catch (e) {}
+        }
+      }
+    }
+
+    if (!fullResponseText) {
+      updateMessageInUI(aiMessageElement, 'Walang naging sagot.');
+    }
 
   } catch (error) {
     updateMessageInUI(aiMessageElement, 'Pasensya na, nagka-error: ' + error.message);
