@@ -11,6 +11,9 @@ export default async function handler(req) {
     const { text } = await req.json();
     const API_KEY = process.env.GEMINI_API_KEY; 
 
+    // Mahigpit na ipinagbabawal ang pagbati sa simula ng mensahe
+    const strictPrompt = `[CRITICAL RULE: Never include introductory greetings like "Hello", "Hi", or "I'm your Kioshflex AI Assistant" in your response. Answer the user directly and concisely in English.]\n\nUser: ${text}`;
+
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent?alt=sse&key=${API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -19,7 +22,7 @@ export default async function handler(req) {
           {
             role: "user",
             parts: [
-              { text: "You are Kioshflex AI Assistant, a helpful movie streaming assistant. Always reply concisely in English. " + text }
+              { text: strictPrompt }
             ]
           }
         ]
