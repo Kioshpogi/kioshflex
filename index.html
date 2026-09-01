@@ -26,6 +26,7 @@
     </div>
     <div class="header-actions">
       <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
+      <button id="aiChatToggleBtn" class="header-btn" style="background:#e50914; color:#fff;">AI Chat</button>
       <button id="themeToggleBtn" class="header-btn">Theme</button>
     </div>
   </header>
@@ -112,6 +113,21 @@
       </div>
     </div>
     <button id="searchBtn" style="background-color: #dc2626; color: #fff; border: none; border-radius: 9999px; padding: 10px 20px; font-weight: 500; cursor: pointer;">Search</button>
+  </div>
+
+  <!-- AI Chat Box Floating UI -->
+  <div id="aiChatBox" style="position: fixed; bottom: 20px; right: 20px; width: 320px; height: 400px; background: #121212; border: 1px solid #27272a; border-radius: 12px; display: none; flex-direction: column; z-index: 10000; box-shadow: 0 10px 25px rgba(0,0,0,0.8);">
+    <div style="padding: 10px 14px; background: #18181b; border-top-left-radius: 12px; border-top-right-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a;">
+      <span style="color: #fff; font-weight: bold; font-size: 13px;">KIOSHFLEX AI Assistant</span>
+      <button id="aiChatClose" style="background: transparent; border: none; color: #aaa; font-size: 16px; cursor: pointer;">&times;</button>
+    </div>
+    <div id="aiChatMessages" style="flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
+      <div style="background: #222; color: #ddd; padding: 8px 12px; border-radius: 8px; align-self: flex-start;">Kamusta! Ako ang AI assistant mo. Anong gusto mong panoorin ngayon?</div>
+    </div>
+    <div style="padding: 10px; border-top: 1px solid #27272a; display: flex; gap: 6px; background: #18181b; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+      <input type="text" id="aiChatInput" placeholder="Magtanong dito..." style="flex: 1; background: #121212; border: 1px solid #27272a; border-radius: 6px; padding: 6px 10px; color: #fff; font-size: 12px; outline: none;">
+      <button id="aiChatSend" style="background: #e50914; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;">Ipadala</button>
+    </div>
   </div>
 
   <div id="heroBanner" class="hero-banner" style="display: none;">

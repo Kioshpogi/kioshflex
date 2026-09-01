@@ -1,4 +1,6 @@
-const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
+const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; // TMDB API Key para sa mga Pelikula
+const AI_API_KEY = ' '; // I-replace ito ng iyong totoong Gemini AI API Key
+
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
 
@@ -741,7 +743,7 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration ---
+// --- AI Chat Assistant Integration (Gemini AI API) ---
 const aiChatToggleBtn = document.getElementById('aiChatToggleBtn');
 const aiChatBox = document.getElementById('aiChatBox');
 const aiChatClose = document.getElementById('aiChatClose');
@@ -771,37 +773,25 @@ async function handleUserMessage() {
   appendMessage(text, 'user');
   aiChatInput.value = '';
 
-  const lowerText = text.toLowerCase();
-  let reply = "Hmm, hindi ko masyadong naintindihan. Subukan mong magtanong ng tulad ng: 'Gusto ko ng comedy movie' o 'Anong trending ngayon?'";
-  let fetchQueryUrl = '';
+  appendMessage("Nag-iisip...", 'bot');
 
-  if (lowerText.includes('comedy') || lowerText.includes('nakakatawa') || lowerText.includes('funny')) {
-    reply = "Eto ang ilang comedy movies na siguradong magpapasaya sa'yo:";
-    fetchQueryUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=35`;
-  } else if (lowerText.includes('horror') || lowerText.includes('matakot') || lowerText.includes('multo') || lowerText.includes('scary')) {
-    reply = "Kaya mo bang tapusin ang mga horror movies na ito? Eto para sa'yo:";
-    fetchQueryUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=27`;
-  } else if (lowerText.includes('action') || lowerText.includes('barilan') || lowerText.includes('pulis')) {
-    reply = "Narito ang mga action-packed movies na puno ng bakbakan:";
-    fetchQueryUrl = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=28`;
-  } else if (lowerText.includes('trending') || lowerText.includes('sikat') || lowerText.includes('panoodin')) {
-    reply = "Eto ang mga pinakasikat at trending ngayong linggo:";
-    fetchQueryUrl = `https://api.themoviedb.org/3/trending/all/week?api_key=${API_KEY}`;
-  }
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${AI_API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `Ikaw ang AI assistant ng KIOSHFLEX, isang streaming website. Sagutin ito nang maikli at nasa Filipino: ${text}` }] }]
+      })
+    });
 
-  appendMessage(reply, 'bot');
-
-  if (fetchQueryUrl) {
-    try {
-      const res = await fetch(fetchQueryUrl);
-      const data = await res.json();
-      if (data.results && data.results.length > 0) {
-        showMedia(data.results.slice(0, 6), currentType, false);
-        sectionTitle.textContent = `AI Recommendation: "${text}"`;
-        carouselSection.style.display = 'none';
-        heroBanner.style.display = 'none';
-      }
-    } catch (e) {}
+    const data = await response.json();
+    const aiReply = data.candidates[0].content.parts[0].text;
+    
+    aiChatMessages.lastChild.remove();
+    appendMessage(aiReply, 'bot');
+  } catch (error) {
+    aiChatMessages.lastChild.remove();
+    appendMessage("Pasensya na, nagkaproblema sa pagkonekta sa AI API key.", 'bot');
   }
 }
 
