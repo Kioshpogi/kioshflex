@@ -1,46 +1,42 @@
-export const config = {
-  runtime: 'edge',
-};
+import { GoogleGenAI } from '@google/genai';
 
-export default async function handler(req) {
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { text } = await req.json();
-    const API_KEY = process.env.GEMINI_API_KEY; 
-
-    // Mahigpit na ipinagbabawal ang pagbati sa simula ng mensahe
-    const strictPrompt = `[CRITICAL RULE: Never include introductory greetings like "Hello", "Hi", or "I'm your Kioshflex AI Assistant" in your response. Answer the user directly and concisely in English.]\n\nUser: ${text}`;
-
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:streamGenerateContent?alt=sse&key=${API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: strictPrompt }
-            ]
-          }
-        ]
-      })
-    });
-
-    const responseText = await response.text();
-
-    if (!response.ok) {
-      throw new Error(responseText);
+    const { text } = req.body;
+    if (!text) {
+      return res.status(400).json({ error: 'Text prompt is required' });
     }
 
-    return new Response(responseText, {
-      status: 200,
-      headers: { 'Content-Type': 'text/event-stream' },
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    const responseStream = await ai.models.generateContentStream({
+      model: 'gemini-2.5-flash',
+      contents: text,
     });
 
+    for await (const chunk of responseStream) {
+      const chunkText = chunk.text;
+      if (chunkText) {
+        res.write(`data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: chunkText }] } }] })}\n\n`);
+      }
+    }
+
+    res.write('data: [DONE]\n\n');
+    res.end();
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
+    console.error('AI Error:', error);
+    if (!res.headersSent) {
+      res.status(500).json({ error: error.message || 'Internal server error' });
+    } else {
+      res.end();
+    }
   }
 }
