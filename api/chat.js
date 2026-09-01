@@ -19,12 +19,13 @@ export default async function handler(req) {
       })
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(errText);
+      throw new Error(responseText);
     }
 
-    return new Response(response.body, {
+    return new Response(responseText, {
       status: 200,
       headers: { 'Content-Type': 'text/event-stream' },
     });
