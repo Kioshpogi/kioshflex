@@ -1,4 +1,4 @@
-// Kioshflex AI Chat Script
+// Kioshflex AI Chat Script & Main Functionality
 const aiChatInput = document.getElementById('aiChatInput');
 const aiChatSend = document.getElementById('aiChatSend');
 const aiChatMessages = document.getElementById('aiChatMessages');
@@ -6,7 +6,6 @@ const aiChatToggleBtn = document.getElementById('aiChatToggleBtn');
 const aiChatBox = document.getElementById('aiChatBox');
 const aiChatClose = document.getElementById('aiChatClose');
 
-// Iba pang mga element at TMDB functions mo rito...
 const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
@@ -783,18 +782,24 @@ async function handleUserMessage() {
     });
 
     const data = await response.json();
-    aiChatMessages.lastChild.remove();
+    if (aiChatMessages.lastChild) aiChatMessages.lastChild.remove();
 
-    if (data.candidates && data.candidates[0].content && data.candidates[0].content.parts[0].text) {
-      const aiReply = data.candidates[0].content.parts[0].text;
-      appendMessage(aiReply, 'bot');
+    let aiReply = '';
+    if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+      aiReply = data.candidates[0].content.parts[0].text;
+    } else if (data.text) {
+      aiReply = data.text;
+    } else if (data.reply) {
+      aiReply = data.reply;
     } else if (data.error) {
-      appendMessage(`Error: ${data.error.message || 'Maling configuration'}`, 'bot');
+      aiReply = `Error: ${data.error.message || data.error}`;
     } else {
-      appendMessage("Sorry, there was an error processing the AI response.", 'bot');
+      aiReply = "Sorry, I couldn't process that response.";
     }
+
+    appendMessage(aiReply, 'bot');
   } catch (error) {
-    aiChatMessages.lastChild.remove();
+    if (aiChatMessages.lastChild) aiChatMessages.lastChild.remove();
     appendMessage("Sorry, network error connecting to the AI API.", 'bot');
   }
 }
@@ -802,7 +807,7 @@ async function handleUserMessage() {
 function appendMessage(text, sender) {
   if (!aiChatMessages) return;
   const msgDiv = document.createElement('div');
-  msgDiv.style.cssText = `padding: 8px 12px; border-radius: 8px; max-width: 80%; line-height: 1.4; ${sender === 'user' ? 'background: #e50914; color: #fff; align-self: flex-end;' : 'background: #222; color: #ddd; align-self: flex-start;'}`;
+  msgDiv.style.cssText = `padding: 8px 12px; border-radius: 8px; max-width: 85%; line-height: 1.4; word-break: break-word; white-space: pre-wrap; ${sender === 'user' ? 'background: #e50914; color: #fff; align-self: flex-end;' : 'background: #222; color: #ddd; align-self: flex-start;'}`;
   msgDiv.textContent = text;
   aiChatMessages.appendChild(msgDiv);
   aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
