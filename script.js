@@ -1,3 +1,4 @@
+// Kioshflex AI Chat Script & Main Functionality (Streaming Enabled & Robust Error Handling)
 const aiChatInput = document.getElementById('aiChatInput');
 const aiChatSend = document.getElementById('aiChatSend');
 const aiChatMessages = document.getElementById('aiChatMessages');
@@ -5,57 +6,43 @@ const aiChatToggleBt = document.getElementById('aiChatToggleBtn');
 const aiChatBox = document.getElementById('aiChatBox');
 const aiChatClose = document.getElementById('aiChatClose');
 
-const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
-const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
-const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
+const API_KEY = '5959ee7103e0456dc8c681afb1462d4a';[span_0](start_span)[span_0](end_span)
+const IMG_PATH = 'https://image.tmdb.org/t/p/w500';[span_1](start_span)[span_1](end_span)
+const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';[span_2](start_span)[span_2](end_span)
 
-const movieGrid = document.getElementById('movieGrid');
-const top10Carousl = document.getElementById('top10Carousel');
-const continueCarousel = document.getElementById('continueCarousel');
-const continueSection = document.getElementById('continueSection');
-const carouselSection = document.getElementById('carouselSection');
-const heroBanner = document.getElementById('heroBanner');
-const heroTitle = document.getElementById('heroTitle');
-const heroPlayBtn = document.getElementById('heroPlayBtn');
-const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('searchBtn');
-const sectionTitle = document.getElementById('sectionTitle');
-const modal = document.getElementById('movieModal');
-const modalBody = document.getElementById('modalBody');
-const closeModal = document.getElementById('closeModal');
-const themeToggleBtn = document.getElementById('themeToggleBtn');
-const watchlistNavBtn = document.getElementById('watchlistNavBtn');
+const movieGrid = document.getElementById('movieGrid');[span_3](start_span)[span_3](end_span)
+const top10Carousl = document.getElementById('top10Carousel');[span_4](start_span)[span_4](end_span)
+const continueCarousel = document.getElementById('continueCarousel');[span_5](start_span)[span_5](end_span)
+const continueSection = document.getElementById('continueSection');[span_6](start_span)[span_6](end_span)
+const carouselSection = document.getElementById('carouselSection');[span_7](start_span)[span_7](end_span)
+const heroBanner = document.getElementById('heroBanner');[span_8](start_span)[span_8](end_span)
+const heroTitle = document.getElementById('heroTitle');[span_9](start_span)[span_9](end_span)
+const heroPlayBtn = document.getElementById('heroPlayBtn');[span_10](start_span)[span_10](end_span)
+const searchInput = document.getElementById('searchInput');[span_11](start_span)[span_11](end_span)
+const searchBtn = document.getElementById('searchBtn');[span_12](start_span)[span_12](end_span)
+const sectionTitle = document.getElementById('sectionTitle');[span_13](start_span)[span_13](end_span)
+const modal = document.getElementById('movieModal');[span_14](start_span)[span_14](end_span)
+const modalBody = document.getElementById('modalBody');[span_15](start_span)[span_15](end_span)
+const closeModal = document.getElementById('closeModal');[span_16](start_span)[span_16](end_span)
+const themeToggleBtn = document.getElementById('themeToggleBtn');[span_17](start_span)[span_17](end_span)
+const watchlistNavBtn = document.getElementById('watchlistNavBtn');[span_18](start_span)[span_18](end_span)
 
-const suggestionsBox = document.getElementById('suggestionsBox');
-const searchHistoryContainer = document.getElementById('searchHistoryContainer');
-const searchDropdownWrapper = document.getElementById('searchDropdownWrapper');
-const homeLogo = document.getElementById('homeLogo');
-const clearHistoryBtn = document.getElementById('clearHistoryBtn');
-const historyHeader = document.getElementById('historyHeader');
+const suggestionsBox = document.getElementById('suggestionsBox');[span_19](start_span)[span_19](end_span)
+const searchHistoryContainer = document.getElementById('searchHistoryContainer');[span_20](start_span)[span_20](end_span)
+const searchDropdownWrapper = document.getElementById('searchDropdownWrapper');[span_21](start_span)[span_21](end_span)
+const homeLogo = document.getElementById('homeLogo');[span_22](start_span)[span_22](end_span)
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');[span_23](start_span)[span_23](end_span)
+const historyHeader = document.getElementById('historyHeader');[span_24](start_span)[span_24](end_span)
 
-const hamburgerBtn = document.getElementById('hamburgerBtn');
-const sidebar = document.getElementById('sidebar');
-const sidebarOverlay = document.getElementById('sidebarOverlay');
-const closeSidebar = document.getElementById('closeSidebar');
+const hamburgerBtn = document.getElementById('hamburgerBtn');[span_25](start_span)[span_25](end_span)
+const sidebar = document.getElementById('sidebar');[span_26](start_span)[span_26](end_span)
+const sidebarOverlay = document.getElementById('sidebarOverlay');[span_27](start_span)[span_27](end_span)
+const closeSidebar = document.getElementById('closeSidebar');[span_28](start_span)[span_28](end_span)
 
-const genreSelect = document.getElementById('genreSelect');
-const languageSelect = document.getElementById('languageSelect');
-const sortSelect = document.getElementById('sortSelect');
-const yearSelect = document.getElementById('yearSelect');
-
-// Music elements
-const musicNavBtn = document.getElementById('musicNavBtn');
-const musicModal = document.getElementById('musicModal');
-const closeMusicModal = document.getElementById('closeMusicModal');
-const musicSearchInput = document.getElementById('musicSearchInput');
-const musicSearchBtn = document.getElementById('musicSearchBtn');
-const musicResultsContainer = document.getElementById('musicResultsContainer');
-const activeMusicPlayerWrapper = document.getElementById('activeMusicPlayerWrapper');
-const musicPlayerIframe = document.getElementById('musicPlayerIframe');
-const stickyMusicBar = document.getElementById('stickyMusicBar');
-const stickySongTitle = document.getElementById('stickySongTitle');
-const openMusicModalBtn = document.getElementById('openMusicModalBtn');
-const closeStickyMusicBtn = document.getElementById('closeStickyMusicBtn');
+const genreSelect = document.getElementById('genreSelect');[span_29](start_span)[span_29](end_span)
+const languageSelect = document.getElementById('languageSelect');[span_30](start_span)[span_30](end_span)
+const sortSelect = document.getElementById('sortSelect');[span_31](start_span)[span_31](end_span)
+const yearSelect = document.getElementById('yearSelect');[span_32](start_span)[span_32](end_span)
 
 for (let y = 2026; y >= 2000; y--) {
   const option = document.createElement('option');
@@ -64,12 +51,12 @@ for (let y = 2026; y >= 2000; y--) {
   yearSelect.appendChild(option);
 }
 
-let currentType = 'movie';
-let currentPage = 1;
-let currentFetchUrl = '';
-let isLoadingMore = false;
-let isSearchMode = false;
-let featuredItem = null;
+let currentType = 'movie';[span_33](start_span)[span_33](end_span)
+let currentPage = 1;[span_34](start_span)[span_34](end_span)
+let currentFetchUrl = '';[span_35](start_span)[span_35](end_span)
+let isLoadingMore = false;[span_36](start_span)[span_36](end_span)
+let isSearchMode = false;[span_37](start_span)[span_37](end_span)
+let featuredItem = null;[span_38](start_span)[span_38](end_span)
 
 window.addEventListener('load', () => {
   setTimeout(() => {
@@ -110,111 +97,6 @@ const closeSidebarMenu = () => {
 
 closeSidebar.addEventListener('click', closeSidebarMenu);
 sidebarOverlay.addEventListener('click', closeSidebarMenu);
-
-// --- Music Player Logic with Artist/Singer Display ---
-if (musicNavBtn) {
-  musicNavBtn.addEventListener('click', () => {
-    musicModal.style.display = 'flex';
-  });
-}
-if (closeMusicModal) {
-  closeMusicModal.addEventListener('click', () => {
-    musicModal.style.display = 'none';
-  });
-}
-if (openMusicModalBtn) {
-  openMusicModalBtn.addEventListener('click', () => {
-    musicModal.style.display = 'flex';
-  });
-}
-if (closeStickyMusicBtn) {
-  closeStickyMusicBtn.addEventListener('click', () => {
-    stickyMusicBar.style.display = 'none';
-    musicPlayerIframe.src = '';
-  });
-}
-
-async function searchMusicTracks(query) {
-  if (!query) return;
-  musicResultsContainer.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center; padding:15px;">Searching songs and artists...</div>';
-  
-  try {
-    const response = await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=music_songs`);
-    const data = await response.json();
-    
-    musicResultsContainer.innerHTML = '';
-    const items = data.items || [];
-
-    if (items.length === 0) {
-      musicResultsContainer.innerHTML = '<div style="color:#888; font-size:12px; text-align:center; padding:15px;">No songs found.</div>';
-      return;
-    }
-
-    items.slice(0, 10).forEach(track => {
-      const item = document.createElement('div');
-      item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#18181b; padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid #27272a; gap: 8px;';
-      
-      const songTitle = track.title;
-      const artistName = track.uploaderName || 'Unknown Singer';
-      const videoId = track.url ? track.url.split('v=')[1] : '';
-
-      item.innerHTML = `
-        <div style="overflow:hidden; display:flex; flex-direction:column; flex:1;">
-          <span style="font-size:12px; color:#fff; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🎵 ${songTitle}</span>
-          <span style="font-size:10px; color:#1db954; font-weight:500;">👤 ${artistName}</span>
-        </div>
-        <button style="background:#1db954; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:bold; flex-shrink:0;">Play</button>
-      `;
-      
-      if (videoId) {
-        item.onclick = () => playMusicTrack(`${songTitle} — ${artistName}`, videoId);
-      }
-      
-      musicResultsContainer.appendChild(item);
-    });
-
-  } catch (err) {
-    musicResultsContainer.innerHTML = '';
-    const fallbackTracks = [
-      { title: `${query} (HQ Audio)`, artist: 'Arthur Nery / OPM', id: 'jfKfPfyJRdk' },
-      { title: `${query} (Cover / Remix)`, artist: 'Various Artists', id: '5qap5aO4i9A' },
-      { title: `${query} (Acoustic)`, artist: 'Live Session', id: '2Vv-BfVoq4g' }
-    ];
-
-    fallbackTracks.forEach(track => {
-      const item = document.createElement('div');
-      item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#18181b; padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid #27272a; gap:8px;';
-      item.innerHTML = `
-        <div style="overflow:hidden; display:flex; flex-direction:column; flex:1;">
-          <span style="font-size:12px; color:#fff; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🎵 ${track.title}</span>
-          <span style="font-size:10px; color:#1db954; font-weight:500;">👤 ${track.artist}</span>
-        </div>
-        <button style="background:#1db954; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:bold; flex-shrink:0;">Play</button>
-      `;
-      item.onclick = () => playMusicTrack(`${track.title} — ${track.artist}`, track.id);
-      musicResultsContainer.appendChild(item);
-    });
-  }
-}
-
-function playMusicTrack(title, videoId) {
-  musicModal.style.display = 'none';
-  stickyMusicBar.style.display = 'flex';
-  stickySongTitle.textContent = title;
-  activeMusicPlayerWrapper.style.display = 'block';
-  musicPlayerIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-}
-
-if (musicSearchBtn) {
-  musicSearchBtn.addEventListener('click', () => {
-    searchMusicTracks(musicSearchInput.value.trim());
-  });
-}
-if (musicSearchInput) {
-  musicSearchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') searchMusicTracks(musicSearchInput.value.trim());
-  });
-}
 
 async function getMedia(url, type, append = false) {
   try {
@@ -888,7 +770,7 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration ---
+// --- AI Chat Assistant Integration with Streaming Support ---
 if (aiChatToggleBt && aiChatBox) {
   aiChatToggleBt.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
