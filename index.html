@@ -171,14 +171,19 @@
         <button id="ytSearchBtn" style="background: var(--accent-color); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">Search</button>
       </div>
 
-      <div id="ytPlayerContainer" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-        <iframe id="ytAudioFrame" width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      <!-- YouTube Player Container with Error Fallback Message -->
+      <div id="ytPlayerContainer" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center;">
+        <div id="youtube-player" style="width: 100%; height: 100%;"></div>
+        <div id="ytErrorMessage" style="display: none; color: #ff4444; font-size: 13px; text-align: center; padding: 15px; position: absolute; z-index: 5; background: rgba(0,0,0,0.85); inset: 0; align-items: center; justify-content: center;">This video is unavailable or restricted. Please try another search.</div>
       </div>
       
       <div id="ytTrackTitle" style="font-size: 12px; color: var(--text-muted); margin-top: 10px; text-align: center;">No track playing</div>
     </div>
   </div>
 
+  <!-- YouTube IFrame API Script -->
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <!-- Ihiwalay ang JavaScript sa pamamagitan ng external file na ito -->
   <script src="script.js"></script>
 </body>
 </html>

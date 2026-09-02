@@ -115,7 +115,7 @@ const closeSidebarMenu = () => {
 if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarMenu);
 if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
-// --- YouTube Music Player Integration (Updated for stability) ---
+// --- YouTube Music Player Integration ---
 if (openMusicModalBtn) {
   openMusicModalBtn.addEventListener('click', () => {
     if (ytMusicModal) ytMusicModal.style.display = 'flex';
@@ -125,7 +125,7 @@ if (openMusicModalBtn) {
 if (closeYtMusicModal) {
   closeYtMusicModal.addEventListener('click', () => {
     if (ytMusicModal) ytMusicModal.style.display = 'none';
-    if (ytAudioFrame) ytAudioFrame.src = ''; // Stop audio when closing
+    if (ytAudioFrame) ytAudioFrame.src = '';
   });
 }
 
@@ -133,13 +133,9 @@ if (ytSearchBtn) {
   ytSearchBtn.addEventListener('click', () => {
     const query = ytSearchInput.value.trim();
     if(!query) return;
-    
     if (ytTrackTitle) ytTrackTitle.textContent = `Searching for "${query}"...`;
-    
-    // Paggamit ng youtube-nocookie at updated embed query parameters para maiwasan ang embedding restrictions
     const safeQuery = encodeURIComponent(query + " official audio");
     const searchUrl = `https://www.youtube-nocookie.com/embed?listType=search&list=${safeQuery}&autoplay=1`;
-    
     if (ytAudioFrame) ytAudioFrame.src = searchUrl;
     if (ytTrackTitle) ytTrackTitle.textContent = `Now Playing: ${query}`;
   });
@@ -147,9 +143,7 @@ if (ytSearchBtn) {
 
 if (ytSearchInput) {
   ytSearchInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-      ytSearchBtn.click();
-    }
+    if (e.key === 'Enter') ytSearchBtn.click();
   });
 }
 
@@ -230,15 +224,6 @@ function showMedia(items, type, append = false) {
     card.addEventListener('click', () => openModal(item, type));
 
     const quickBtn = card.querySelector('.quick-trailer-btn');
-    quickBtn.addEventListener('mouseenter', () => {
-      quickBtn.style.transform = 'scale(1.1)';
-      quickBtn.style.background = 'rgba(229, 9, 20, 0.85)';
-    });
-    quickBtn.addEventListener('mouseleave', () => {
-      quickBtn.style.transform = 'scale(1)';
-      quickBtn.style.background = 'rgba(20, 20, 20, 0.7)';
-    });
-
     quickBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const mediaId = e.target.getAttribute('data-id') || e.target.closest('.quick-trailer-btn').getAttribute('data-id');
@@ -286,7 +271,6 @@ async function loadHeroAndTop10() {
         featuredItem = validItems[randomIndex];
         const title = featuredItem.title || featuredItem.name;
         heroTitle.textContent = title;
-        
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
@@ -294,43 +278,6 @@ async function loadHeroAndTop10() {
         heroBanner.style.backgroundPosition = 'center';
         heroBanner.style.display = 'flex';
         if(heroPlayBtn) heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
-
-        setTimeout(async () => {
-          try {
-            const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${featuredItem.id}/videos?api_key=${API_KEY}`);
-            const vidData = await vidRes.json();
-            const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-            
-            if (trailer && heroBanner) {
-              heroBanner.innerHTML = `
-                <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
-                  <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
-                </div>
-                <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
-                <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
-                    <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
-                  </div>
-                  <div style="display: flex; gap: 10px; align-items: center;">
-                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
-                  </div>
-                </div>
-              `;
-              
-              const unmuteBtn = document.getElementById('unmuteBtn');
-              const heroIframe = document.getElementById('heroIframe');
-              if (unmuteBtn && heroIframe) {
-                let isMuted = true;
-                unmuteBtn.onclick = () => {
-                  isMuted = !isMuted;
-                  heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
-                  unmuteBtn.textContent = isMuted ? 'Muted Off' : 'Muted On';
-                };
-              }
-            }
-          } catch (e) {}
-        }, 800);
       }
 
       if(top10Carousl) {
@@ -360,7 +307,6 @@ function loadContinueWatching() {
       const card = document.createElement('div');
       card.classList.add('carousel-card');
       card.style.position = 'relative';
-      
       const badgeText = item.media_type === 'tv' && item.savedSeason ? `S${item.savedSeason} E${item.savedEpisode}` : '';
 
       card.innerHTML = `
@@ -595,6 +541,7 @@ window.addEventListener('scroll', () => {
   }
 });
 
+// --- ROBUST VIDEO PLAYER & MODAL INTEGRATION ---
 async function openModal(item, type) {
   if(!modalBody || !modal) return;
   const title = item.title || item.name;
@@ -651,15 +598,7 @@ async function openModal(item, type) {
     </div>
     
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
-      <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
-      ${type === 'tv' ? `
-      <div class="custom-player-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="customSkipBack" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">↺ 10s</button>
-          <button id="customSkipForward" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">10s ↻</button>
-        </div>
-        <button id="customNextEp" style="background:#e50914; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Next Ep ➔</button>
-      </div>` : ''}
+      <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="display:block; background:#000;"></iframe>
     </div>
     
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
@@ -740,18 +679,6 @@ async function openModal(item, type) {
     };
 
     loadEpisodesForSeason(season);
-
-    const nextEpBtn = document.getElementById('customNextEp');
-    if (nextEpBtn) {
-      nextEpBtn.onclick = () => {
-        episode++;
-        saveContinueWatching(item, type, season, episode);
-        let nl = getLinks(season, episode);
-        const playerIframeEl = document.getElementById('playerIframe');
-        if(playerIframeEl) playerIframeEl.src = nl.s1;
-        loadEpisodesForSeason(season);
-      };
-    }
   }
 
   try {
@@ -803,55 +730,6 @@ async function openModal(item, type) {
       e.target.style.background = inList ? '#e50914' : '#222';
     });
   }
-}
-
-async function openActorModal(personId) {
-  try {
-    const res = await fetch(`https://api.themoviedb.org/3/person/${personId}?api_key=${API_KEY}`);
-    const person = await res.json();
-    const creditsRes = await fetch(`https://api.themoviedb.org/3/person/${personId}/combined_credits?api_key=${API_KEY}`);
-    const creditsData = await creditsRes.json();
-    const profileImg = person.profile_path ? `https://image.tmdb.org/t/p/w300${person.profile_path}` : 'https://via.placeholder.com/150?text=No+Img';
-    
-    if(modalBody) {
-      modalBody.innerHTML = `
-        <button id="backToMediaBtn" style="background:#222; color:#fff; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; margin-bottom:12px;">&larr; Close</button>
-        <div style="display:flex; gap:15px; align-items:flex-start; margin-bottom:15px; flex-wrap:wrap;">
-          <img src="${profileImg}" alt="${person.name}" style="width:100px; height:150px; object-fit:cover; border-radius:8px;">
-          <div style="flex:1;">
-            <h3 style="color:#fff; font-size:18px; margin-bottom:5px;">${person.name}</h3>
-            <p style="color:#aaa; font-size:12px; margin-bottom:8px;"><strong>Born:</strong> ${person.birthday || 'N/A'}</p>
-            <p style="color:#bbb; font-size:11px; max-height:80px; overflow-y:auto; line-height:1.4;">${person.biography || 'No biography available.'}</p>
-          </div>
-        </div>
-        <h4 style="color:#fff; font-size:14px; margin-bottom:8px;">Filmography:</h4>
-        <div id="actorMoviesGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap:8px; max-height:200px; overflow-y:auto;">
-          ${creditsData.cast && creditsData.cast.length > 0 ? creditsData.cast.map(media => {
-            if(!media.poster_path) return '';
-            return `
-              <div class="actor-media-card" data-id="${media.id}" data-type="${media.media_type || 'movie'}" style="cursor:pointer;">
-                <img src="https://image.tmdb.org/t/p/w185${media.poster_path}" style="width:100%; border-radius:6px;" alt="${media.title || media.name}">
-                <span style="font-size:10px; color:#aaa; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${media.title || media.name}</span>
-              </div>
-            `;
-          }).join('') : '<p style="color:#aaa; font-size:11px;">No filmography found.</p>'}
-        </div>
-      `;
-    }
-
-    const backToMediaBtnEl = document.getElementById('backToMediaBtn');
-    if(backToMediaBtnEl) {
-      backToMediaBtnEl.addEventListener('click', () => { if(modal) modal.style.display = 'none'; });
-    }
-    
-    document.querySelectorAll('.actor-media-card').forEach(card => {
-      card.addEventListener('click', () => {
-        fetch(`https://api.themoviedb.org/3/${card.getAttribute('data-type')}/${card.getAttribute('data-id')}?api_key=${API_KEY}`)
-          .then(res => res.json())
-          .then(item => openModal(item, card.getAttribute('data-type')));
-      });
-    });
-  } catch (err) {}
 }
 
 window.changeServer = function(url, btn) {
