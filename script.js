@@ -115,7 +115,7 @@ const closeSidebarMenu = () => {
 if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarMenu);
 if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
-// --- YouTube Music Player Integration ---
+// --- YouTube Music Player Integration (Updated for stability) ---
 if (openMusicModalBtn) {
   openMusicModalBtn.addEventListener('click', () => {
     if (ytMusicModal) ytMusicModal.style.display = 'flex';
@@ -135,7 +135,11 @@ if (ytSearchBtn) {
     if(!query) return;
     
     if (ytTrackTitle) ytTrackTitle.textContent = `Searching for "${query}"...`;
-    const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query + " audio")}&autoplay=1`;
+    
+    // Paggamit ng youtube-nocookie at updated embed query parameters para maiwasan ang embedding restrictions
+    const safeQuery = encodeURIComponent(query + " official audio");
+    const searchUrl = `https://www.youtube-nocookie.com/embed?listType=search&list=${safeQuery}&autoplay=1`;
+    
     if (ytAudioFrame) ytAudioFrame.src = searchUrl;
     if (ytTrackTitle) ytTrackTitle.textContent = `Now Playing: ${query}`;
   });
