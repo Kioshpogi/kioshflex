@@ -27,9 +27,15 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .nav-left { display: flex; align-items: center; gap: 12px; }
 .hamburger-btn { background: none; border: none; color: var(--text-color); font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .logo { color: var(--accent-color); font-size: 20px; font-weight: 900; letter-spacing: 1.5px; }
-.header-actions { display: flex; gap: 8px; }
+.header-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .header-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
 .header-btn:hover { border-color: var(--accent-color); }
+
+.header-btn.music-active {
+  border-color: var(--accent-color);
+  background: rgba(229, 9, 20, 0.2);
+  color: var(--accent-color);
+}
 
 .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 200; }
 .sidebar { 

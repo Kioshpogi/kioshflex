@@ -25,6 +25,7 @@
       <div class="logo" id="homeLogo" style="cursor: pointer;">KIOSHFLEX</div>
     </div>
     <div class="header-actions">
+      <button id="musicToggleBtn" class="header-btn">🎵 Music: Off</button>
       <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
       <button id="aiChatToggleBtn" class="header-btn" style="background:#e50914; color:#fff;">AI Chat</button>
       <button id="themeToggleBtn" class="header-btn">Theme</button>
@@ -158,6 +159,11 @@
       <div id="modalBody"></div>
     </div>
   </div>
+
+  <!-- Background Music Element -->
+  <audio id="bgMusic" loop>
+    <source src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
+  </audio>
 
   <script src="script.js"></script>
 </body>
