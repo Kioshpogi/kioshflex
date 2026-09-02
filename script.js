@@ -6,43 +6,43 @@ const aiChatToggleBt = document.getElementById('aiChatToggleBtn');
 const aiChatBox = document.getElementById('aiChatBox');
 const aiChatClose = document.getElementById('aiChatClose');
 
-const API_KEY = '5959ee7103e0456dc8c681afb1462d4a';[span_0](start_span)[span_0](end_span)
-const IMG_PATH = 'https://image.tmdb.org/t/p/w500';[span_1](start_span)[span_1](end_span)
-const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';[span_2](start_span)[span_2](end_span)
+const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
+const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
+const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
 
-const movieGrid = document.getElementById('movieGrid');[span_3](start_span)[span_3](end_span)
-const top10Carousl = document.getElementById('top10Carousel');[span_4](start_span)[span_4](end_span)
-const continueCarousel = document.getElementById('continueCarousel');[span_5](start_span)[span_5](end_span)
-const continueSection = document.getElementById('continueSection');[span_6](start_span)[span_6](end_span)
-const carouselSection = document.getElementById('carouselSection');[span_7](start_span)[span_7](end_span)
-const heroBanner = document.getElementById('heroBanner');[span_8](start_span)[span_8](end_span)
-const heroTitle = document.getElementById('heroTitle');[span_9](start_span)[span_9](end_span)
-const heroPlayBtn = document.getElementById('heroPlayBtn');[span_10](start_span)[span_10](end_span)
-const searchInput = document.getElementById('searchInput');[span_11](start_span)[span_11](end_span)
-const searchBtn = document.getElementById('searchBtn');[span_12](start_span)[span_12](end_span)
-const sectionTitle = document.getElementById('sectionTitle');[span_13](start_span)[span_13](end_span)
-const modal = document.getElementById('movieModal');[span_14](start_span)[span_14](end_span)
-const modalBody = document.getElementById('modalBody');[span_15](start_span)[span_15](end_span)
-const closeModal = document.getElementById('closeModal');[span_16](start_span)[span_16](end_span)
-const themeToggleBtn = document.getElementById('themeToggleBtn');[span_17](start_span)[span_17](end_span)
-const watchlistNavBtn = document.getElementById('watchlistNavBtn');[span_18](start_span)[span_18](end_span)
+const movieGrid = document.getElementById('movieGrid');
+const top10Carousl = document.getElementById('top10Carousel');
+const continueCarousel = document.getElementById('continueCarousel');
+const continueSection = document.getElementById('continueSection');
+const carouselSection = document.getElementById('carouselSection');
+const heroBanner = document.getElementById('heroBanner');
+const heroTitle = document.getElementById('heroTitle');
+const heroPlayBtn = document.getElementById('heroPlayBtn');
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const sectionTitle = document.getElementById('sectionTitle');
+const modal = document.getElementById('movieModal');
+const modalBody = document.getElementById('modalBody');
+const closeModal = document.getElementById('closeModal');
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+const watchlistNavBtn = document.getElementById('watchlistNavBtn');
 
-const suggestionsBox = document.getElementById('suggestionsBox');[span_19](start_span)[span_19](end_span)
-const searchHistoryContainer = document.getElementById('searchHistoryContainer');[span_20](start_span)[span_20](end_span)
-const searchDropdownWrapper = document.getElementById('searchDropdownWrapper');[span_21](start_span)[span_21](end_span)
-const homeLogo = document.getElementById('homeLogo');[span_22](start_span)[span_22](end_span)
-const clearHistoryBtn = document.getElementById('clearHistoryBtn');[span_23](start_span)[span_23](end_span)
-const historyHeader = document.getElementById('historyHeader');[span_24](start_span)[span_24](end_span)
+const suggestionsBox = document.getElementById('suggestionsBox');
+const searchHistoryContainer = document.getElementById('searchHistoryContainer');
+const searchDropdownWrapper = document.getElementById('searchDropdownWrapper');
+const homeLogo = document.getElementById('homeLogo');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+const historyHeader = document.getElementById('historyHeader');
 
-const hamburgerBtn = document.getElementById('hamburgerBtn');[span_25](start_span)[span_25](end_span)
-const sidebar = document.getElementById('sidebar');[span_26](start_span)[span_26](end_span)
-const sidebarOverlay = document.getElementById('sidebarOverlay');[span_27](start_span)[span_27](end_span)
-const closeSidebar = document.getElementById('closeSidebar');[span_28](start_span)[span_28](end_span)
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.getElementById('sidebar');
+const sidebarOverlay = document.getElementById('sidebarOverlay');
+const closeSidebar = document.getElementById('closeSidebar');
 
-const genreSelect = document.getElementById('genreSelect');[span_29](start_span)[span_29](end_span)
-const languageSelect = document.getElementById('languageSelect');[span_30](start_span)[span_30](end_span)
-const sortSelect = document.getElementById('sortSelect');[span_31](start_span)[span_31](end_span)
-const yearSelect = document.getElementById('yearSelect');[span_32](start_span)[span_32](end_span)
+const genreSelect = document.getElementById('genreSelect');
+const languageSelect = document.getElementById('languageSelect');
+const sortSelect = document.getElementById('sortSelect');
+const yearSelect = document.getElementById('yearSelect');
 
 for (let y = 2026; y >= 2000; y--) {
   const option = document.createElement('option');
@@ -51,12 +51,12 @@ for (let y = 2026; y >= 2000; y--) {
   yearSelect.appendChild(option);
 }
 
-let currentType = 'movie';[span_33](start_span)[span_33](end_span)
-let currentPage = 1;[span_34](start_span)[span_34](end_span)
-let currentFetchUrl = '';[span_35](start_span)[span_35](end_span)
-let isLoadingMore = false;[span_36](start_span)[span_36](end_span)
-let isSearchMode = false;[span_37](start_span)[span_37](end_span)
-let featuredItem = null;[span_38](start_span)[span_38](end_span)
+let currentType = 'movie';
+let currentPage = 1;
+let currentFetchUrl = '';
+let isLoadingMore = false;
+let isSearchMode = false;
+let featuredItem = null;
 
 window.addEventListener('load', () => {
   setTimeout(() => {
