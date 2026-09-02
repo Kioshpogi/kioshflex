@@ -44,6 +44,15 @@ const languageSelect = document.getElementById('languageSelect');
 const sortSelect = document.getElementById('sortSelect');
 const yearSelect = document.getElementById('yearSelect');
 
+// YouTube Music Elements
+const ytMusicModal = document.getElementById('ytMusicModal');
+const openMusicModalBtn = document.getElementById('openMusicModalBtn');
+const closeYtMusicModal = document.getElementById('closeYtMusicModal');
+const ytSearchBtn = document.getElementById('ytSearchBtn');
+const ytSearchInput = document.getElementById('ytSearchInput');
+const ytAudioFrame = document.getElementById('ytAudioFrame');
+const ytTrackTitle = document.getElementById('ytTrackTitle');
+
 if (yearSelect) {
   for (let y = 2026; y >= 2000; y--) {
     const option = document.createElement('option');
@@ -105,6 +114,40 @@ const closeSidebarMenu = () => {
 
 if (closeSidebar) closeSidebar.addEventListener('click', closeSidebarMenu);
 if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebarMenu);
+
+// --- YouTube Music Player Integration ---
+if (openMusicModalBtn) {
+  openMusicModalBtn.addEventListener('click', () => {
+    if (ytMusicModal) ytMusicModal.style.display = 'flex';
+  });
+}
+
+if (closeYtMusicModal) {
+  closeYtMusicModal.addEventListener('click', () => {
+    if (ytMusicModal) ytMusicModal.style.display = 'none';
+    if (ytAudioFrame) ytAudioFrame.src = ''; // Stop audio when closing
+  });
+}
+
+if (ytSearchBtn) {
+  ytSearchBtn.addEventListener('click', () => {
+    const query = ytSearchInput.value.trim();
+    if(!query) return;
+    
+    if (ytTrackTitle) ytTrackTitle.textContent = `Searching for "${query}"...`;
+    const searchUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(query + " audio")}&autoplay=1`;
+    if (ytAudioFrame) ytAudioFrame.src = searchUrl;
+    if (ytTrackTitle) ytTrackTitle.textContent = `Now Playing: ${query}`;
+  });
+}
+
+if (ytSearchInput) {
+  ytSearchInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      ytSearchBtn.click();
+    }
+  });
+}
 
 async function getMedia(url, type, append = false) {
   try {

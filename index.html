@@ -25,7 +25,7 @@
       <div class="logo" id="homeLogo" style="cursor: pointer;">KIOSHFLEX</div>
     </div>
     <div class="header-actions">
-      <button id="musicToggleBtn" class="header-btn">🎵 Music: Off</button>
+      <button id="openMusicModalBtn" class="header-btn">🎧 YT Music</button>
       <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
       <button id="aiChatToggleBtn" class="header-btn" style="background:#e50914; color:#fff;">AI Chat</button>
       <button id="themeToggleBtn" class="header-btn">Theme</button>
@@ -160,10 +160,24 @@
     </div>
   </div>
 
-  <!-- Background Music Element -->
-  <audio id="bgMusic" loop>
-    <source src="https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3" type="audio/mpeg">
-  </audio>
+  <!-- YouTube Music Player Modal -->
+  <div id="ytMusicModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <button id="closeYtMusicModal" class="close-modal">&times;</button>
+      <div class="section-title" style="padding: 0 0 12px 0;">YouTube Music Player</div>
+      
+      <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+        <input type="text" id="ytSearchInput" placeholder="Search song or artist..." style="flex: 1; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-color); padding: 8px 12px; border-radius: 8px; font-size: 12px; outline: none;">
+        <button id="ytSearchBtn" style="background: var(--accent-color); color: #fff; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 12px;">Search</button>
+      </div>
+
+      <div id="ytPlayerContainer" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <iframe id="ytAudioFrame" width="100%" height="100%" src="" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+      
+      <div id="ytTrackTitle" style="font-size: 12px; color: var(--text-muted); margin-top: 10px; text-align: center;">No track playing</div>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

@@ -31,12 +31,6 @@ header { display: flex; justify-content: space-between; align-items: center; pad
 .header-btn { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; }
 .header-btn:hover { border-color: var(--accent-color); }
 
-.header-btn.music-active {
-  border-color: var(--accent-color);
-  background: rgba(229, 9, 20, 0.2);
-  color: var(--accent-color);
-}
-
 .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 200; }
 .sidebar { 
   position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; 
