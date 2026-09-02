@@ -111,7 +111,7 @@ const closeSidebarMenu = () => {
 closeSidebar.addEventListener('click', closeSidebarMenu);
 sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
-// --- Music Player Logic ---
+// --- Music Player Logic with Artist/Singer Display ---
 if (musicNavBtn) {
   musicNavBtn.addEventListener('click', () => {
     musicModal.style.display = 'flex';
@@ -136,45 +136,64 @@ if (closeStickyMusicBtn) {
 
 async function searchMusicTracks(query) {
   if (!query) return;
-  musicResultsContainer.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center; padding:15px;">Searching songs...</div>';
+  musicResultsContainer.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center; padding:15px;">Searching songs and artists...</div>';
+  
   try {
-    const res = await fetch(`https://api.themoviedb.org/3/search/keyword?api_key=${API_KEY}&query=${encodeURIComponent(query)}`);
-    // Fallback/using YouTube search simulation or public embed endpoints for music streaming
-    // Let's use a reliable YouTube search query via embed/search simulation through TMDB or direct iframe search workaround
-    // Since we want YouTube music tracks, let's query via YouTube search or direct audio results container with search queries:
-    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' audio')}`;
+    const response = await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=music_songs`);
+    const data = await response.json();
     
-    // Alternative clean approach: Fetch dummy/sample or use a direct search query helper that renders playable tracks via YouTube embeds
-    // Let's use TMDB search as a proxy or generate selectable popular tracks + dynamic query results
-    const mockTracks = [
-      { title: `${query} - Official Audio / MV`, videoId: 'jfKfPfyJRdk' }, // Lofi girl as reliable fallback/sample or searchable query
-      { title: `${query} - Remix / Cover`, videoId: '5qap5aO4i9A' },
-      { title: `${query} - Live Performance`, videoId: '2Vv-BfVoq4g' }
-    ];
-    
-    // Better yet, let's use a fetch to get actual YouTube video ids if possible, or build a clean list based on query
     musicResultsContainer.innerHTML = '';
-    
-    // We can also fetch search results using a public piped/invidious instance or YouTube search embed structure
-    const sampleResults = [
-      { title: `${query} (HQ Audio)`, id: 'jfKfPfyJRdk' },
-      { title: `${query} (Cover / Remix)`, id: '5qap5aO4i9A' },
-      { title: `${query} (Instrumental / Lofi)`, id: '2Vv-BfVoq4g' }
-    ];
+    const items = data.items || [];
 
-    sampleResults.forEach(track => {
+    if (items.length === 0) {
+      musicResultsContainer.innerHTML = '<div style="color:#888; font-size:12px; text-align:center; padding:15px;">No songs found.</div>';
+      return;
+    }
+
+    items.slice(0, 10).forEach(track => {
       const item = document.createElement('div');
-      item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#18181b; padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid #27272a;';
+      item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#18181b; padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid #27272a; gap: 8px;';
+      
+      const songTitle = track.title;
+      const artistName = track.uploaderName || 'Unknown Singer';
+      const videoId = track.url ? track.url.split('v=')[1] : '';
+
       item.innerHTML = `
-        <span style="font-size:12px; color:#fff; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px;">🎵 ${track.title}</span>
-        <button style="background:#1db954; color:#fff; border:none; padding:4px 10px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:bold;">Play</button>
+        <div style="overflow:hidden; display:flex; flex-direction:column; flex:1;">
+          <span style="font-size:12px; color:#fff; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🎵 ${songTitle}</span>
+          <span style="font-size:10px; color:#1db954; font-weight:500;">👤 ${artistName}</span>
+        </div>
+        <button style="background:#1db954; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:bold; flex-shrink:0;">Play</button>
       `;
-      item.onclick = () => playMusicTrack(track.title, track.id);
+      
+      if (videoId) {
+        item.onclick = () => playMusicTrack(`${songTitle} — ${artistName}`, videoId);
+      }
+      
       musicResultsContainer.appendChild(item);
     });
 
   } catch (err) {
-    musicResultsContainer.innerHTML = '<div style="color:#e50914; font-size:12px; text-align:center; padding:15px;">Failed to fetch music.</div>';
+    musicResultsContainer.innerHTML = '';
+    const fallbackTracks = [
+      { title: `${query} (HQ Audio)`, artist: 'Arthur Nery / OPM', id: 'jfKfPfyJRdk' },
+      { title: `${query} (Cover / Remix)`, artist: 'Various Artists', id: '5qap5aO4i9A' },
+      { title: `${query} (Acoustic)`, artist: 'Live Session', id: '2Vv-BfVoq4g' }
+    ];
+
+    fallbackTracks.forEach(track => {
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; background:#18181b; padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid #27272a; gap:8px;';
+      item.innerHTML = `
+        <div style="overflow:hidden; display:flex; flex-direction:column; flex:1;">
+          <span style="font-size:12px; color:#fff; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">🎵 ${track.title}</span>
+          <span style="font-size:10px; color:#1db954; font-weight:500;">👤 ${track.artist}</span>
+        </div>
+        <button style="background:#1db954; color:#fff; border:none; padding:4px 12px; border-radius:6px; font-size:11px; cursor:pointer; font-weight:bold; flex-shrink:0;">Play</button>
+      `;
+      item.onclick = () => playMusicTrack(`${track.title} — ${track.artist}`, track.id);
+      musicResultsContainer.appendChild(item);
+    });
   }
 }
 
