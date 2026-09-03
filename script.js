@@ -1,4 +1,3 @@
-// Kioshflex AI Chat Script & Main Functionality (Streaming Enabled & Robust Error Handling)
 const aiChatInput = document.getElementById('aiChatInput');
 const aiChatSend = document.getElementById('aiChatSend');
 const aiChatMessages = document.getElementById('aiChatMessages');
