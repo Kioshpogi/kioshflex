@@ -93,6 +93,11 @@
         <option value="">All Years</option>
       </select>
     </div>
+
+    <!-- Donation Button in Sidebar -->
+    <div class="sidebar-group" style="margin-top: auto; padding-top: 10px;">
+      <button id="donateBtn" style="width: 100%; background: #e50914; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px;">☕ Support / Donate</button>
+    </div>
   </div>
 
   <div class="search-container" style="position: relative; display: flex; gap: 8px; align-items: center;">
@@ -156,6 +161,16 @@
     <div class="modal-content">
       <button id="closeModal" class="close-modal">&times;</button>
       <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Donation QR Code Modal -->
+  <div id="donateModal" class="modal" style="display: none; justify-content: center; align-items: center; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000;">
+    <div class="modal-content" style="background: var(--card-bg); width: 100%; max-width: 320px; border-radius: 14px; padding: 20px; text-align: center; position: relative; border: 1px solid var(--border-color);">
+      <button id="closeDonateModal" class="close-modal" style="position: absolute; top: 10px; right: 10px; background: var(--border-color); color: var(--text-color); border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;">&times;</button>
+      <h3 style="color: #fff; font-size: 16px; margin-bottom: 12px;">Scan to Donate via GCash</h3>
+      <img src="6274.jpg" alt="GCash QR Code" style="width: 100%; max-width: 240px; border-radius: 8px; margin-bottom: 10px;">
+      <p style="color: var(--text-muted); font-size: 11px;">Thank you for supporting KIOSHFLEX!</p>
     </div>
   </div>
 

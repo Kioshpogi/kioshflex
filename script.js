@@ -98,6 +98,30 @@ const closeSidebarMenu = () => {
 closeSidebar.addEventListener('click', closeSidebarMenu);
 sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
+// --- Donation Modal Handling ---
+const donateBtn = document.getElementById('donateBtn');
+const donateModal = document.getElementById('donateModal');
+const closeDonateModal = document.getElementById('closeDonateModal');
+
+if (donateBtn && donateModal) {
+  donateBtn.addEventListener('click', () => {
+    donateModal.style.display = 'flex';
+    closeSidebarMenu();
+  });
+
+  if (closeDonateModal) {
+    closeDonateModal.addEventListener('click', () => {
+      donateModal.style.display = 'none';
+    });
+  }
+
+  donateModal.addEventListener('click', (e) => {
+    if (e.target === donateModal) {
+      donateModal.style.display = 'none';
+    }
+  });
+}
+
 async function getMedia(url, type, append = false) {
   try {
     isLoadingMore = true;
