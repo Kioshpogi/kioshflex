@@ -602,14 +602,6 @@ async function openModal(item, type) {
     
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
-      ${type === 'tv' ? `
-      <div class="custom-player-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="customSkipBack" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">↺ 10s</button>
-          <button id="customSkipForward" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">10s ↻</button>
-        </div>
-        <button id="customNextEp" style="background:#e50914; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Next Ep ➔</button>
-      </div>` : ''}
     </div>
     
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
@@ -688,17 +680,6 @@ async function openModal(item, type) {
     };
 
     loadEpisodesForSeason(season);
-
-    const nextEpBtn = document.getElementById('customNextEp');
-    if (nextEpBtn) {
-      nextEpBtn.onclick = () => {
-        episode++;
-        saveContinueWatching(item, type, season, episode);
-        let nl = getLinks(season, episode);
-        document.getElementById('playerIframe').src = nl.s1;
-        loadEpisodesForSeason(season);
-      };
-    }
   }
 
   try {
