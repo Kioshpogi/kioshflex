@@ -57,22 +57,16 @@ let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
 
-// --- Splash Screen Fix & Fallback ---
-const removeSplash = () => {
-  const splash = document.getElementById('splashScreen');
-  if (splash) {
-    splash.style.transition = 'opacity 0.5s ease-out';
-    splash.style.opacity = '0';
-    setTimeout(() => splash.remove(), 500);
-  }
-};
-
 window.addEventListener('load', () => {
-  setTimeout(removeSplash, 400);
+  setTimeout(() => {
+    const splash = document.getElementById('splashScreen');
+    if (splash) {
+      splash.style.transition = 'opacity 0.5s ease-out';
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, 400);
 });
-
-// Fallback para masigurong mawawala ang splash screen pagkalipas ng 2 segundo
-setTimeout(removeSplash, 2000);
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
   document.body.classList.add('light-mode');
@@ -752,7 +746,7 @@ async function openActorModal(personId) {
           if(!media.poster_path) return '';
           return `
             <div class="actor-media-card" data-id="${media.id}" data-type="${media.media_type || 'movie'}" style="cursor:pointer;">
-              <img src="https://image.tmdb.org/t/p/w185${media.poster_path}" style="width:100\%; border-radius:6px;" alt="${media.title || media.name}">
+              <img src="https://image.tmdb.org/t/p/w185${media.poster_path}" style="width:100%; border-radius:6px;" alt="${media.title || media.name}">
               <span style="font-size:10px; color:#aaa; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${media.title || media.name}</span>
             </div>
           `;
