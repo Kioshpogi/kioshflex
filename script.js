@@ -64,17 +64,6 @@ tag.src = "https://www.youtube.com/iframe_api";
 const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const splash = document.getElementById('splashScreen');
-    if (splash) {
-      splash.style.transition = 'opacity 0.5s ease-out';
-      splash.style.opacity = '0';
-      setTimeout(() => splash.remove(), 500);
-    }
-  }, 400);
-});
-
 if (localStorage.getItem('kiosh_theme') === 'light') {
   document.body.classList.add('light-mode');
 }
@@ -270,8 +259,6 @@ async function loadHeroAndTop10() {
             const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             
             if (trailer) {
-              const existingContent = heroBanner.querySelector('.hero-content');
-              
               const iframeWrapper = document.createElement('div');
               iframeWrapper.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; background: #000; z-index: 1;';
               iframeWrapper.innerHTML = `<div id="youtubeHeroPlayer" style="width: 100%; height: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.35);"></div>`;
