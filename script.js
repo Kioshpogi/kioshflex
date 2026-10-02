@@ -5,9 +5,9 @@ const aiChatToggleBt = document.getElementById('aiChatToggleBtn');
 const aiChatBox = document.getElementById('aiChatBox');
 const aiChatClose = document.getElementById('aiChatClose');
 
-const API_KEY = '5959ee7103e0456dc8c681afb1462d4a';[span_157](start_span)[span_157](end_span)
-const IMG_PATH = 'https://image.tmdb.org/t/p/w500';[span_158](start_span)[span_158](end_span)
-const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';[span_159](start_span)[span_159](end_span)
+const API_KEY ='5959ee7103e0456dc8c681afb1462d4a'; 
+const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
+const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
 
 const movieGrid = document.getElementById('movieGrid');
 const top10Carousl = document.getElementById('top10Carousel');
@@ -15,6 +15,8 @@ const continueCarousel = document.getElementById('continueCarousel');
 const continueSection = document.getElementById('continueSection');
 const carouselSection = document.getElementById('carouselSection');
 const heroBanner = document.getElementById('heroBanner');
+const heroTitle = document.getElementById('heroTitle');
+const heroPlayBtn = document.getElementById('heroPlayBtn');
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const sectionTitle = document.getElementById('sectionTitle');
@@ -57,7 +59,7 @@ let featuredItem = null;
 let heroPlayer = null;
 
 const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";[span_160](start_span)[span_160](end_span)
+tag.src = "https://www.youtube.com/iframe_api";
 const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
@@ -251,13 +253,16 @@ async function loadHeroAndTop10() {
       if (validItems.length > 0) {
         const randomIndex = Math.floor(Math.random() * validItems.length);
         featuredItem = validItems[randomIndex];
+        const title = featuredItem.title || featuredItem.name;
+        heroTitle.textContent = title;
+        
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
         heroBanner.style.backgroundSize = 'cover';
         heroBanner.style.backgroundPosition = 'center';
         heroBanner.style.display = 'flex';
-        heroBanner.onclick = () => openModal(featuredItem, mediaType);
+        heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
 
         setTimeout(async () => {
           try {
@@ -268,10 +273,17 @@ async function loadHeroAndTop10() {
             if (trailer) {
               heroBanner.innerHTML = `
                 <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1; display: flex; align-items: center; justify-content: center; background: #000;" id="iframeContainer">
-                  <div id="youtubeHeroPlayer" style="width: 100%; height: 100%; pointer-events: none; transform: scale(1.35);"></div>
+                  <div id="youtubeHeroPlayer" style="width: 100%; height: 100%; pointer-events: none;"></div>
                 </div>
-                <div style="position: absolute; bottom: 12px; right: 12px; z-index: 3;">
-                  <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; cursor: pointer;">Muted Off</button>
+                <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
+                <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
+                    <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; z-index: 10;">Muted Off</button>
+                  </div>
                 </div>
               `;
               
@@ -311,8 +323,7 @@ async function loadHeroAndTop10() {
               const unmuteBtn = document.getElementById('unmuteBtn');
               if (unmuteBtn) {
                 let isMuted = true;
-                unmuteBtn.onclick = (e) => {
-                  e.stopPropagation();
+                unmuteBtn.onclick = () => {
                   if (heroPlayer && typeof heroPlayer.mute === 'function') {
                     isMuted = !isMuted;
                     if (isMuted) {
@@ -321,7 +332,7 @@ async function loadHeroAndTop10() {
                     } else {
                       heroPlayer.unMute();
                       heroPlayer.setVolume(100);
-                      heroPlayer.playVideo();
+                      heroPlayer.playVideo(); // Sinisigurong hindi mamamatay ang video sa WebView kapag na-unmute
                       unmuteBtn.textContent = 'Muted On';
                     }
                   }
