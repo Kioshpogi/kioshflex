@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KioshFlix - Streaming Platform</title>
+  <style>
+    :root {
+      --bg-color: #141414;
+      --card-bg: #1f1f1f;
+      --text-color: #fff;
+      --text-secondary: #aaa;
+      --accent-color: #e50914;
+      --nav-bg: rgba(20, 20, 20, 0.9);
+    }
+    .light-mode {
+      --bg-color: #f4f4f4;
+      --card-bg: #e2e2e2;
+      --text-color: #141414;
+      --text-secondary: #555;
+      --nav-bg: rgba(244, 244, 244, 0.9);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-color); transition: background 0.3s, color 0.3s; overflow-x: hidden; }
+    
+    /* Splash Screen */
+    #splashScreen { position: fixed; inset: 0; background: #141414; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; }
+    .splash-logo { font-size: 36px; font-weight: 900; color: var(--accent-color); letter-spacing: 2px; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
+
+    /* Navbar */
+    nav { position: fixed; top: 0; left: 0; width: 100%; height: 60px; background: var(--nav-bg); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .nav-left, .nav-right { display: flex; align-items: center; gap: 15px; }
+    .logo { font-size: 20px; font-weight: 800; color: var(--accent-color); cursor: pointer; letter-spacing: 1px; }
+    .nav-links { display: flex; gap: 15px; }
+    .nav-links button { background: none; border: none; color: var(--text-color); font-size: 14px; font-weight: 600; cursor: pointer; padding: 5px 10px; border-radius: 4px; transition: background 0.2s; }
+    .nav-links button.active, .nav-links button:hover { background: var(--accent-color); color: #fff; }
+
+    /* Search Bar & Dropdown */
+    .search-container { position: relative; display: flex; align-items: center; }
+    .search-input { background: #222; border: 1px solid #333; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 13px; outline: none; width: 180px; transition: width 0.3s; }
+    .search-input:focus { width: 240px; border-color: var(--accent-color); }
+    .search-btn { background: none; border: none; color: #aaa; cursor: pointer; margin-left: -25px; font-size: 13px; }
+    .search-dropdown-wrapper { position: absolute; top: 38px; right: 0; width: 280px; background: #18181b; border: 1px solid #27272a; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); display: none; flex-direction: column; z-index: 1100; overflow: hidden; }
+    .search-history-section { padding: 10px; border-bottom: 1px solid #27272a; }
+    .search-history-header { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #a1a1aa; margin-bottom: 6px; }
+    .clear-history-btn { background: none; border: none; color: #e50914; font-size: 11px; cursor: pointer; }
+    .search-history-chips { display: flex; flex-wrap: wrap; gap: 6px; max-height: 80px; overflow-y: auto; }
+    .suggestions-box { max-height: 200px; overflow-y: auto; }
+    .suggestion-item { padding: 10px 14px; font-size: 13px; color: #e4e4e7; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .suggestion-item:hover { background: #27272a; color: #fff; }
+
+    /* Icons / Buttons */
+    .icon-btn { background: none; border: none; color: var(--text-color); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; transition: background 0.2s; }
+    .icon-btn:hover { background: rgba(255,255,255,0.1); }
+    .hamburger { display: none; }
+
+    /* Sidebar Drawer (Mobile) */
+    .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 2000; display: none; }
+    .sidebar { position: fixed; top: 0; right: -280px; width: 280px; height: 100%; background: #141414; z-index: 2001; transition: right 0.3s ease; display: flex; flex-direction: column; padding: 20px; border-left: 1px solid #27272a; }
+    .sidebar.open { right: 0; }
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .sidebar-links { display: flex; flex-direction: column; gap: 15px; }
+    .sidebar-links button, .sidebar-links a { background: none; border: none; color: #fff; font-size: 16px; text-align: left; cursor: pointer; padding: 8px 0; font-weight: 500; text-decoration: none; }
+    .sidebar-links button:hover, .sidebar-links a:hover { color: var(--accent-color); }
+
+    /* Hero Banner */
+    .hero { position: relative; height: 500px; width: 100%; display: flex; align-items: flex-end; padding: 40px; margin-top: 60px; background-size: cover; background-position: center; }
+    .hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, var(--bg-color) 0%, transparent 60%); }
+    .hero-content { position: relative; z-index: 2; max-width: 600px; }
+    .hero-content h1 { font-size: 40px; font-weight: 900; margin-bottom: 10px; text-shadow: 2px 2px 8px rgba(0,0,0,0.8); }
+    .hero-btn { background: var(--accent-color); color: #fff; border: none; padding: 10px 24px; font-size: 15px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: transform 0.2s, background 0.2s; box-shadow: 0 4px 15px rgba(229,9,20,0.4); }
+    .hero-btn:hover { transform: scale(1.05); background: #f6121d; }
+
+    /* Filters Bar */
+    .filters-bar { display: flex; gap: 10px; padding: 20px; overflow-x: auto; background: var(--bg-color); align-items: center; }
+    .filters-bar select { background: var(--card-bg); color: var(--text-color); border: 1px solid #333; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; cursor: pointer; }
+
+    /* Sections & Carousels */
+    .section-container { padding: 10px 20px; }
+    .section-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; color: var(--text-color); }
+    .carousel { display: flex; gap: 15px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+    .carousel::-webkit-scrollbar { display: none; }
+    .carousel-card { flex: 0 0 140px; height: 200px; background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; position: relative; transition: transform 0.3s; }
+    .carousel-card:hover { transform: scale(1.05); }
+    .carousel-card img { width: 100%; height: 100%; object-fit: cover; }
+    .carousel-card span { position: absolute; bottom: 5px; left: 8px; font-size: 36px; font-weight: 900; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.9); }
+
+    /* Movie Grid */
+    .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; padding: 20px; }
+    .card { background: var(--card-bg); border-radius: 10px; overflow: hidden; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; height: 260px; display: flex; flex-direction: column; position: relative; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.4); }
+    .card img { width: 100%; height: 200px; object-fit: cover; }
+    .card-info { padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; flex: 1; }
+    .card-info h3 { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; color: var(--text-color); }
+    .card-info span { font-size: 12px; color: #f5c518; font-weight: bold; }
+
+    /* Skeleton Loaders */
+    .skeleton-card { background: linear-gradient(90deg, var(--card-bg) 25%, #2a2a2a 50%, var(--card-bg) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 10px; height: 260px; }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    /* Modal */
+    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 15px; backdrop-filter: blur(5px); }
+    .modal-content { background: #18181b; width: 100%; max-width: 750px; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #27272a; max-height: 90vh; display: flex; flex-direction: column; }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .close-modal { position: absolute; top: 12px; right: 15px; background: rgba(0,0,0,0.6); border: none; color: #fff; font-size: 20px; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; }
+
+    /* Cast Scroll */
+    .cast-scroll { display: flex; gap: 10px; overflow-x: auto; margin-top: 6px; padding-bottom: 5px; scrollbar-width: none; }
+    .cast-scroll::-webkit-scrollbar { display: none; }
+    .cast-item { flex: 0 0 60px; text-align: center; }
+    .cast-item img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 4px; }
+    .cast-item span { font-size: 10px; color: #aaa; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* Floating AI Chat Widget */
+    #aiChatToggleBtn { position: fixed; bottom: 25px; right: 25px; background: var(--accent-color); color: #fff; border: none; width: 50px; height: 50px; border-radius: 50%; font-size: 20px; cursor: pointer; box-shadow: 0 4px 15px rgba(229,9,20,0.5); z-index: 4000; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    #aiChatToggleBtn:hover { transform: scale(1.1); }
+    #aiChatBox { position: fixed; bottom: 85px; right: 25px; width: 350px; height: 450px; background: #18181b; border: 1px solid #27272a; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); display: none; flex-direction: column; z-index: 4000; overflow: hidden; }
+    .ai-chat-header { background: #202024; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #27272a; }
+    .ai-chat-header h4 { font-size: 14px; color: #fff; }
+    .ai-chat-close { background: none; border: none; color: #aaa; font-size: 16px; cursor: pointer; }
+    .ai-chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+    .ai-chat-input-area { padding: 10px; background: #202024; display: flex; gap: 8px; border-top: 1px solid #27272a; }
+    .ai-chat-input { flex: 1; background: #141414; border: 1px solid #333; color: #fff; padding: 8px 12px; border-radius: 8px; font-size: 13px; outline: none; }
+    .ai-chat-send { background: var(--accent-color); color: #fff; border: none; padding: 0 14px; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: bold; }
+
+    /* Donation Modal */
+    .donate-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 5000; padding: 15px; backdrop-filter: blur(5px); }
+    .donate-content { background: #18181b; padding: 25px; border-radius: 14px; max-width: 400px; width: 100%; text-align: center; border: 1px solid #27272a; position: relative; }
+    .donate-content h3 { color: #fff; margin-bottom: 10px; font-size: 20px; }
+    .donate-content p { color: #aaa; font-size: 13px; margin-bottom: 20px; }
+    .qr-placeholder { background: #222; padding: 15px; border-radius: 10px; margin-bottom: 15px; color: #fff; font-weight: bold; font-size: 14px; border: 1px dashed #444; }
+
+    /* Responsive */
+    @media(max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .hero { height: 400px; padding: 20px; }
+      .hero-content h1 { font-size: 28px; }
+      #aiChatBox { width: calc(100% - 30px); right: 15px; left: 15px; bottom: 80px; height: 400px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splashScreen">
+    <div class="splash-logo">KIOSHFLIX</div>
+  </div>
+
+  <!-- Navigation -->
+  <nav>
+    <div class="nav-left">
+      <div class="logo" id="homeLogo">KIOSHFLIX</div>
+      <div class="nav-links">
+        <button id="btnMovies" data-type="movie" class="active">Movies</button>
+        <button id="btnTV" data-type="tv">TV Shows</button>
+      </div>
+    </div>
+    <div class="nav-right">
+      <div class="search-container">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search movies, tv...">
+        <button class="search-btn" id="searchBtn">&#128269;</button>
+        <div class="search-dropdown-wrapper" id="searchDropdownWrapper">
+          <div class="search-history-section" id="searchHistoryHeader" style="display:none;">
+            <div class="search-history-header" id="historyHeader">
+              <span>Recent Searches</span>
+              <button class="clear-history-btn" id="clearHistoryBtn">Clear</button>
+            </div>
+            <div class="search-history-chips" id="searchHistoryContainer"></div>
+          </div>
+          <div class="suggestions-box" id="suggestionsBox"></div>
+        </div>
+      </div>
+      <button class="icon-btn" id="watchlistNavBtn" title="My Watchlist">&#128150;</button>
+      <button class="icon-btn" id="themeToggleBtn" title="Toggle Theme">&#9680;</button>
+      <button class="icon-btn hamburger" id="hamburgerBtn">&#9776;</button>
+    </div>
+  </nav>
+
+  <!-- Mobile Sidebar -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">KIOSHFLIX</div>
+      <button class="icon-btn" id="closeSidebar">&times;</button>
+    </div>
+    <div class="sidebar-links">
+      <button id="sidebarMovies" onclick="document.getElementById('btnMovies').click()">Movies</button>
+      <button id="sidebarTV" onclick="document.getElementById('btnTV').click()">TV Shows</button>
+      <button id="donateBtn" style="color: #e50914; font-weight: bold;">Donate / Support</button>
+    </div>
+  </div>
+
+  <!-- Hero Banner -->
+  <div class="hero" id="heroBanner" style="display:none;">
+    <div class="hero-content">
+      <h1 id="heroTitle">Featured Title</h1>
+      <button class="hero-btn" id="heroPlayBtn">Watch Now</button>
+    </div>
+  </div>
+
+  <!-- Filters Bar -->
+  <div class="filters-bar" id="filtersBar">
+    <select id="genreSelect">
+      <option value="">All Genres</option>
+      <option value="28">Action</option>
+      <option value="12">Adventure</option>
+      <option value="16">Animation</option>
+      <option value="35">Comedy</option>
+      <option value="80">Crime</option>
+      <option value="99">Documentary</option>
+      <option value="18">Drama</option>
+      <option value="10751">Family</option>
+      <option value="14">Fantasy</option>
+      <option value="36">History</option>
+      <option value="27">Horror</option>
+      <option value="10402">Music</option>
+      <option value="9648">Mystery</option>
+      <option value="10749">Romance</option>
+      <option value="878">Sci-Fi</option>
+      <option value="53">Thriller</option>
+      <option value="10752">War</option>
+      <option value="37">Western</option>
+    </select>
+    <select id="languageSelect">
+      <option value="">All Languages</option>
+      <option value="en">English</option>
+      <option value="ko">Korean</option>
+      <option value="ja">Japanese</option>
+      <option value="es">Spanish</option>
+      <option value="fr">French</option>
+      <option value="hi">Hindi</option>
+    </select>
+    <select id="sortSelect">
+      <option value="popularity.desc">Most Popular</option>
+      <option value="vote_average.desc">Highest Rated</option>
+      <option value="primary_release_date.desc">Newest Releases</option>
+    </select>
+    <select id="yearSelect">
+      <option value="">All Years</option>
+    </select>
+  </div>
+
+  <!-- Continue Watching Section -->
+  <div class="section-container" id="continueSection" style="display:none;">
+    <div class="section-title">Continue Watching</div>
+    <div class="carousel" id="continueCarousel"></div>
+  </div>
+
+  <!-- Top 10 Carousel Section -->
+  <div class="section-container" id="carouselSection">
+    <div class="section-title">Top 10 Today</div>
+    <div class="carousel" id="top10Carousel"></div>
+  </div>
+
+  <!-- Main Grid Section -->
+  <div class="section-container">
+    <div class="section-title" id="sectionTitle">Explore Movies</div>
+    <div class="movie-grid" id="movieGrid"></div>
+  </div>
+
+  <!-- Detail Modal -->
+  <div class="modal" id="movieModal">
+    <div class="modal-content">
+      <button class="close-modal" id="closeModal">&times;</button>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Donation Modal -->
+  <div class="donate-modal" id="donateModal">
+    <div class="donate-content">
+      <h3>Support KioshFlix</h3>
+      <p>Help keep servers running and features coming!</p>
+      <div class="qr-placeholder">
+        [ GCash / QR Code Placeholder ]<br>
+        <span style="font-size: 12px; color: #888; font-weight: normal;">Scan to donate</span>
+      </div>
+      <button class="hero-btn" id="closeDonateModal" style="width: 100%;">Close</button>
+    </div>
+  </div>
+
+  <!-- Floating AI Chat Assistant -->
+  <button id="aiChatToggleBtn" title="Ask AI Assistant">&#129302;</button>
+  <div id="aiChatBox">
+    <div class="ai-chat-header">
+      <h4>Kiosh AI Assistant</h4>
+      <button class="ai-chat-close" id="aiChatClose">&times;</button>
+    </div>
+    <div class="ai-chat-messages" id="aiChatMessages">
+      <div style="background: #222; color: #ddd; padding: 8px 12px; border-radius: 8px; max-width: 85%;">Hello! Need a movie recommendation or help navigating KioshFlix? Ask me anything!</div>
+    </div>
+    <div class="ai-chat-input-area">
+      <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Ask about movies, shows...">
+      <button class="ai-chat-send" id="aiChatSend">Send</button>
+    </div>
+  </div>
+
+</body>
+</html>
