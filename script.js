@@ -559,15 +559,15 @@ async function openModal(item, type) {
 
   saveContinueWatching(item, type, season, episode);
   
-  // Updated streaming servers configuration
+  // Na-update na mga streaming servers (VidLink, VidSrc.me, Embed.su, Multiembed)
   const getLinks = (s, e) => type === 'tv' ? {
-    s1: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-    s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+    s1: `https://vidlink.pro/tv/${id}/${s}/${e}`,
+    s2: `https://vidsrcme.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s3: `https://embed.su/embed/tv/${id}/${s}/${e}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`
   } : {
-    s1: `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
-    s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
+    s1: `https://vidlink.pro/movie/${id}`,
+    s2: `https://vidsrcme.ru/embed/movie?tmdb=${id}`,
     s3: `https://embed.su/embed/movie/${id}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`
   };
