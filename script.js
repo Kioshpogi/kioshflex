@@ -1,3 +1,10 @@
+const aiChatInput = document.getElementById('aiChatInput');
+const aiChatSend = document.getElementById('aiChatSend');
+const aiChatMessages = document.getElementById('aiChatMessages');
+const aiChatToggleBt = document.getElementById('aiChatToggleBtn');
+const aiChatBox = document.getElementById('aiChatBox');
+const aiChatClose = document.getElementById('aiChatClose')
+
 const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
@@ -49,13 +56,17 @@ let currentFetchUrl = '';
 let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
-let heroPlayer = null;
-let isHeroMuted = true;
 
-const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
-const firstScriptTag = document.getElementsByTagName('script')[0];
-firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const splash = document.getElementById('splashScreen');
+    if (splash) {
+      splash.style.transition = 'opacity 0.5s ease-out';
+      splash.style.opacity = '0';
+      setTimeout(() => splash.remove(), 500);
+    }
+  }, 400);
+});
 
 if (localStorage.getItem('kiosh_theme') === 'light') {
   document.body.classList.add('light-mode');
@@ -86,6 +97,7 @@ const closeSidebarMenu = () => {
 closeSidebar.addEventListener('click', closeSidebarMenu);
 sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
+// --- Donation Modal Handling ---
 const donateBtn = document.getElementById('donateBtn');
 const donateModal = document.getElementById('donateModal');
 const closeDonateModal = document.getElementById('closeDonateModal');
@@ -242,6 +254,8 @@ async function loadHeroAndTop10() {
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
+        heroBanner.style.backgroundSize = 'cover';
+        heroBanner.style.backgroundPosition = 'center';
         heroBanner.style.display = 'flex';
         heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
 
@@ -252,63 +266,32 @@ async function loadHeroAndTop10() {
             const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             
             if (trailer) {
-              const iframeWrapper = document.createElement('div');
-              iframeWrapper.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; background: #000; z-index: 1;';
-              iframeWrapper.innerHTML = `<div id="youtubeHeroPlayer" style="width: 100%; height: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.35);"></div>`;
+              heroBanner.innerHTML = `
+                <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
+                  <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
+                </div>
+                <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
+                <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
+                    <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
+                  </div>
+                  <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
+                  </div>
+                </div>
+              `;
               
-              heroBanner.insertBefore(iframeWrapper, heroBanner.firstChild);
-
-              const muteBtn = document.createElement('button');
-              muteBtn.id = 'heroMuteBtn';
-              muteBtn.style.cssText = 'position: absolute; bottom: 20px; right: 20px; z-index: 15; background: rgba(20,20,20,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s;';
-              muteBtn.innerHTML = `<svg id="muteIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
-              
-              muteBtn.onclick = () => {
-                if (!heroPlayer) return;
-                if (isHeroMuted) {
-                  heroPlayer.unMute();
-                  isHeroMuted = false;
-                  muteBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
-                } else {
-                  heroPlayer.mute();
-                  isHeroMuted = true;
-                  muteBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
-                }
-              };
-              heroBanner.appendChild(muteBtn);
-              
-              const initPlayer = () => {
-                if (window.YT && window.YT.Player) {
-                  heroPlayer = new YT.Player('youtubeHeroPlayer', {
-                    videoId: trailer.key,
-                    width: '100%',
-                    height: '100%',
-                    playerVars: {
-                      autoplay: 1,
-                      mute: 1,
-                      controls: 0,
-                      loop: 1,
-                      playlist: trailer.key,
-                      modestbranding: 1,
-                      iv_load_policy: 3,
-                      enablejsapi: 1
-                    },
-                    events: {
-                      onReady: (event) => {
-                        event.target.playVideo();
-                      },
-                      onStateChange: (event) => {
-                        if (event.data === YT.PlayerState.ENDED) {
-                          event.target.playVideo();
-                        }
-                      }
-                    }
-                  });
-                } else {
-                  setTimeout(initPlayer, 200);
-                }
-              };
-              initPlayer();
+              const unmuteBtn = document.getElementById('unmuteBtn');
+              const heroIframe = document.getElementById('heroIframe');
+              if (unmuteBtn && heroIframe) {
+                let isMuted = true;
+                unmuteBtn.onclick = () => {
+                  isMuted = !isMuted;
+                  heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
+                  unmuteBtn.textContent = isMuted ? 'Muted Off' : 'Muted On';
+                };
+              }
             }
           } catch (e) {}
         }, 800);
@@ -576,20 +559,19 @@ async function openModal(item, type) {
 
   saveContinueWatching(item, type, season, episode);
   
-  // Inayos ang Server 1 (vidsrc.to) at ibinalik ang mga dating servers
   const getLinks = (s, e) => type === 'tv' ? {
-    s1: `https://vidsrc.to/embed/tv/${id}/${s}/${e}`,
+    s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-    s3: `https://vidlink.pro/tv/${id}/${s}/${e}`
+    s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
+    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`
   } : {
-    s1: `https://vidsrc.to/embed/movie/${id}`,
+    s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
     s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
-    s3: `https://vidlink.pro/movie/${id}`
+    s3: `https://vidlink.pro/movie/${id}`,
+    s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`
   };
 
   let links = getLinks(season, episode);
-  window.currentModalLinks = links;
-  
   const isInWatchlist = getWatchlist().some(i => i.id === id);
 
   modalBody.innerHTML = `
@@ -612,9 +594,10 @@ async function openModal(item, type) {
     ` : ''}
 
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
-      <button onclick="changeServer('s1', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer;">Server 1 (VidSrc.to)</button>
-      <button onclick="changeServer('s2', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2 (VidSrc.cc)</button>
-      <button onclick="changeServer('s3', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 3 (VidLink)</button>
+      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer;">Server 1</button>
+      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2</button>
+      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 3</button>
+      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
@@ -655,7 +638,6 @@ async function openModal(item, type) {
               episode = 1;
               loadEpisodesForSeason(season);
               let nl = getLinks(season, episode);
-              window.currentModalLinks = nl;
               document.getElementById('playerIframe').src = nl.s1;
             };
             seasonTabsContainer.appendChild(btn);
@@ -686,7 +668,6 @@ async function openModal(item, type) {
               episode = ep.episode_number;
               saveContinueWatching(item, type, season, episode);
               let nl = getLinks(season, episode);
-              window.currentModalLinks = nl;
               document.getElementById('playerIframe').src = nl.s1;
               loadEpisodesForSeason(season);
             };
@@ -784,21 +765,133 @@ async function openActorModal(personId) {
   } catch (err) {}
 }
 
-window.changeServer = function(serverKey, btn) {
-  const iframe = document.getElementById('playerIframe');
-  if (window.currentModalLinks && window.currentModalLinks[serverKey]) {
-    iframe.src = window.currentModalLinks[serverKey];
-  }
-  document.querySelectorAll('#serverButtons button').forEach(b => { 
-    b.style.background = '#222'; 
-    b.style.color = '#ccc'; 
-  });
-  btn.style.background = '#e50914'; 
-  btn.style.color = '#fff';
+window.changeServer = function(url, btn) {
+  document.getElementById('playerIframe').src = url;
+  document.querySelectorAll('#serverButtons button').forEach(b => { b.style.background = '#222'; b.style.color = '#ccc'; });
+  btn.style.background = '#e50914'; btn.style.color = '#fff';
 };
 
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
+
+// --- AI Chat Assistant Integration with Streaming Support ---
+if (aiChatToggleBt && aiChatBox) {
+  aiChatToggleBt.addEventListener('click', () => {
+    aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
+  });
+
+  aiChatClose.addEventListener('click', () => {
+    aiChatBox.style.display = 'none';
+  });
+
+  aiChatSend.addEventListener('click', handleUserMessage);
+  aiChatInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') handleUserMessage();
+  });
+}
+
+function parseMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/###\s*(.*?)/g, '<strong style="display:block; margin-top:8px; color:#fff;">$1</strong>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+}
+
+async function handleUserMessage() {
+  const text = aiChatInput.value.trim();
+  if (!text) return;
+
+  appendMessageToUI('user', text);
+  aiChatInput.value = '';
+  
+  let aiMessageElement = appendMessageToUI('bot', 'Thinking...');
+  let fullResponseText = '';
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: text })
+    });
+
+    const rawText = await response.text();
+
+    if (!response.ok) {
+      let errorMsg = 'API error occurred.';
+      try {
+        const errJson = JSON.parse(rawText);
+        errorMsg = errJson.error || errorMsg;
+      } catch (e) {
+        errorMsg = rawText || errorMsg;
+      }
+      throw new Error(errorMsg);
+    }
+
+    if (rawText.trim().startsWith('{')) {
+      try {
+        const parsedJson = JSON.parse(rawText);
+        const candidateText = parsedJson.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (candidateText) {
+          updateMessageInUI(aiMessageElement, candidateText);
+          return;
+        } else if (parsedJson.error) {
+          throw new Error(typeof parsedJson.error === 'string' ? parsedJson.error : JSON.stringify(parsedJson.error));
+        }
+      } catch (jsonErr) {
+        if (jsonErr.message && !jsonErr.message.includes('JSON')) {
+          throw jsonErr;
+        }
+      }
+    }
+
+    const lines = rawText.split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('data:')) {
+        const jsonStr = trimmed.replace(/^data:\s*/, '');
+        if (jsonStr === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const chunkText = parsed.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (chunkText) {
+            fullResponseText += chunkText;
+            updateMessageInUI(aiMessageElement, fullResponseText);
+          }
+        } catch (e) {}
+      }
+    }
+
+    if (!fullResponseText && !aiMessageElement.textContent) {
+      updateMessageInUI(aiMessageElement, rawText || 'No response received.');
+    }
+
+  } catch (error) {
+    updateMessageInUI(aiMessageElement, 'Sorry, an error occurred: ' + error.message);
+  }
+}
+
+function appendMessageToUI(sender, text) {
+  if (!aiChatMessages) return;
+  const msgDiv = document.createElement('div');
+  msgDiv.style.cssText = `padding: 8px 12px; border-radius: 8px; max-width: 85%; line-height: 1.4; word-break: break-word; white-space: pre-wrap; ${sender === 'user' ? 'background: #e50914; color: #fff; align-self: flex-end;' : 'background: #222; color: #ddd; align-self: flex-start;'}`;
+  
+  if (sender === 'user') {
+    msgDiv.textContent = text;
+  } else {
+    msgDiv.innerHTML = parseMarkdown(text);
+  }
+
+  aiChatMessages.appendChild(msgDiv);
+  aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+  return msgDiv;
+}
+
+function updateMessageInUI(msgDiv, text) {
+  if (!msgDiv) return;
+  msgDiv.innerHTML = parseMarkdown(text);
+  aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
+}
 
 loadHeroAndTop10();
 loadContent(true);
