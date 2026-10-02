@@ -56,6 +56,13 @@ let currentFetchUrl = '';
 let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
+let heroPlayer = null;
+let isHeroMuted = true;
+
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+const firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 window.addEventListener('load', () => {
   setTimeout(() => {
@@ -97,7 +104,6 @@ const closeSidebarMenu = () => {
 closeSidebar.addEventListener('click', closeSidebarMenu);
 sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
-// --- Donation Modal Handling ---
 const donateBtn = document.getElementById('donateBtn');
 const donateModal = document.getElementById('donateModal');
 const closeDonateModal = document.getElementById('closeDonateModal');
@@ -254,8 +260,6 @@ async function loadHeroAndTop10() {
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
-        heroBanner.style.backgroundSize = 'cover';
-        heroBanner.style.backgroundPosition = 'center';
         heroBanner.style.display = 'flex';
         heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
 
@@ -266,32 +270,65 @@ async function loadHeroAndTop10() {
             const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             
             if (trailer) {
-              heroBanner.innerHTML = `
-                <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
-                  <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
-                </div>
-                <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
-                <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
-                    <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
-                  </div>
-                  <div style="display: flex; gap: 10px; align-items: center;">
-                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
-                  </div>
-                </div>
-              `;
+              const existingContent = heroBanner.querySelector('.hero-content');
               
-              const unmuteBtn = document.getElementById('unmuteBtn');
-              const heroIframe = document.getElementById('heroIframe');
-              if (unmuteBtn && heroIframe) {
-                let isMuted = true;
-                unmuteBtn.onclick = () => {
-                  isMuted = !isMuted;
-                  heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
-                  unmuteBtn.textContent = isMuted ? 'Muted Off' : 'Muted On';
-                };
-              }
+              const iframeWrapper = document.createElement('div');
+              iframeWrapper.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; background: #000; z-index: 1;';
+              iframeWrapper.innerHTML = `<div id="youtubeHeroPlayer" style="width: 100%; height: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.35);"></div>`;
+              
+              heroBanner.insertBefore(iframeWrapper, heroBanner.firstChild);
+
+              const muteBtn = document.createElement('button');
+              muteBtn.id = 'heroMuteBtn';
+              muteBtn.style.cssText = 'position: absolute; bottom: 20px; right: 20px; z-index: 15; background: rgba(20,20,20,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s;';
+              muteBtn.innerHTML = `<svg id="muteIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
+              
+              muteBtn.onclick = () => {
+                if (!heroPlayer) return;
+                if (isHeroMuted) {
+                  heroPlayer.unMute();
+                  isHeroMuted = false;
+                  muteBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+                } else {
+                  heroPlayer.mute();
+                  isHeroMuted = true;
+                  muteBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
+                }
+              };
+              heroBanner.appendChild(muteBtn);
+              
+              const initPlayer = () => {
+                if (window.YT && window.YT.Player) {
+                  heroPlayer = new YT.Player('youtubeHeroPlayer', {
+                    videoId: trailer.key,
+                    width: '100%',
+                    height: '100%',
+                    playerVars: {
+                      autoplay: 1,
+                      mute: 1,
+                      controls: 0,
+                      loop: 1,
+                      playlist: trailer.key,
+                      modestbranding: 1,
+                      iv_load_policy: 3,
+                      enablejsapi: 1
+                    },
+                    events: {
+                      onReady: (event) => {
+                        event.target.playVideo();
+                      },
+                      onStateChange: (event) => {
+                        if (event.data === YT.PlayerState.ENDED) {
+                          event.target.playVideo();
+                        }
+                      }
+                    }
+                  });
+                } else {
+                  setTimeout(initPlayer, 200);
+                }
+              };
+              initPlayer();
             }
           } catch (e) {}
         }, 800);
@@ -559,16 +596,15 @@ async function openModal(item, type) {
 
   saveContinueWatching(item, type, season, episode);
   
-  // Na-update na mga streaming servers (VidLink, VidSrc.me, Embed.su, Multiembed)
   const getLinks = (s, e) => type === 'tv' ? {
-    s1: `https://vidlink.pro/tv/${id}/${s}/${e}`,
-    s2: `https://vidsrcme.ru/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-    s3: `https://embed.su/embed/tv/${id}/${s}/${e}`,
+    s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+    s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+    s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`
   } : {
-    s1: `https://vidlink.pro/movie/${id}`,
-    s2: `https://vidsrcme.ru/embed/movie?tmdb=${id}`,
-    s3: `https://embed.su/embed/movie/${id}`,
+    s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
+    s3: `https://vidlink.pro/movie/${id}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`
   };
 
@@ -603,14 +639,6 @@ async function openModal(item, type) {
     
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
       <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
-      ${type === 'tv' ? `
-      <div class="custom-player-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(0deg, rgba(0,0,0,0.8), transparent); padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; opacity: 0; transition: opacity 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0'">
-        <div style="display: flex; gap: 10px; align-items: center;">
-          <button id="customSkipBack" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">↺ 10s</button>
-          <button id="customSkipForward" style="background:none; border:none; color:#fff; cursor:pointer; font-size:12px;">10s ↻</button>
-        </div>
-        <button id="customNextEp" style="background:#e50914; color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Next Ep ➔</button>
-      </div>` : ''}
     </div>
     
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
@@ -689,17 +717,6 @@ async function openModal(item, type) {
     };
 
     loadEpisodesForSeason(season);
-
-    const nextEpBtn = document.getElementById('customNextEp');
-    if (nextEpBtn) {
-      nextEpBtn.onclick = () => {
-        episode++;
-        saveContinueWatching(item, type, season, episode);
-        let nl = getLinks(season, episode);
-        document.getElementById('playerIframe').src = nl.s1;
-        loadEpisodesForSeason(season);
-      };
-    }
   }
 
   try {
@@ -794,7 +811,6 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration with Streaming Support ---
 if (aiChatToggleBt && aiChatBox) {
   aiChatToggleBt.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
