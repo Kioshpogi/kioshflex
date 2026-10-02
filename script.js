@@ -5,7 +5,7 @@ const aiChatToggleBt = document.getElementById('aiChatToggleBtn');
 const aiChatBox = document.getElementById('aiChatBox');
 const aiChatClose = document.getElementById('aiChatClose');
 
-const API_KEY ='5959ee7103e0456dc8c681afb1462d4a'; 
+const API_KEY = '5959ee7103e0456dc8c681afb1462d4a'; 
 const IMG_PATH = 'https://image.tmdb.org/t/p/w500';
 const BACKDROP_PATH = 'https://image.tmdb.org/t/p/original';
 
