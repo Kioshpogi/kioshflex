@@ -577,18 +577,20 @@ async function openModal(item, type) {
   saveContinueWatching(item, type, season, episode);
   
   const getLinks = (s, e) => type === 'tv' ? {
-    s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
-    s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
-    s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
+    s1: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
+    s2: `https://vidlink.pro/tv/${id}/${s}/${e}`,
+    s3: `https://vidsrc.xyz/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`
   } : {
-    s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
-    s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
-    s3: `https://vidlink.pro/movie/${id}`,
+    s1: `https://vidsrc.cc/v2/embed/movie/${id}`,
+    s2: `https://vidlink.pro/movie/${id}`,
+    s3: `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`
   };
 
   let links = getLinks(season, episode);
+  window.currentModalLinks = links; // Ginawang accessible globally para sa changeServer function
+  
   const isInWatchlist = getWatchlist().some(i => i.id === id);
 
   modalBody.innerHTML = `
@@ -611,10 +613,10 @@ async function openModal(item, type) {
     ` : ''}
 
     <div style="display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap;" id="serverButtons">
-      <button onclick="changeServer('${links.s1}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer;">Server 1</button>
-      <button onclick="changeServer('${links.s2}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2</button>
-      <button onclick="changeServer('${links.s3}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 3</button>
-      <button onclick="changeServer('${links.s4}', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
+      <button onclick="changeServer('s1', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#e50914; color:#fff; border:none; border-radius:8px; cursor:pointer;">Server 1</button>
+      <button onclick="changeServer('s2', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 2</button>
+      <button onclick="changeServer('s3', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 3</button>
+      <button onclick="changeServer('s4', this)" class="server-btn" style="padding:6px 12px; font-size:11px; background:#222; color:#ccc; border:none; border-radius:8px; cursor:pointer;">Server 4</button>
     </div>
     
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
@@ -655,6 +657,7 @@ async function openModal(item, type) {
               episode = 1;
               loadEpisodesForSeason(season);
               let nl = getLinks(season, episode);
+              window.currentModalLinks = nl;
               document.getElementById('playerIframe').src = nl.s1;
             };
             seasonTabsContainer.appendChild(btn);
@@ -685,6 +688,7 @@ async function openModal(item, type) {
               episode = ep.episode_number;
               saveContinueWatching(item, type, season, episode);
               let nl = getLinks(season, episode);
+              window.currentModalLinks = nl;
               document.getElementById('playerIframe').src = nl.s1;
               loadEpisodesForSeason(season);
             };
@@ -782,10 +786,17 @@ async function openActorModal(personId) {
   } catch (err) {}
 }
 
-window.changeServer = function(url, btn) {
-  document.getElementById('playerIframe').src = url;
-  document.querySelectorAll('#serverButtons button').forEach(b => { b.style.background = '#222'; b.style.color = '#ccc'; });
-  btn.style.background = '#e50914'; btn.style.color = '#fff';
+window.changeServer = function(serverKey, btn) {
+  const iframe = document.getElementById('playerIframe');
+  if (window.currentModalLinks && window.currentModalLinks[serverKey]) {
+    iframe.src = window.currentModalLinks[serverKey];
+  }
+  document.querySelectorAll('#serverButtons button').forEach(b => { 
+    b.style.background = '#222'; 
+    b.style.color = '#ccc'; 
+  });
+  btn.style.background = '#e50914'; 
+  btn.style.color = '#fff';
 };
 
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
