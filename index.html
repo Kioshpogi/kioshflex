@@ -297,18 +297,5 @@
     </div>
   </div>
 
-  <!-- Splash Screen Dismissal Script -->
-  <script>
-    window.addEventListener('load', () => {
-      const splashScreen = document.getElementById('splashScreen');
-      if (splashScreen) {
-        splashScreen.style.opacity = '0';
-        splashScreen.style.transition = 'opacity 0.5s ease';
-        setTimeout(() => {
-          splashScreen.style.display = 'none';
-        }, 500);
-      }
-    });
-  </script>
 </body>
 </html>
