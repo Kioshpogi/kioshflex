@@ -300,7 +300,8 @@ async function loadHeroAndTop10() {
                       loop: 1,
                       playlist: trailer.key,
                       modestbranding: 1,
-                      iv_load_policy: 3
+                      iv_load_policy: 3,
+                      enablejsapi: 1
                     },
                     events: {
                       onReady: (event) => {
@@ -331,6 +332,7 @@ async function loadHeroAndTop10() {
                     } else {
                       heroPlayer.unMute();
                       heroPlayer.setVolume(100);
+                      heroPlayer.playVideo(); // Sinisigurong hindi mamamatay ang video sa WebView kapag na-unmute
                       unmuteBtn.textContent = 'Muted On';
                     }
                   }
