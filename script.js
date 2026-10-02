@@ -584,12 +584,12 @@ async function openModal(item, type) {
   saveContinueWatching(item, type, season, episode);
   
   const getLinks = (s, e) => type === 'tv' ? {
-    s1: `https://vidsrc.me/embed/tv?tmdb=${id}&season=${s}&episode=${e}`,
+    s1: `https://vidsrc.xyz/embed/tv?tmdb=${id}&s=${s}&e=${e}`,
     s2: `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}`,
     s3: `https://vidlink.pro/tv/${id}/${s}/${e}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${s}&e=${e}`
   } : {
-    s1: `https://vidsrc.me/embed/movie?tmdb=${id}`,
+    s1: `https://vidsrc.xyz/embed/movie?tmdb=${id}`,
     s2: `https://vidsrc.cc/v2/embed/movie/${id}`,
     s3: `https://vidlink.pro/movie/${id}`,
     s4: `https://multiembed.mov/?video_id=${id}&tmdb=1`
@@ -625,7 +625,7 @@ async function openModal(item, type) {
     </div>
     
     <div style="border-radius:10px; overflow:hidden; margin-bottom:12px; position:relative;" id="playerWrapper">
-      <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen style="display:block; background:#000;"></iframe>
+      <iframe id="playerIframe" src="${links.s1}" width="100%" height="260" frameborder="0" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" style="display:block; background:#000;"></iframe>
     </div>
     
     <p style="color:#bbb; font-size:12px; line-height:1.4; margin-bottom:10px; max-height:50px; overflow-y:auto;">${overview || 'No overview available.'}</p>
