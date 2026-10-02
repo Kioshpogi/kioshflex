@@ -272,18 +272,8 @@ async function loadHeroAndTop10() {
             
             if (trailer) {
               heroBanner.innerHTML = `
-                <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1; display: flex; align-items: center; justify-content: center; background: #000;" id="iframeContainer">
-                  <div id="youtubeHeroPlayer" style="width: 100%; height: 100%; pointer-events: none;"></div>
-                </div>
-                <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
-                <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 5px; height: 36px; background-color: #e50914; border-radius: 3px;"></div>
-                    <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
-                  </div>
-                  <div style="display: flex; gap: 10px; align-items: center;">
-                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; z-index: 10;">Muted Off</button>
-                  </div>
+                <div style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; background: #000;">
+                  <div id="youtubeHeroPlayer" style="width: 100%; height: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.35);"></div>
                 </div>
               `;
               
@@ -319,25 +309,6 @@ async function loadHeroAndTop10() {
                 }
               };
               initPlayer();
-
-              const unmuteBtn = document.getElementById('unmuteBtn');
-              if (unmuteBtn) {
-                let isMuted = true;
-                unmuteBtn.onclick = () => {
-                  if (heroPlayer && typeof heroPlayer.mute === 'function') {
-                    isMuted = !isMuted;
-                    if (isMuted) {
-                      heroPlayer.mute();
-                      unmuteBtn.textContent = 'Muted Off';
-                    } else {
-                      heroPlayer.unMute();
-                      heroPlayer.setVolume(100);
-                      heroPlayer.playVideo(); // Sinisigurong hindi mamamatay ang video sa WebView kapag na-unmute
-                      unmuteBtn.textContent = 'Muted On';
-                    }
-                  }
-                };
-              }
             }
           } catch (e) {}
         }, 800);
