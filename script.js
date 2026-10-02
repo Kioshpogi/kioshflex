@@ -57,6 +57,7 @@ let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
 let heroPlayer = null;
+let isHeroMuted = true;
 
 const tag = document.createElement('script');
 tag.src = "https://www.youtube.com/iframe_api";
@@ -259,8 +260,6 @@ async function loadHeroAndTop10() {
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
-        heroBanner.style.backgroundSize = 'cover';
-        heroBanner.style.backgroundPosition = 'center';
         heroBanner.style.display = 'flex';
         heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
 
@@ -271,11 +270,32 @@ async function loadHeroAndTop10() {
             const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
             
             if (trailer) {
-              heroBanner.innerHTML = `
-                <div style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; background: #000;">
-                  <div id="youtubeHeroPlayer" style="width: 100%; height: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.35);"></div>
-                </div>
-              `;
+              const existingContent = heroBanner.querySelector('.hero-content');
+              
+              const iframeWrapper = document.createElement('div');
+              iframeWrapper.style.cssText = 'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; background: #000; z-index: 1;';
+              iframeWrapper.innerHTML = `<div id="youtubeHeroPlayer" style="width: 100%; height: 100%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(1.35);"></div>`;
+              
+              heroBanner.insertBefore(iframeWrapper, heroBanner.firstChild);
+
+              const muteBtn = document.createElement('button');
+              muteBtn.id = 'heroMuteBtn';
+              muteBtn.style.cssText = 'position: absolute; bottom: 20px; right: 20px; z-index: 15; background: rgba(20,20,20,0.6); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); transition: background 0.2s;';
+              muteBtn.innerHTML = `<svg id="muteIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
+              
+              muteBtn.onclick = () => {
+                if (!heroPlayer) return;
+                if (isHeroMuted) {
+                  heroPlayer.unMute();
+                  isHeroMuted = false;
+                  muteBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
+                } else {
+                  heroPlayer.mute();
+                  isHeroMuted = true;
+                  muteBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"></path><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
+                }
+              };
+              heroBanner.appendChild(muteBtn);
               
               const initPlayer = () => {
                 if (window.YT && window.YT.Player) {
