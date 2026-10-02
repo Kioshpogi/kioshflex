@@ -56,6 +56,12 @@ let currentFetchUrl = '';
 let isLoadingMore = false;
 let isSearchMode = false;
 let featuredItem = null;
+let heroPlayer = null;
+
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+const firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 window.addEventListener('load', () => {
   setTimeout(() => {
@@ -97,7 +103,6 @@ const closeSidebarMenu = () => {
 closeSidebar.addEventListener('click', closeSidebarMenu);
 sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
-// --- Donation Modal Handling ---
 const donateBtn = document.getElementById('donateBtn');
 const donateModal = document.getElementById('donateModal');
 const closeDonateModal = document.getElementById('closeDonateModal');
@@ -267,8 +272,8 @@ async function loadHeroAndTop10() {
             
             if (trailer) {
               heroBanner.innerHTML = `
-                <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1;" id="iframeContainer">
-                  <iframe id="heroIframe" src="https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=1&controls=0&loop=1&playlist=${trailer.key}&enablejsapi=1" width="100%" height="100%" frameborder="0" style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); pointer-events: none;" allow="autoplay"></iframe>
+                <div style="position: absolute; inset: 0; overflow: hidden; z-index: 1; display: flex; align-items: center; justify-content: center; background: #000;" id="iframeContainer">
+                  <div id="youtubeHeroPlayer" style="width: 100%; height: 100%; pointer-events: none;"></div>
                 </div>
                 <div style="position: absolute; inset: 0; background: linear-gradient(0deg, #141414 0%, transparent 60%); z-index: 2; pointer-events: none;"></div>
                 <div style="position: absolute; bottom: 24px; left: 24px; z-index: 3; display:flex; align-items:flex-end; justify-content:space-between; width: calc(100% - 48px);">
@@ -277,19 +282,58 @@ async function loadHeroAndTop10() {
                     <h1 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0; text-shadow: 2px 2px 8px rgba(0,0,0,0.9);">${title}</h1>
                   </div>
                   <div style="display: flex; gap: 10px; align-items: center;">
-                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer;">Muted Off</button>
+                    <button id="unmuteBtn" style="background: rgba(20,20,20,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; cursor: pointer; z-index: 10;">Muted Off</button>
                   </div>
                 </div>
               `;
               
+              const initPlayer = () => {
+                if (window.YT && window.YT.Player) {
+                  heroPlayer = new YT.Player('youtubeHeroPlayer', {
+                    videoId: trailer.key,
+                    width: '100%',
+                    height: '100%',
+                    playerVars: {
+                      autoplay: 1,
+                      mute: 1,
+                      controls: 0,
+                      loop: 1,
+                      playlist: trailer.key,
+                      modestbranding: 1,
+                      iv_load_policy: 3
+                    },
+                    events: {
+                      onReady: (event) => {
+                        event.target.playVideo();
+                      },
+                      onStateChange: (event) => {
+                        if (event.data === YT.PlayerState.ENDED) {
+                          event.target.playVideo();
+                        }
+                      }
+                    }
+                  });
+                } else {
+                  setTimeout(initPlayer, 200);
+                }
+              };
+              initPlayer();
+
               const unmuteBtn = document.getElementById('unmuteBtn');
-              const heroIframe = document.getElementById('heroIframe');
-              if (unmuteBtn && heroIframe) {
+              if (unmuteBtn) {
                 let isMuted = true;
                 unmuteBtn.onclick = () => {
-                  isMuted = !isMuted;
-                  heroIframe.src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=1&loop=1&playlist=${trailer.key}`;
-                  unmuteBtn.textContent = isMuted ? 'Muted Off' : 'Muted On';
+                  if (heroPlayer && typeof heroPlayer.mute === 'function') {
+                    isMuted = !isMuted;
+                    if (isMuted) {
+                      heroPlayer.mute();
+                      unmuteBtn.textContent = 'Muted Off';
+                    } else {
+                      heroPlayer.unMute();
+                      heroPlayer.setVolume(100);
+                      unmuteBtn.textContent = 'Muted On';
+                    }
+                  }
                 };
               }
             }
@@ -746,7 +790,7 @@ async function openActorModal(personId) {
           if(!media.poster_path) return '';
           return `
             <div class="actor-media-card" data-id="${media.id}" data-type="${media.media_type || 'movie'}" style="cursor:pointer;">
-              <img src="https://image.tmdb.org/t/p/w185${media.poster_path}" style="width:100%; border-radius:6px;" alt="${media.title || media.name}">
+              <img src="https://image.tmdb.org/t/p/w185${media.poster_path}" style="width:100\%; border-radius:6px;" alt="${media.title || media.name}">
               <span style="font-size:10px; color:#aaa; display:block; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${media.title || media.name}</span>
             </div>
           `;
@@ -774,7 +818,6 @@ window.changeServer = function(url, btn) {
 closeModal.addEventListener('click', () => { modal.style.display = 'none'; modalBody.innerHTML = ''; });
 window.addEventListener('click', (e) => { if (e.target === modal) { modal.style.display = 'none'; modalBody.innerHTML = ''; } });
 
-// --- AI Chat Assistant Integration with Streaming Support ---
 if (aiChatToggleBt && aiChatBox) {
   aiChatToggleBt.addEventListener('click', () => {
     aiChatBox.style.display = aiChatBox.style.display === 'flex' ? 'none' : 'flex';
