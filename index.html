@@ -24,7 +24,7 @@
     body { background-color: var(--bg-color); color: var(--text-color); transition: background 0.3s, color 0.3s; overflow-x: hidden; }
     
     /* Splash Screen */
-    #splashScreen { position: fixed; inset: 0; background: #141414; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; }
+    #splashScreen { position: fixed; inset: 0; background: #141414; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 99999; cursor: pointer; transition: opacity 0.5s ease; }
     .splash-logo { font-size: 36px; font-weight: 900; color: var(--accent-color); letter-spacing: 2px; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { transform: scale(1); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } 100% { transform: scale(1); opacity: 0.8; } }
 
@@ -143,8 +143,8 @@
 </head>
 <body>
 
-  <!-- Splash Screen -->
-  <div id="splashScreen">
+  <!-- Splash Screen with Failsafe Click Handler -->
+  <div id="splashScreen" onclick="this.style.opacity='0'; setTimeout(() => this.style.display='none', 500);">
     <div class="splash-logo">KIOSHFLIX</div>
   </div>
 
@@ -297,5 +297,17 @@
     </div>
   </div>
 
+  <!-- Built-in Failsafe to guarantee splash screen removal -->
+  <script>
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const splash = document.getElementById('splashScreen');
+        if (splash && splash.style.display !== 'none') {
+          splash.style.opacity = '0';
+          setTimeout(() => splash.style.display = 'none', 500);
+        }
+      }, 2000); // Automatically hides after 2 seconds if JS script fails to remove it
+    });
+  </script>
 </body>
 </html>
