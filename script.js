@@ -10,6 +10,7 @@ const carouselSection = document.getElementById('carouselSection');
 const heroBanner = document.getElementById('heroBanner');
 const heroTitle = document.getElementById('heroTitle');
 const heroPlayBtn = document.getElementById('heroPlayBtn');
+const heroBadge = document.getElementById('heroBadge');
 const searchInput = document.getElementById('searchInput');
 const searchBtn = document.getElementById('searchBtn');
 const sectionTitle = document.getElementById('sectionTitle');
@@ -202,7 +203,7 @@ function showMedia(items, type, append = false) {
       try {
         const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${mediaId}/videos?api_key=${API_KEY}`);
         const vidData = await vidRes.json();
-        const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+        const trailer = vidData.results.find(v => (v.type === 'Trailer' || v.type === 'Teaser') && v.site === 'YouTube');
         
         if (trailer) {
           modalBody.innerHTML = `
@@ -241,6 +242,11 @@ async function loadHeroAndTop10() {
         
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         
+        // Dynamically set the badge based on actual media type
+        if (heroBadge) {
+          heroBadge.textContent = mediaType === 'tv' ? 'SERIES' : 'MOVIE';
+        }
+        
         heroBanner.style.backgroundImage = `url(${BACKDROP_PATH + featuredItem.backdrop_path})`;
         heroBanner.style.display = 'flex';
         heroPlayBtn.onclick = () => openModal(featuredItem, mediaType);
@@ -249,7 +255,7 @@ async function loadHeroAndTop10() {
           try {
             const vidRes = await fetch(`https://api.themoviedb.org/3/${mediaType}/${featuredItem.id}/videos?api_key=${API_KEY}`);
             const vidData = await vidRes.json();
-            const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+            const trailer = vidData.results.find(v => (v.type === 'Trailer' || v.type === 'Teaser') && v.site === 'YouTube');
             
             if (trailer) {
               const iframeWrapper = document.createElement('div');
@@ -720,11 +726,18 @@ async function openModal(item, type) {
   } catch (err) {}
 
   document.getElementById('trailerBtn').addEventListener('click', async () => {
-    const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
-    const vidData = await vidRes.json();
-    const trailer = vidData.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-    if (trailer) document.getElementById('playerIframe').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
-    else alert('Trailer not available.');
+    try {
+      const vidRes = await fetch(`https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}`);
+      const vidData = await vidRes.json();
+      const trailer = vidData.results.find(v => (v.type === 'Trailer' || v.type === 'Teaser') && v.site === 'YouTube');
+      if (trailer) {
+        document.getElementById('playerIframe').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+      } else {
+        alert('Trailer not available.');
+      }
+    } catch (e) {
+      alert('Error loading trailer.');
+    }
   });
 
   document.getElementById('shareBtn').addEventListener('click', () => {
