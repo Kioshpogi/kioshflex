@@ -87,6 +87,7 @@ const closeSidebarMenu = () => {
 closeSidebar.addEventListener('click', closeSidebarMenu);
 sidebarOverlay.addEventListener('click', closeSidebarMenu);
 
+// ==================== DONATE MODAL (Nasa Sidebar na) ====================
 const donateBtn = document.getElementById('donateBtn');
 const donateModal = document.getElementById('donateModal');
 const closeDonateModal = document.getElementById('closeDonateModal');
@@ -242,7 +243,6 @@ async function loadHeroAndTop10() {
         
         const mediaType = featuredItem.media_type === 'tv' ? 'tv' : 'movie';
         
-        // Dynamically set the badge based on actual media type
         if (heroBadge) {
           heroBadge.textContent = mediaType === 'tv' ? 'SERIES' : 'MOVIE';
         }
