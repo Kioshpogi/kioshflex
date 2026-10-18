@@ -88,8 +88,9 @@
       </select>
     </div>
 
-    <!-- Download App Button -->
-    <a href="https://github.com/Kioshpogi/kioshflex/releases/latest/download/KioshFlex.apk" id="downloadAppBtn" onclick="event.preventDefault(); window.open(this.href, '_system');" style="text-decoration: none; width: 100%; display: block;">
+    <!-- Download App Button (Para sa Website/PCC) -->
+    <div class="sidebar-group">
+      <a href="https://github.com/Kioshpogi/kioshflex/releases/latest/download/KioshFlex.apk" id="downloadAppBtn" onclick="event.preventDefault(); window.open(this.href, '_system');" style="text-decoration: none; width: 100%; display: block;">
          <button style="width: 100%; background: #e50914; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
           Download APK
@@ -97,6 +98,7 @@
       </a>
     </div>
 
+    <!-- Donate Button (Nasa loob na ng Sidebar nang maayos) -->
     <div class="sidebar-group" style="margin-top: auto; padding-top: 10px;">
       <button id="donateBtn" style="width: 100%; background: #222; color: #fff; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px;">Support / Donate</button>
     </div>
@@ -110,6 +112,16 @@
       </svg>
       <input type="text" id="searchInput" placeholder="Search movies, TV shows..." autocomplete="off" style="background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 14px;">
       
+      <!-- Voice Search Button -->
+      <button id="voiceSearchBtn" title="Voice Search" style="background: transparent; border: none; color: #a1a1aa; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; margin-right: 6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+
       <div id="searchDropdownWrapper" style="position: absolute; top: calc(100% + 8px); left: 0; right: 0; background-color: #121212; border: 1px solid #27272a; border-radius: 16px; padding: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); z-index: 50; display: none; flex-direction: column; gap: 8px;">
         <div id="historyHeader" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a1a1aa; padding: 0 4px;">
           <span>Recent Searches</span>
