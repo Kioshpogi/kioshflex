@@ -14,13 +14,13 @@
 </head>
 <body>
 
-  <header>
+  <header id="mainHeader">
     <div class="nav-left">
       <button id="hamburgerBtn" class="hamburger-btn">&#9776;</button>
       <div class="logo" id="homeLogo" style="cursor: pointer;">KIOSHFLEX</div>
     </div>
     <div class="header-actions">
-      <button id="watchlistNavBtn" class="header-btn">Watchlist</button>
+      <button id="watchlistNavBtn" class="header-btn" style="display:none;">Watchlist</button>
       <button id="themeToggleBtn" class="header-btn">Theme</button>
     </div>
   </header>
@@ -40,55 +40,73 @@
       </div>
     </div>
 
+    <!-- Custom Dropdown: Genre -->
     <div class="sidebar-group">
       <div class="sidebar-label">Genre</div>
-      <select id="genreSelect">
-        <option value="">All Genres</option>
-        <option value="28">Action</option>
-        <option value="12">Adventure</option>
-        <option value="16">Animation</option>
-        <option value="35">Comedy</option>
-        <option value="80">Crime</option>
-        <option value="18">Drama</option>
-        <option value="14">Fantasy</option>
-        <option value="27">Horror</option>
-        <option value="9648">Mystery</option>
-        <option value="10749">Romance</option>
-        <option value="878">Sci-Fi</option>
-        <option value="53">Thriller</option>
-      </select>
+      <div class="custom-select-wrapper" id="genreDropdown">
+        <div class="custom-select-trigger" id="genreTrigger"><span>All Genres</span></div>
+        <div class="custom-options" id="genreOptionsContainer">
+          <div class="custom-option selected" data-value="">All Genres</div>
+          <div class="custom-option" data-value="28">Action</div>
+          <div class="custom-option" data-value="12">Adventure</div>
+          <div class="custom-option" data-value="16">Animation</div>
+          <div class="custom-option" data-value="35">Comedy</div>
+          <div class="custom-option" data-value="80">Crime</div>
+          <div class="custom-option" data-value="18">Drama</div>
+          <div class="custom-option" data-value="14">Fantasy</div>
+          <div class="custom-option" data-value="27">Horror</div>
+          <div class="custom-option" data-value="9648">Mystery</div>
+          <div class="custom-option" data-value="10749">Romance</div>
+          <div class="custom-option" data-value="878">Sci-Fi</div>
+          <div class="custom-option" data-value="53">Thriller</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Custom Dropdown: Language -->
     <div class="sidebar-group">
       <div class="sidebar-label">Language</div>
-      <select id="languageSelect">
-        <option value="">All Languages</option>
-        <option value="en">English</option>
-        <option value="tl">Tagalog / Filipino</option>
-        <option value="ko">Korean</option>
-        <option value="ja">Japanese</option>
-        <option value="es">Spanish</option>
-        <option value="zh">Chinese</option>
-      </select>
+      <div class="custom-select-wrapper" id="languageDropdown">
+        <div class="custom-select-trigger" id="languageTrigger"><span>All Languages</span></div>
+        <div class="custom-options" id="languageOptionsContainer">
+          <div class="custom-option selected" data-value="">All Languages</div>
+          <div class="custom-option" data-value="en">English</div>
+          <div class="custom-option" data-value="tl">Tagalog / Filipino</div>
+          <div class="custom-option" data-value="ko">Korean</div>
+          <div class="custom-option" data-value="ja">Japanese</div>
+          <div class="custom-option" data-value="es">Spanish</div>
+          <div class="custom-option" data-value="zh">Chinese</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Custom Dropdown: Sort By -->
     <div class="sidebar-group">
       <div class="sidebar-label">Sort By</div>
-      <select id="sortSelect">
-        <option value="popularity.desc">Most Popular</option>
-        <option value="vote_average.desc">Highest Rated</option>
-        <option value="primary_release_date.desc">Latest Release</option>
-      </select>
+      <div class="custom-select-wrapper" id="sortDropdown">
+        <div class="custom-select-trigger" id="sortTrigger"><span>Most Popular</span></div>
+        <div class="custom-options" id="sortOptionsContainer">
+          <div class="custom-option selected" data-value="popularity.desc">Most Popular</div>
+          <div class="custom-option" data-value="vote_average.desc">Highest Rated</div>
+          <div class="custom-option" data-value="primary_release_date.desc">Latest Release</div>
+        </div>
+      </div>
     </div>
 
+    <!-- Custom Searchable Dropdown: Year -->
     <div class="sidebar-group">
       <div class="sidebar-label">Year</div>
-      <select id="yearSelect">
-        <option value="">All Years</option>
-      </select>
+      <div class="custom-select-wrapper" id="yearDropdown">
+        <div class="custom-select-trigger" style="padding: 0; background: #18181b; border: 1px solid #27272a; border-radius: 8px; overflow: hidden;">
+          <input type="number" id="yearInput" placeholder="All Years (e.g. 2024)" autocomplete="off" style="width: 100%; background: transparent; border: none; outline: none; color: #fff; padding: 10px 14px; font-size: 13px; font-weight: 500;">
+        </div>
+        <div class="custom-options" id="yearOptionsContainer" style="max-height: 180px;">
+          <div class="custom-option" data-value="">All Years</div>
+        </div>
+      </div>
     </div>
-
-    <!-- Download App Button (Para sa Website/PCC) -->
+    
+      <!-- Download App Button (Para sa Website/PCC) -->
     <div class="sidebar-group">
       <a href="https://github.com/Kioshpogi/kioshflex/releases/latest/download/KioshFlex.apk" id="downloadAppBtn" onclick="event.preventDefault(); window.open(this.href, '_system');" style="text-decoration: none; width: 100%; display: block;">
          <button style="width: 100%; background: #e50914; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
@@ -98,40 +116,32 @@
       </a>
     </div>
 
-    <!-- Donate Button (Nasa loob na ng Sidebar nang maayos) -->
     <div class="sidebar-group" style="margin-top: auto; padding-top: 10px;">
       <button id="donateBtn" style="width: 100%; background: #222; color: #fff; border: 1px solid var(--border-color); padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px;">Support / Donate</button>
     </div>
   </div>
 
-  <div class="search-container" style="position: relative; display: flex; gap: 8px; align-items: center;">
-    <div class="search-wrapper" style="position: relative; flex: 1; display: flex; align-items: center; background-color: #121212; border: 1px solid #27272a; border-radius: 9999px; padding: 6px 16px;">
-      <svg style="width: 18px; height: 18px; fill: none; stroke: #a1a1aa; stroke-width: 2; margin-right: 10px; flex-shrink: 0;" viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-      <input type="text" id="searchInput" placeholder="Search movies, TV shows..." autocomplete="off" style="background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 14px;">
-      
-      <!-- Voice Search Button -->
-      <button id="voiceSearchBtn" title="Voice Search" style="background: transparent; border: none; color: #a1a1aa; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; margin-right: 6px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-          <line x1="12" y1="19" x2="12" y2="23"></line>
-          <line x1="8" y1="23" x2="16" y2="23"></line>
+  <!-- Dedicated Search View Section -->
+  <div id="searchViewSection" style="display: none; padding: 16px; padding-bottom: 90px;">
+    <div class="search-container" style="position: relative; display: flex; gap: 8px; align-items: center; margin-bottom: 20px;">
+      <div class="search-wrapper" style="position: relative; flex: 1; display: flex; align-items: center; background-color: #121212; border: 1px solid #27272a; border-radius: 9999px; padding: 8px 16px;">
+        <svg style="width: 18px; height: 18px; fill: none; stroke: #a1a1aa; stroke-width: 2; margin-right: 10px; flex-shrink: 0;" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-      </button>
-
-      <div id="searchDropdownWrapper" style="position: absolute; top: calc(100% + 8px); left: 0; right: 0; background-color: #121212; border: 1px solid #27272a; border-radius: 16px; padding: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.7); z-index: 50; display: none; flex-direction: column; gap: 8px;">
-        <div id="historyHeader" style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #a1a1aa; padding: 0 4px;">
-          <span>Recent Searches</span>
-          <button id="clearHistoryBtn" style="background: transparent !important; border: none !important; color: #a1a1aa; cursor: pointer; font-size: 12px; font-weight: 500; padding: 0;">Clear All</button>
-        </div>
-        <div id="searchHistoryContainer" style="display: flex; gap: 6px; flex-wrap: wrap;"></div>
-        <div id="suggestionsBox" class="suggestions-dropdown" style="position: static; border: none; box-shadow: none; width: 100%; background: transparent; padding: 0;"></div>
+        <input type="text" id="searchInput" placeholder="Search shows, movies..." autocomplete="off" style="background: transparent; border: none; outline: none; color: #fff; width: 100%; font-size: 14px;">
+        
+        <button id="voiceSearchBtn" title="Voice Search" style="background: transparent; border: none; color: #a1a1aa; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; margin-right: 6px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
       </div>
     </div>
-    <button id="searchBtn" style="background-color: #dc2626; color: #fff; border: none; border-radius: 9999px; padding: 10px 20px; font-weight: 500; cursor: pointer;">Search</button>
+    <div id="searchListContainer" style="display: flex; flex-direction: column; gap: 12px;"></div>
   </div>
 
   <div id="heroBanner" class="hero-banner" style="display: none;">
@@ -157,10 +167,37 @@
     <div id="top10Carousel" class="carousel"></div>
   </div>
 
-  <div>
+  <div id="exploreSection" style="padding-bottom: 90px;">
     <div id="sectionTitle" class="section-title">Explore Movies</div>
     <div id="movieGrid" class="movie-grid"></div>
   </div>
+
+  <!-- Floating Bottom Navigation Bar -->
+  <div id="bottomNav" style="position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(18, 18, 20, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); padding: 4px 10px; border-radius: 9999px; display: flex; align-items: center; gap: 12px; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,0.8);">
+    
+    <button class="nav-item active" data-tab="home" style="background: rgba(255, 255, 255, 0.12); border: none; color: #fff; padding: 4px 10px; border-radius: 9999px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span>Home</span>
+    </button>
+
+    <button class="nav-item" data-tab="clips" style="background: transparent; border: none; color: #a1a1aa; padding: 4px 10px; border-radius: 9999px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+      <span>Clips</span>
+    </button>
+
+    <button class="nav-item" data-tab="search" style="background: transparent; border: none; color: #a1a1aa; padding: 4px 10px; border-radius: 9999px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <span>Search</span>
+    </button>
+
+    <button class="nav-item" data-tab="watchlist" style="background: transparent; border: none; color: #a1a1aa; padding: 4px 10px; border-radius: 9999px; cursor: pointer; display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+      <span>My KIOSH</span>
+    </button>
+
+  </div>
+
+  <div id="clipsContainer" style="position: fixed; inset: 0; background: #000; z-index: 999; display: none; overflow-y: scroll; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch;"></div>
 
   <div id="movieModal" class="modal">
     <div class="modal-content">
