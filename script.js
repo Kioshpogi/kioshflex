@@ -332,38 +332,6 @@ if (donateBtn && donateModal) {
   });
 }
 
-async function checkForAppUpdates() {
-    try {
-        const response = await fetch("https://api.github.com/repos/Kioshpogi/kioshflex/releases/latest");
-        const data = await response.json();
-        
-        const latestVersion = data.tag_name.replace(/^v\.?/, '').trim();
-        const directDownloadUrl = "https://github.com/Kioshpogi/kioshflex/releases/latest/download/KioshFlex.apk";
-
-        if (latestVersion.localeCompare(CURRENT_APP_VERSION, undefined, { numeric: true, sensitivity: 'base' }) > 0) {
-            showUpdateNotification(latestVersion, directDownloadUrl);
-        }
-    } catch (error) {}
-}
-
-function showUpdateNotification(newVersion, url) {
-    if (sessionStorage.getItem('update_dismissed')) return;
-
-    const updateBanner = document.createElement('div');
-    updateBanner.style.cssText = "position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 9999; display: flex; justify-content: center; align-items: center; padding: 20px;";
-    
-    updateBanner.innerHTML = `
-        <div style="background: #141414; border: 1px solid #222; width: 100%; max-width: 320px; border-radius: 14px; padding: 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.8); display: flex; flex-direction: column; gap: 14px;">
-            <div style="color: #e50914; font-weight: 900; font-size: 16px;">New Update Available!</div>
-            <p style="color: #b3b3b3; font-size: 12px; margin: 0; line-height: 1.4;">Version <b>v${newVersion}</b> of KIOSHFLEX is now available. Update now for an enhanced streaming experience.</p>
-            
-            <div style="display: flex; gap: 8px; margin-top: 6px;">
-                <button id="updateLaterBtn" style="flex: 1; background: #222; color: #fff; border: 1px solid #333; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 11px;">Update It Later</button>
-                <a href="${url}" id="updateNowBtn" style="flex: 1; background: #e50914; color: #fff; text-align: center; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 11px; text-decoration: none; display: flex; align-items: center; justify-content: center;">Update Now</a>
-            </div>
-        </div>
-    `;
-
     document.body.appendChild(updateBanner);
 
     document.getElementById('updateLaterBtn').addEventListener('click', () => {
